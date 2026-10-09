@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">RSS: tus fuentes, en un solo lugar</title>
+  <desc id="desc">Tres sitios publican novedades en un canal RSS que un lector reúne en una lista.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#102237"/>
+      <stop offset="1" stop-color="#192f46"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#adc5e5" stroke-opacity=".06"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="675" fill="url(#background)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <circle cx="1130" cy="70" r="270" fill="#315475" opacity=".18"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="76" y="83" fill="#adbed2" font-size="17" letter-spacing="4">SOLIDCHAIN / WEB ABIERTA</text>
+    <text x="76" y="169" fill="#f5f8fc" font-size="68" font-weight="700">Tus fuentes.</text>
+    <text x="76" y="247" fill="#f5f8fc" font-size="68" font-weight="700">Tu ritmo.</text>
+    <text x="78" y="298" fill="#b6c8df" font-size="24">Really Simple Syndication</text>
+    <g fill="none" stroke="#6287ac" stroke-width="3">
+      <path d="M289 404H372Q405 404 405 437V462H478"/>
+      <path d="M289 470H478"/>
+      <path d="M289 536H372Q405 536 405 503V478H478"/>
+      <path d="M660 470H791"/>
+    </g>
+    <path d="m779 458 16 12-16 12" fill="none" stroke="#ffb071" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#213d58" stroke="#43617e">
+      <rect x="78" y="379" width="211" height="50" rx="12"/>
+      <rect x="78" y="445" width="211" height="50" rx="12"/>
+      <rect x="78" y="511" width="211" height="50" rx="12"/>
+    </g>
+    <g fill="#e3edf8" font-size="19">
+      <text x="102" y="411">Un blog</text>
+      <text x="102" y="477">Un medio</text>
+      <text x="102" y="543">Un podcast</text>
+    </g>
+    <rect x="478" y="377" width="182" height="182" rx="31" fill="#f28a42"/>
+    <g fill="none" stroke="#fff9f0" stroke-width="13" stroke-linecap="round">
+      <path d="M520 454a62 62 0 0 1 62 62"/>
+      <path d="M520 420a96 96 0 0 1 96 96"/>
+    </g>
+    <circle cx="520" cy="516" r="10" fill="#fff9f0"/>
+    <rect x="805" y="337" width="311" height="250" rx="20" fill="#eaf1f8"/>
+    <path d="M825 337H1096Q1116 337 1116 357V383H805V357Q805 337 825 337" fill="#d9e5f0"/>
+    <circle cx="831" cy="361" r="5" fill="#6f89a4"/>
+    <circle cx="850" cy="361" r="5" fill="#6f89a4"/>
+    <circle cx="869" cy="361" r="5" fill="#6f89a4"/>
+    <text x="828" y="422" fill="#213d58" font-size="23" font-weight="600">Tu lector</text>
+    <g fill="#f28a42">
+      <circle cx="835" cy="461" r="6"/>
+      <circle cx="835" cy="502" r="6"/>
+      <circle cx="835" cy="543" r="6"/>
+    </g>
+    <g stroke="#829ab2" stroke-width="9" stroke-linecap="round">
+      <path d="M858 461H1081"/>
+      <path d="M858 502H1044"/>
+      <path d="M858 543H1064"/>
+    </g>
+    <text x="78" y="627" fill="#adbed2" font-size="17">PUBLICAR → SINDICAR → LEER</text>
+    <text x="1116" y="627" text-anchor="end" fill="#ffb071" font-size="26" font-weight="700">RSS</text>
+  </g>
+</svg>

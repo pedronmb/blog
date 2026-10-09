@@ -54,10 +54,14 @@ try {
     }
     foreach ($catalog['posts'] as $post) {
         assert_http(http('/' . $post['path'])['status'] === 200, 'HTML estático: ' . $post['slug']);
-        $old = http($post['legacy'][0] . '/');
-        assert_http($old['status'] === 301 && str_ends_with($old['headers']['location'] ?? '', '/' . $post['path']), '301 de URL antigua: ' . $post['slug']);
-        $id = http('/?p=' . $post['wordpress_id']);
-        assert_http($id['status'] === 301 && str_ends_with($id['headers']['location'] ?? '', '/' . $post['path']), '301 de ID: ' . $post['wordpress_id']);
+        foreach ($post['legacy'] as $legacy) {
+            $old = http($legacy . '/');
+            assert_http($old['status'] === 301 && str_ends_with($old['headers']['location'] ?? '', '/' . $post['path']), '301 de URL antigua: ' . $post['slug']);
+        }
+        if ($post['wordpress_id'] !== '') {
+            $id = http('/?p=' . $post['wordpress_id']);
+            assert_http($id['status'] === 301 && str_ends_with($id['headers']['location'] ?? '', '/' . $post['path']), '301 de ID: ' . $post['wordpress_id']);
+        }
     }
     foreach (array_keys($catalog['categories']) as $slug) {
         $category = http('/index.php/category/' . $slug . '/');

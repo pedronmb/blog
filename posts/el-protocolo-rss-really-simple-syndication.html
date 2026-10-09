@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>El protocolo RSS: Really Simple Syndication y el control de tus lecturas</title>
+    <meta name="description" content="Cómo funciona RSS: feeds XML, lectores, identificadores y suscripciones. Una guía práctica para seguir tus fuentes y suscribirte a Solidchain.">
+    <meta property="article:published_time" content="2026-10-08T12:00:00-03:00">
+    <meta property="article:section" content="Web">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="El protocolo RSS: Really Simple Syndication y el control de tus lecturas">
+    <meta property="og:description" content="Cómo funciona RSS: feeds XML, lectores, identificadores y suscripciones. Una guía práctica para seguir tus fuentes y suscribirte a Solidchain.">
+    <meta property="og:image" content="../media/rss/portada.svg">
+    <meta property="og:url" content="https://solidchain.ar/posts/el-protocolo-rss-really-simple-syndication.html">
+    <link rel="canonical" href="https://solidchain.ar/posts/el-protocolo-rss-really-simple-syndication.html">
+    <script src="../assets/theme.js"></script>
+    <link rel="stylesheet" href="../assets/site.css?v=3">
+    <link rel="stylesheet" href="../assets/theme.css?v=3">
+    <link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+    <link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+    <style>
+        .rss-flow { list-style: none; padding: 0 !important; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .rss-flow li { margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); font-size: 14px; line-height: 1.7; }
+        .rss-flow strong { display: block; color: var(--blue); margin-bottom: 6px; }
+        .rss-subscribe { padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--blue-soft); }
+        .rss-subscribe p:last-child { margin-bottom: 0; }
+        @media (max-width: 650px) { .rss-flow { grid-template-columns: 1fr; } .rss-subscribe { padding: 20px; } }
+    </style>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+    <nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+    <header class="article-header">
+        <p class="eyebrow">WEB</p>
+        <h1>El protocolo RSS: Really Simple Syndication y el control de tus lecturas</h1>
+        <p class="article-date"><time datetime="2026-10-08T12:00:00-03:00">8 oct 2026</time></p>
+    </header>
+    <img class="article-cover" src="../media/rss/portada.svg" alt="Un blog, un medio y un podcast comparten novedades a través de RSS para reunirlas en tu lector." width="1200" height="675" decoding="async">
+    <div class="article-content">
+        <p><strong>Seguir diez sitios no debería exigir abrir diez pestañas todos los días.</strong> Si un blog publica algo interesante una vez al mes, lo que necesitamos es enterarnos de esa novedad y poder leerla cuando tengamos tiempo.</p>
+        <p>RSS resuelve ese problema con una idea sencilla: cada sitio ofrece una lista de publicaciones que otras aplicaciones pueden consultar. Elegís las fuentes, las reunís en un lector y revisás las novedades desde allí. Esa separación entre publicar y leer sigue siendo una buena decisión de diseño para la web.</p>
+
+        <h2>1. Qué es RSS</h2>
+        <p><strong>RSS</strong> significa <em>Really Simple Syndication</em>, que podemos traducir como «sindicación realmente simple». Sindicar contenido consiste en ofrecerlo en un formato que otras aplicaciones pueden reutilizar. Según la <a href="https://www.rssboard.org/rss-specification">especificación de RSS 2.0</a>, ese formato se basa en XML.</p>
+        <p>Se suele hablar del «protocolo RSS». Para entender sus piezas, conviene precisar que <strong>RSS define la estructura del contenido y HTTP se ocupa habitualmente de transportarlo</strong>. Un <em>feed</em>, o canal, es el documento que publica el sitio; un lector o agregador es la aplicación que lo consulta y organiza sus entradas.</p>
+        <p>La suscripción consiste en guardar la dirección de ese canal en el lector. Para un feed público, el sitio no necesita registrar tu correo electrónico. Un servicio de lectura en la nube puede pedirte una cuenta propia para sincronizar tus suscripciones entre dispositivos.</p>
+
+        <h2>2. Cómo llegan las novedades al lector</h2>
+        <ol class="rss-flow" aria-label="Recorrido de una publicación">
+            <li><strong>1. El sitio publica</strong>Agrega un artículo y actualiza el documento del canal.</li>
+            <li><strong>2. El lector consulta</strong>Descarga el feed y compara sus entradas con las que ya conoce.</li>
+            <li><strong>3. Vos leés</strong>Revisás las novedades y abrís el contenido que te interesa.</li>
+        </ol>
+        <p>En el funcionamiento habitual, el lector vuelve a consultar cada cierto tiempo. Por eso, una publicación puede tardar en aparecer: intervienen la frecuencia de actualización del lector, la caché y la disponibilidad del sitio. La suscripción por sí sola no establece una conexión permanente con el servidor.</p>
+        <p>HTTP permite ahorrar transferencias. Si el servidor ofrece un <code>ETag</code>, el lector puede enviarlo en <code>If-None-Match</code>. Cuando el documento conserva esa versión, el servidor puede responder <code>304 Not Modified</code>, sin reenviar el cuerpo. También existen <code>Last-Modified</code> e <code>If-Modified-Since</code>. Estas consultas condicionales están definidas en <a href="https://httpwg.org/specs/rfc9110.html#conditional.requests">HTTP Semantics, RFC 9110</a>; cada servidor y lector decide qué mecanismos implementa.</p>
+        <p>Si querés mirar más de cerca ese intercambio, podés seguir con el artículo sobre <a href="solicitudes-y-respuestas-http-en-formato-raw.html">solicitudes y respuestas HTTP en formato RAW</a>.</p>
+
+        <h2>3. Un feed RSS por dentro</h2>
+        <p>Este ejemplo ilustrativo contiene una entrada. Las direcciones identifican el sitio, el feed y el artículo:</p>
+        <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"&gt;
+  &lt;channel&gt;
+    &lt;title&gt;Solidchain&lt;/title&gt;
+    &lt;link&gt;https://solidchain.ar/&lt;/link&gt;
+    &lt;description&gt;Ideas sobre software, seguridad y blockchain.&lt;/description&gt;
+    &lt;language&gt;es-ar&lt;/language&gt;
+    &lt;atom:link href="https://solidchain.ar/feed.xml"
+               rel="self" type="application/rss+xml" /&gt;
+    &lt;item&gt;
+      &lt;title&gt;El protocolo RSS&lt;/title&gt;
+      &lt;link&gt;https://solidchain.ar/posts/el-protocolo-rss-really-simple-syndication.html&lt;/link&gt;
+      &lt;guid isPermaLink="true"&gt;https://solidchain.ar/posts/el-protocolo-rss-really-simple-syndication.html&lt;/guid&gt;
+      &lt;description&gt;Cómo reunir tus fuentes en un lector.&lt;/description&gt;
+      &lt;pubDate&gt;Thu, 08 Oct 2026 12:00:00 -0300&lt;/pubDate&gt;
+      &lt;category&gt;Web&lt;/category&gt;
+    &lt;/item&gt;
+  &lt;/channel&gt;
+&lt;/rss&gt;</code></pre>
+        <p>En RSS 2.0, <code>channel</code> requiere <code>title</code>, <code>link</code> y <code>description</code>. Cada <code>item</code> debe incluir al menos un título o una descripción. Los demás campos mostrados aportan identificación, fecha y clasificación. Las fechas de <code>pubDate</code> siguen el formato de RSS basado en RFC 822, como el del ejemplo. Estas reglas están en la <a href="https://www.rssboard.org/rss-specification">especificación</a>.</p>
+        <p>El prefijo <code>atom:</code> declara una extensión mediante un espacio de nombres. El enlace con <code>rel="self"</code> identifica la dirección del propio feed, una práctica recomendada por el <a href="https://www.rssboard.org/rss-profile#namespace-elements-atom-link">perfil de buenas prácticas de RSS</a>.</p>
+        <p>El documento puede distribuir resúmenes o texto completo. En el primer caso, abrís el enlace para continuar leyendo; en el segundo, podés leer el artículo dentro del agregador, según sus capacidades. En Solidchain, el feed reúne títulos, resúmenes y enlaces a los artículos.</p>
+
+        <h2>4. El detalle que evita publicaciones duplicadas: el GUID</h2>
+        <p>Imaginemos que corregís una errata. El título cambia, pero el artículo sigue siendo el mismo. El lector necesita una identidad que sobreviva a esa edición: para eso sirve <code>guid</code>. El <a href="https://www.rssboard.org/rss-profile#element-channel-item-guid">perfil de RSS</a> recomienda incluirlo en cada entrada.</p>
+        <p>Si el identificador es el enlace permanente, puede usar <code>isPermaLink="true"</code>. Si elegís una clave propia, indicá <code>isPermaLink="false"</code>:</p>
+        <pre><code>&lt;guid isPermaLink="false"&gt;solidchain:articulo:42&lt;/guid&gt;</code></pre>
+        <p>La regla práctica es conservarlo durante toda la vida de esa publicación. Generar un identificador aleatorio cada vez que se solicita el feed puede hacer que el lector trate entradas conocidas como nuevas. Con una identidad estable puede reconocerlas; cómo muestra una corrección depende del lector.</p>
+
+        <h2>5. Cómo suscribirte a Solidchain</h2>
+        <aside class="rss-subscribe" aria-label="Suscripción al feed de Solidchain">
+            <p><strong>El feed de Solidchain está en <a href="../feed.xml">feed.xml</a>.</strong></p>
+            <p>Para seguir la versión pública del blog, copiá esta dirección en tu lector:<br><code>https://solidchain.ar/feed.xml</code></p>
+        </aside>
+        <ol>
+            <li>Abrí tu lector RSS y buscá la opción para agregar una fuente o una suscripción.</li>
+            <li>Pegá la dirección del feed y confirmá el canal que encuentra.</li>
+            <li>Cuando el lector lo actualice, vas a poder revisar los artículos desde tu lista de suscripciones.</li>
+        </ol>
+        <p>Si al abrir el enlace ves etiquetas XML, estás viendo el documento que consume el lector. Algunos navegadores lo muestran como texto o permiten descargarlo. Para suscribirte, usá su dirección en el agregador.</p>
+        <p>Una rutina útil es organizar pocas fuentes por tema y revisar la lista cuando puedas. Marcar entradas como leídas ayuda a distinguir lo pendiente sin convertir cada publicación en una interrupción.</p>
+
+        <h2>6. Qué necesita un sitio para ofrecer RSS</h2>
+        <p>Para un blog, alcanza con generar un documento a partir de las publicaciones y servirlo en una dirección estable. En este sitio, los metadatos de cada artículo alimentan el catálogo y el feed: agregar el HTML actualiza ambos en la siguiente solicitud.</p>
+        <p>Además del enlace visible, una página puede anunciar el canal desde su <code>head</code>. Esta técnica se llama <a href="https://www.rssboard.org/rss-autodiscovery">RSS Autodiscovery</a> y permite que los programas compatibles descubran la suscripción:</p>
+        <pre><code>&lt;link rel="alternate"
+      type="application/rss+xml"
+      title="Solidchain"
+      href="https://solidchain.ar/feed.xml"&gt;</code></pre>
+        <p>Para que el feed sea fácil de consumir, cuidá estos puntos:</p>
+        <ul>
+            <li><strong>XML bien formado:</strong> escapá caracteres del contenido, por ejemplo <code>&amp;</code> como <code>&amp;amp;</code>, mediante una biblioteca adecuada.</li>
+            <li><strong>Enlaces completos:</strong> usá URLs absolutas en las entradas para que funcionen fuera del sitio.</li>
+            <li><strong>Identidad estable:</strong> conservá el GUID al editar una publicación.</li>
+            <li><strong>Entrega coherente:</strong> serví el canal como <code>application/rss+xml</code> y mantené su dirección.</li>
+        </ul>
+        <p>El <a href="https://www.rssboard.org/rss-profile">perfil de buenas prácticas</a> desarrolla las recomendaciones de interoperabilidad. También conviene probar el canal en un lector: un XML válido todavía puede contener enlaces equivocados o resúmenes poco útiles.</p>
+
+        <h2>7. Podcasts y Atom: dos piezas del mismo ecosistema</h2>
+        <p>RSS también permite asociar un archivo a una entrada mediante <code>enclosure</code>, que indica su URL, tamaño en bytes y tipo de contenido. Esta capacidad se utiliza para distribuir episodios de podcasts; los directorios pueden exigir metadatos adicionales. El elemento está definido en la <a href="https://www.rssboard.org/rss-specification#ltenclosuregtSubelementOfLtitemgt">especificación de RSS</a>.</p>
+        <p><strong>Atom</strong> es otro formato de sindicación basado en XML, definido en la <a href="https://www.rfc-editor.org/rfc/rfc4287">RFC 4287</a>. Tiene sus propias reglas para entradas, identificadores, fechas y contenido. Un lector puede admitir ambos formatos y presentarlos en la misma lista. Usar un elemento <code>atom:link</code> como extensión dentro de RSS conserva el formato RSS del documento.</p>
+
+        <h2>8. Elegir fuentes también es una forma de diseñar tu lectura</h2>
+        <p>RSS resulta útil cuando querés seguir publicaciones concretas: un blog técnico que escribe de forma irregular, un medio especializado o un podcast. El sitio conserva su lugar de publicación y vos elegís dónde reunir esas novedades.</p>
+        <p>Hay límites prácticos. Cada fuente decide cuánto contenido ofrece y cuántas entradas conserva. Si una publicación desaparece del feed antes de que tu lector lo consulte, podés perderla. El canal tampoco garantiza entrega inmediata ni reemplaza un archivo histórico del sitio.</p>
+        <p>Mi criterio es empezar con las fuentes a las que ya vuelvo por interés. Un lector con cinco buenos canales puede ser más útil que una lista enorme que nunca reviso. RSS aporta una interfaz sencilla para sostener ese hábito: <strong>las publicaciones llegan a una lista que puedo recorrer a mi ritmo</strong>.</p>
+    </div>
+    <div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>
