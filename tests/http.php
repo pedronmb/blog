@@ -72,7 +72,7 @@ try {
     $feed = http('/feed.xml');
     $rss = simplexml_load_string($feed['body']);
     assert_http($feed['status'] === 200 && $rss !== false && count($rss->channel->item) === count($catalog['posts']), 'RSS válido y completo');
-    foreach (['/app/bootstrap.php','/tools/import-wordpress.php','/tools/import-state.json','/tests/run.php','/templates/articulo.html','/.htaccess','/README.md'] as $path) {
+    foreach (['/app/bootstrap.php','/tools/validate.php','/tests/run.php','/templates/articulo.html','/.htaccess','/README.md'] as $path) {
         assert_http(http($path)['status'] === 403, 'acceso interno bloqueado: ' . $path);
     }
     foreach (['posts/prueba-ejecucion.php','media/prueba-ejecucion.php','assets/prueba-ejecucion.php.jpg','posts/prueba-ejecucion.php.html'] as $relative) {

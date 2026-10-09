@@ -4,10 +4,6 @@
 /*.tar.gz
 /backups/
 
-# Estado e informes generados por el importador de WordPress.
-/tools/import-state.json
-/tools/migration-report.json
-
 # Archivos temporales, registros y cargas incompletas.
 *.log
 *.bak

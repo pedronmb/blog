@@ -13,7 +13,7 @@ function escape(string $value): string
 function base_path(): string
 {
     $directory = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
-    // PATH_INFO can make SCRIPT_NAME include the old WordPress path.
+    // PATH_INFO can make SCRIPT_NAME include the requested route.
     $position = strpos($directory, '/index.php');
     if ($position !== false) {
         $directory = substr($directory, 0, $position);

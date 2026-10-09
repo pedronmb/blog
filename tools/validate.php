@@ -49,15 +49,6 @@ foreach ($catalog['posts'] as $post) {
         $wordpressIds[$post['wordpress_id']] = true;
     }
 }
-if (is_file(__DIR__ . '/migration-report.json')) {
-    $report = json_decode(file_get_contents(__DIR__ . '/migration-report.json'), true, 512, JSON_THROW_ON_ERROR);
-    array_push($errors, ...($report['errors'] ?? []));
-    if (count($catalog['posts']) < ($report['source_post_count'] ?? 0)) { $errors[] = 'El catálogo tiene menos artículos que el inventario de migración.'; }
-    foreach ($report['resources'] ?? [] as $relative=>$resource) {
-        $filename = BLOG_ROOT . '/' . $relative;
-        if (!is_file($filename) || hash_file('sha256', $filename) !== ($resource['sha256'] ?? '')) { $errors[] = "Recurso cambiado o faltante: $relative"; }
-    }
-}
 echo count($catalog['posts']) . ' artículos válidos; ' . count($catalog['categories']) . ' categorías; ' . $resourceCount . " referencias locales verificadas.\n";
 foreach ($errors as $error) { fwrite(STDERR, "ERROR: $error\n"); }
 echo count($errors) . " errores.\n";
