@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendiendo los Principios SOLID en el Desarrollo de Software</title>
+<meta name="description" content="El desarrollo de software moderno exige calidad, escalabilidad y mantenimiento. Para lograrlo, se utilizan buenas">
+<meta property="article:published_time" content="2024-12-02T01:00:55Z">
+<meta property="article:modified_time" content="2025-03-03T00:29:20Z">
+<meta property="article:section" content="Web">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/12/01/comprendiendo-los-principios-solid-en-el-desarrollo-de-software/">
+<meta name="blog:wordpress-id" content="137">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Comprendiendo los Principios SOLID en el Desarrollo de Software">
+<meta property="og:description" content="El desarrollo de software moderno exige calidad, escalabilidad y mantenimiento. Para lograrlo, se utilizan buenas">
+<meta property="og:url" content="https://solidchain.ar/posts/comprendiendo-los-principios-solid-en-el-desarrollo-de-software.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/12/SOLIDimage-768x525.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/comprendiendo-los-principios-solid-en-el-desarrollo-de-software.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Web</p><h1>Comprendiendo los Principios SOLID en el Desarrollo de Software</h1><p class="article-date"><time datetime="2024-12-02T01:00:55Z">1 dic 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/12/SOLIDimage.png" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph">El desarrollo de software moderno exige calidad, escalabilidad y mantenimiento. Para lograrlo, se utilizan buenas prácticas y principios que sirven como guía. Uno de los conjuntos de principios más importantes y populares en la programación orientada a objetos es <strong>SOLID</strong>, una metodología que promueve un diseño robusto y adaptable. En este artículo exploraremos qué significa SOLID, los principios que lo conforman y cómo aplicarlos en el desarrollo de software.</p>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h2 class="wp-block-heading">¿Qué es SOLID?</h2>
+
+
+
+<p class="wp-block-paragraph"><strong>SOLID</strong> es un acrónimo que representa cinco principios fundamentales diseñados para mejorar la calidad del software y facilitar su mantenimiento y escalabilidad. Estos principios fueron introducidos por el ingeniero de software Robert C. Martin (conocido como “Uncle Bob”) y se consideran esenciales para escribir código limpio y eficiente en la programación orientada a objetos.</p>
+
+
+
+<h3 class="wp-block-heading">Los cinco principios SOLID son:</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>S</strong>ingle Responsibility Principle (Principio de Responsabilidad Única)</li>
+
+
+
+<li><strong>O</strong>pen/Closed Principle (Principio Abierto/Cerrado)</li>
+
+
+
+<li><strong>L</strong>iskov Substitution Principle (Principio de Sustitución de Liskov)</li>
+
+
+
+<li><strong>I</strong>nterface Segregation Principle (Principio de Segregación de Interfaces)</li>
+
+
+
+<li><strong>D</strong>ependency Inversion Principle (Principio de Inversión de Dependencias)</li>
+</ol>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h2 class="wp-block-heading">Explicación de los Principios</h2>
+
+
+
+<h3 class="wp-block-heading">1. <strong>Principio de Responsabilidad Única (SRP)</strong></h3>
+
+
+
+<p class="wp-block-paragraph">Cada clase debe tener una única responsabilidad o motivo para cambiar. En otras palabras, una clase debe encargarse únicamente de una funcionalidad específica dentro de la aplicación.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo:</strong><br>En lugar de tener una clase <code>GestorDeArchivos</code> que maneje la lectura, escritura y el formato de los datos, podríamos dividir estas tareas en clases separadas como <code>LectorDeArchivos</code>, <code>EscritorDeArchivos</code> y <code>FormateadorDeDatos</code>.</p>
+
+
+
+<h3 class="wp-block-heading">2. <strong>Principio Abierto/Cerrado (OCP)</strong></h3>
+
+
+
+<p class="wp-block-paragraph">Las entidades de software (clases, módulos, funciones, etc.) deben estar <strong>abiertas para extensión</strong> pero <strong>cerradas para modificación</strong>. Esto significa que deberíamos poder agregar nuevas funcionalidades sin cambiar el código existente.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo:</strong><br>En un sistema de pagos, en lugar de modificar una clase <code>ProcesadorDePagos</code> para incluir un nuevo método de pago, podemos usar el polimorfismo para agregar nuevos métodos sin alterar la implementación base.</p>
+
+
+
+<pre class="wp-block-preformatted">phpCopiar código<code>interface MetodoDePago {
+    public function procesar();
+}
+
+class PagoConTarjeta implements MetodoDePago {
+    public function procesar() {
+        // Lógica para pago con tarjeta
+    }
+}
+
+class PagoConPaypal implements MetodoDePago {
+    public function procesar() {
+        // Lógica para pago con PayPal
+    }
+}
+</code></pre>
+
+
+
+<h3 class="wp-block-heading">3. <strong>Principio de Sustitución de Liskov (LSP)</strong></h3>
+
+
+
+<p class="wp-block-paragraph">Las subclases deben ser sustituibles por sus clases base sin alterar el funcionamiento del programa. Esto asegura que las herencias sean correctas y respeten las expectativas de la clase base.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo:</strong><br>Si tenemos una clase base <code>Animal</code> con un método <code>mover()</code>, cualquier subclase (como <code>Ave</code> o <code>Pez</code>) debe implementar este método sin cambiar su contrato.</p>
+
+
+
+<h3 class="wp-block-heading">4. <strong>Principio de Segregación de Interfaces (ISP)</strong></h3>
+
+
+
+<p class="wp-block-paragraph">Una clase no debería verse obligada a implementar métodos que no utiliza. Esto se logra dividiendo las interfaces grandes en interfaces más pequeñas y específicas.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo:</strong><br>En lugar de tener una interfaz <code>Vehiculo</code> con métodos como <code>encender()</code>, <code>volar()</code> y <code>navegar()</code>, podemos dividirla en interfaces específicas como <code>VehiculoTerrestre</code>, <code>VehiculoAereo</code> y <code>VehiculoMaritimo</code>.</p>
+
+
+
+<h3 class="wp-block-heading">5. <strong>Principio de Inversión de Dependencias (DIP)</strong></h3>
+
+
+
+<p class="wp-block-paragraph">Las clases de alto nivel no deben depender de clases de bajo nivel, sino de abstracciones (interfaces). Esto reduce el acoplamiento y facilita los cambios.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo:</strong><br>En un sistema de notificaciones, en lugar de que una clase <code>Notificador</code> dependa directamente de <code>CorreoElectronico</code> o <code>SMS</code>, debería depender de una interfaz genérica <code>MedioDeNotificacion</code>.</p>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h2 class="wp-block-heading">Beneficios de Aplicar SOLID</h2>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Código más limpio:</strong> Los principios fomentan estructuras claras y organizadas.</li>
+
+
+
+<li><strong>Facilidad de mantenimiento:</strong> Es más fácil identificar y solucionar problemas.</li>
+
+
+
+<li><strong>Escalabilidad:</strong> Las aplicaciones pueden crecer sin dificultad, añadiendo nuevas funcionalidades sin romper las existentes.</li>
+
+
+
+<li><strong>Pruebas más sencillas:</strong> Al estar mejor estructurado, el código es más fácil de probar.</li>
+</ul>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h2 class="wp-block-heading">Conclusión</h2>
+
+
+
+<p class="wp-block-paragraph">Los principios SOLID no son reglas estrictas, sino guías para escribir mejor código. Implementarlos requiere práctica, pero los beneficios a largo plazo son evidentes: menos errores, mayor adaptabilidad y un código más entendible.</p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Una idea interactiva</title>
+    <meta name="description" content="Un ejemplo de artículo autónomo: mové el control para explorar cómo crecen las combinaciones posibles.">
+    <meta property="article:published_time" content="2026-10-07T12:00:00-03:00">
+    <meta property="article:section" content="Proyectos">
+    <meta property="og:image" content="../assets/placeholder.svg">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Una idea interactiva">
+    <meta property="og:description" content="Explorá cómo crecen las combinaciones posibles.">
+    <script src="../assets/theme.js"></script>
+    <link rel="stylesheet" href="../assets/site.css?v=3">
+    <link rel="stylesheet" href="../assets/theme.css?v=3">
+    <link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+    <!-- Al publicar, agregar canonical y og:url con la URL definitiva. -->
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí ↗</a></nav></div></header>
+<main id="contenido" class="article-shell">
+    <nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+    <header class="article-header"><p class="eyebrow">PROYECTOS</p><h1>Una idea interactiva</h1><p class="article-date"><time datetime="2026-10-07T12:00:00-03:00">7 oct 2026</time></p></header>
+    <div class="article-content">
+        <p>Un artículo puede incluir su propio CSS y JavaScript. Este ejemplo muestra cuántas combinaciones se pueden representar con una cantidad de bits.</p>
+        <div class="interactive-demo">
+            <label for="bits">Cantidad de bits: <strong id="bits-label">8</strong></label>
+            <input id="bits" type="range" min="1" max="32" value="8">
+            <output id="combinaciones" for="bits" aria-live="polite">256 combinaciones</output>
+        </div>
+        <noscript><p>Con 8 bits se pueden representar 256 combinaciones. Activá JavaScript para explorar otros valores.</p></noscript>
+        <p>Cada bit adicional duplica las combinaciones posibles: <code>2 ** bits</code>.</p>
+    </div>
+    <div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+<script>
+const control = document.getElementById('bits');
+control.addEventListener('input', () => {
+    document.getElementById('bits-label').textContent = control.value;
+    document.getElementById('combinaciones').textContent = (2 ** Number(control.value)).toLocaleString('es-AR') + ' combinaciones';
+});
+</script>
+</body>
+</html>

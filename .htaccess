@@ -1,0 +1,23 @@
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+AddType text/html .html
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+<FilesMatch "(?i)^(?:\.|README|router\.php)|\.(?:json|log|md|bak|tmp|part|ps1|sh)$">
+    Require all denied
+</FilesMatch>
+
+RewriteEngine On
+RewriteRule ^(?:app|tools|tests|templates)(?:/|$) - [F,L,NC]
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^(?:posts|media|assets)/.*\.(?:php[0-9]*|phtml|phar|cgi|pl|py|shtml)(?:[./]|$) - [F,L,NC]
+RewriteRule ^wp-content/(uploads|ql-cache)/(.*)$ media/$1/$2 [R=301,L,NE]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [END]
+RewriteRule ^ index.php [END]

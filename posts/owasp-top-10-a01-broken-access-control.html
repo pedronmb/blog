@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OWASP Top 10: A01 Broken Access Control</title>
+<meta name="description" content="A01: Broken Access Control (Control de Acceso Roto) es el riesgo de seguridad número uno">
+<meta property="article:published_time" content="2024-08-10T20:23:33Z">
+<meta property="article:modified_time" content="2025-03-03T00:29:27Z">
+<meta property="article:section" content="Ciberseguridad">
+<meta property="article:section" content="Web">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/08/10/owasp-top-10-a01-broken-access-control/">
+<meta name="blog:wordpress-id" content="104">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OWASP Top 10: A01 Broken Access Control">
+<meta property="og:description" content="A01: Broken Access Control (Control de Acceso Roto) es el riesgo de seguridad número uno">
+<meta property="og:url" content="https://solidchain.ar/posts/owasp-top-10-a01-broken-access-control.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/08/owasp01-768x461.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/owasp-top-10-a01-broken-access-control.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Ciberseguridad / Web</p><h1>OWASP Top 10: A01 Broken Access Control</h1><p class="article-date"><time datetime="2024-08-10T20:23:33Z">10 ago 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/08/owasp01-e1723320963972.png" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph"><strong>A01: Broken Access Control</strong> (Control de Acceso Roto) es el riesgo de seguridad número uno en el OWASP Top 10. Esta categoría cubre una amplia gama de vulnerabilidades que permiten a los usuarios eludir las políticas de control de acceso establecidas en una aplicación, lo que puede resultar en la exposición de datos sensibles, la manipulación de la funcionalidad de la aplicación o la ejecución de acciones no autorizadas.</p>
+
+
+
+<h3 class="wp-block-heading">¿Qué es el Control de Acceso?</h3>
+
+
+
+<p class="wp-block-paragraph">El control de acceso es un mecanismo de seguridad fundamental que asegura que los usuarios puedan acceder solo a los recursos y realizar únicamente las acciones para las que están autorizados. Esto incluye:</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Autenticación:</strong> Verificación de la identidad del usuario.</li>
+
+
+
+<li><strong>Autorización:</strong> Determinación de los permisos del usuario, es decir, lo que puede o no puede hacer en el sistema.</li>
+
+
+
+<li><strong>Control de Sesión:</strong> Gestión de las sesiones de usuario para prevenir acceso no autorizado a recursos tras la autenticación.</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">Ejemplos Comunes de Fallos en el Control de Acceso</h3>
+
+
+
+<figure class="wp-block-image size-full"><img loading="lazy" decoding="async" width="914" height="693" src="../media/uploads/2024/08/LRgif.gif" alt="" class="wp-image-107"></figure>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Omisión de Control de Acceso en URLs:</strong>
+<ul class="wp-block-list">
+<li>Un atacante podría modificar la URL de la aplicación para acceder a recursos restringidos, por ejemplo, cambiar <code>https://miapp.com/admin</code> a <code>https://miapp.com/user/1</code>.</li>
+
+
+
+<li>Si el control de acceso no está implementado correctamente, el atacante podría acceder a funciones de administrador o ver información de otros usuarios.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Manipulación de Parámetros:</strong>
+<ul class="wp-block-list">
+<li>Los usuarios podrían modificar parámetros en las solicitudes HTTP (GET, POST) para acceder a datos o realizar acciones no autorizadas.</li>
+
+
+
+<li>Ejemplo: Un usuario cambia el parámetro <code>user_id=123</code> a <code>user_id=124</code> para ver la información de otro usuario.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Falta de Control de Acceso en el Lado del Cliente:</strong>
+<ul class="wp-block-list">
+<li>Confiar en controles de acceso implementados únicamente en el lado del cliente (JavaScript, HTML) es un error, ya que estos pueden ser fácilmente manipulados o ignorados por atacantes.</li>
+
+
+
+<li>Los controles de acceso deben siempre implementarse y validarse en el servidor.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Escalada de Privilegios:</strong>
+<ul class="wp-block-list">
+<li>Un usuario normal encuentra una forma de obtener permisos de administrador, permitiéndole realizar acciones críticas como modificar configuraciones del sistema o acceder a datos sensibles.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Borrado de Referencias Directas Inseguras:</strong>
+<ul class="wp-block-list">
+<li>Cuando la aplicación utiliza identificadores en la URL o formularios sin comprobar que el usuario tiene permiso para acceder al recurso asociado, un atacante podría adivinar o manipular estos identificadores para acceder a recursos no autorizados.</li>
+</ul>
+</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Impacto de los Fallos en el Control de Acceso</h3>
+
+
+
+<p class="wp-block-paragraph">El impacto de los fallos en el control de acceso puede ser severo, incluyendo:</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Exposición de Datos Sensibles:</strong> Información privada de usuarios podría ser accesible para personas no autorizadas.</li>
+
+
+
+<li><strong>Manipulación de Datos:</strong> Un atacante podría alterar o borrar información crítica.</li>
+
+
+
+<li><strong>Compromiso de la Funcionalidad de la Aplicación:</strong> Funciones críticas podrían ser usadas indebidamente, como la desactivación de medidas de seguridad.</li>
+
+
+
+<li><strong>Escalación de Privilegios:</strong> Usuarios con bajos niveles de acceso podrían obtener acceso administrativo, poniendo en riesgo toda la aplicación.</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">Cómo Mitigar los Riesgos de Control de Acceso Roto</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Implementación de Políticas de Control de Acceso en el Servidor:</strong>
+<ul class="wp-block-list">
+<li>Las decisiones de control de acceso deben ser realizadas y verificadas en el servidor, no en el lado del cliente.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Principio de Privilegios Mínimos:</strong>
+<ul class="wp-block-list">
+<li>Asegurarse de que los usuarios solo tengan los permisos mínimos necesarios para realizar sus tareas.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Revisión Regular de Permisos:</strong>
+<ul class="wp-block-list">
+<li>Auditar regularmente los permisos de los usuarios para asegurarse de que estén alineados con sus roles y responsabilidades.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Uso de Mecanismos de Autenticación y Autorización Probados:</strong>
+<ul class="wp-block-list">
+<li>Utilizar frameworks y bibliotecas de autenticación y autorización bien probados y actualizados.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Validación de Acceso en Cada Solicitud:</strong>
+<ul class="wp-block-list">
+<li>Verificar que el usuario tiene permisos en cada solicitud que realiza, no solo al iniciar sesión.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Testeo de Seguridad:</strong>
+<ul class="wp-block-list">
+<li>Realizar pruebas de seguridad regulares, incluyendo pruebas de penetración, para identificar y corregir posibles fallos en el control de acceso.</li>
+</ul>
+</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Conclusión</h3>
+
+
+
+<p class="wp-block-paragraph">El control de acceso roto es una de las vulnerabilidades más críticas y comunes en aplicaciones web. Asegurar que los mecanismos de control de acceso estén correctamente implementados y revisados regularmente es esencial para proteger la integridad, confidencialidad y disponibilidad de la información y funcionalidades en una aplicación.</p>
+
+
+
+<h3 class="wp-block-heading">Fuentes</h3>
+
+
+
+<p class="wp-block-paragraph"><a href="https://owasp.org/Top10/A01_2021-Broken_Access_Control" target="_blank" rel="noopener" title="">https://owasp.org/Top10/A01_2021-Broken_Access_Control</a></p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

@@ -1,0 +1,10 @@
+Options -Indexes -ExecCGI -Includes
+RemoveHandler .html .htm
+RemoveType .html .htm
+AddType text/html .html .htm
+<FilesMatch "(?i)\.html?$">
+    SetHandler default-handler
+</FilesMatch>
+<FilesMatch "(?i)\.(?:php[0-9]*|phtml|phar|cgi|pl|py|shtml)(?:\.|$)">
+    Require all denied
+</FilesMatch>

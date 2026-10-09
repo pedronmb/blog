@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instala y Configura tu Nodo de Ethereum: Guía Esencial</title>
+<meta name="description" content="Ventajas de tener tu propio nodo Tener tu propio nodo de Ethereum ofrece varias ventajas">
+<meta property="article:published_time" content="2024-05-26T21:45:50Z">
+<meta property="article:modified_time" content="2024-07-02T17:08:06Z">
+<meta property="article:section" content="Blockchain">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/05/26/instala-y-configura-tu-nodo-de-ethereum-guia-esencial/">
+<meta name="blog:wordpress-id" content="59">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Instala y Configura tu Nodo de Ethereum: Guía Esencial">
+<meta property="og:description" content="Ventajas de tener tu propio nodo Tener tu propio nodo de Ethereum ofrece varias ventajas">
+<meta property="og:url" content="https://solidchain.ar/posts/instala-y-configura-tu-nodo-de-ethereum-guia-esencial.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/05/decentralized-social-media-768x461.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/instala-y-configura-tu-nodo-de-ethereum-guia-esencial.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Blockchain</p><h1>Instala y Configura tu Nodo de Ethereum: Guía Esencial</h1><p class="article-date"><time datetime="2024-05-26T21:45:50Z">26 may 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/05/decentralized-social-media.jpg" alt="" decoding="async">
+<div class="article-content ">
+
+<h2 class="wp-block-heading">Ventajas de tener tu propio nodo</h2>
+
+
+
+<p class="wp-block-paragraph">Tener tu propio nodo de Ethereum ofrece varias ventajas significativas como tener control total sobre las transacciones y los datos que procesas. No dependes de terceros para acceder a la blockchain, lo que aumenta la independencia y la seguridad. Al operar tu propio nodo, no necesitas confiar en nodos externos que podrían registrar tus actividades. Esto reduce los riesgos de vigilancia y aumenta la privacidad de tus transacciones y datos entre otras ventajas.</p>
+
+
+
+<p class="wp-block-paragraph">También tener tu propio nodo te permite probar contratos inteligentes y aplicaciones descentralizadas (dApps) en un entorno controlado, facilitando el desarrollo y la implementación de nuevas soluciones en la red Ethereum y además no necesitas confiar en servicios como Infura para interactuar con la red Ethereum. Esto puede ser crucial en situaciones donde la disponibilidad de estos servicios es limitada o se imponen restricciones.</p>
+
+
+
+<h2 class="wp-block-heading">A tener en cuenta</h2>
+
+
+
+<p class="wp-block-paragraph">A continuación vamos a ir dando un paso a paso de lo que necesitamos tener e ir ejecutando para levantar nuestro nodo, no vamos a ahondar en la teoría de los nodos de etehreum pero vamos a dejar todos los links a la documentación para los que quieras profundizar sobre el tema.</p>
+
+
+
+<p class="wp-block-paragraph">Desde el cambio de Ethereum de PoW a PoS no solo debemos tener un cliente de ejecución de la blokchain si no también un cliente de consenso, las opciones para un cliente de ejecución que en este momento nos están dando son: Besu, Erigon, Geth y Nethermind y en cuanto a las opciones de clientes de consenso son: Lighthouse, Lodestar, Nimbus, Prysm y Teku para nuestro caso vamos a utilizar Geth y Prysm ambos están escritos en el lenguaje GO.</p>
+
+
+
+<h2 class="wp-block-heading">Requisitos técnicos</h2>
+
+
+
+<p class="wp-block-paragraph">Este es un apartado no menor, la documentación de <a rel="noreferrer noopener" href="https://ethereum.org/es/developers/docs/nodes-and-clients/run-a-node/" target="_blank">Ethereum</a> nos indica los siguientes requisitos:</p>
+
+
+
+<h5 class="wp-block-heading" id="requisitos-m%C3%ADnimos">Requisitos mínimos</h5>
+
+
+
+<ul class="wp-block-list">
+<li>CPU con dos o más núcleos</li>
+
+
+
+<li>8 GB de RAM</li>
+
+
+
+<li>SSD de 2 TB</li>
+
+
+
+<li>10 o más MBit/s de banda ancha</li>
+</ul>
+
+
+
+<h5 class="wp-block-heading" id="especificaciones-recomendadas">Especificaciones recomendadas</h5>
+
+
+
+<ul class="wp-block-list">
+<li>CPU rápida con cuatro o más núcleos</li>
+
+
+
+<li>16 GB o más de RAM</li>
+
+
+
+<li>SSD rápida con 2 o másTB</li>
+
+
+
+<li>25 o más MBit/s de banda ancha</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">En nuestra prueba logramos levantar el nodo con una PC con los siguientes requisitos:</p>
+
+
+
+<h5 class="wp-block-heading" id="especificaciones-recomendadas">Especificaciones de nuestro nodo</h5>
+
+
+
+<ul class="wp-block-list">
+<li>CPU Intel Core i7-4790 3.60Ghz</li>
+
+
+
+<li>RAM 16 GB DDR3</li>
+
+
+
+<li>SSD 500GB</li>
+
+
+
+<li>HDD 2TB</li>
+
+
+
+<li>100 MBit/s de banda ancha</li>
+
+
+
+<li>SO Linux Mint 21.1 Cinnamon</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">Si bien la documentación dice que el almacenamiento debe ser obligatoriamente SSD ósea un disco solido por temas de velocidad de escritura y lectura pudimos encontrar una configuración que mencionaremos mas adelante para usar un almacenamiento mixto.</p>
+
+
+
+<h2 class="wp-block-heading">Primeros pasos</h2>
+
+
+
+<p class="wp-block-paragraph">Vamos a instalar el cliente Geth usando la siguiente <a rel="noreferrer noopener" href="https://geth.ethereum.org/docs/getting-started" target="_blank">documentación</a> y vamos a ejecutar las siguientes lineas:</p>
+
+
+
+<pre class="wp-block-code"><code>sudo add-apt-repository -y ppa:ethereum/ethereum
+sudo apt-get update
+sudo apt-get install ethereum</code></pre>
+
+
+
+<p class="wp-block-paragraph">Ahora creamos nuestro directorio donde vamos a instalar el cliente de ejecución y el cliente de consenso en el escritorio de nuestro nodo</p>
+
+
+
+<pre class="wp-block-code"><code>cd /home/&lt;User&gt;/Desktop
+mkdir ethereum
+mkdir ethereum/consensus</code></pre>
+
+
+
+<p class="wp-block-paragraph">Instalamos el cliente de consenso usando esta <a rel="noreferrer noopener" href="https://docs.prylabs.network/docs/install/install-with-script" target="_blank">documentación</a> dentro de la carpeta consensus que acabamos de crear ejecutamos el siguiente comando:</p>
+
+
+
+<pre class="wp-block-code"><code>curl https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh --output prysm.sh &amp;&amp; chmod +x prysm.sh</code></pre>
+
+
+
+<p class="wp-block-paragraph">En el mismo directorio vamos a crear el archivo JWT que necesita el cliente de consenso para hablar con el cliente de ejecucióny lo vamos a mover al directorio /tmp</p>
+
+
+
+<pre class="wp-block-code"><code>./prysm.sh beacon-chain generate-auth-secret
+cp jwp.hex /tmp/jwtsecret</code></pre>
+
+
+
+<h2 class="wp-block-heading">Iniciando el nodo</h2>
+
+
+
+<p class="wp-block-paragraph">Antes de poder iniciar el cliente de ejecución debemos iniciar el clef con los siguientes comandos posicionados en la carpeta /ethereum que habíamos creado en el escritorio.</p>
+
+
+
+<pre class="wp-block-code"><code>clef newaccount --keystore geth-tutorial/keystore
+clef --keystore geth-tutorial/keystore --configdir geth-tutorial/clef --chainid 1</code></pre>
+
+
+
+<p class="wp-block-paragraph">Podemos observar que se creo una carpeta nueva “geth-tutorial” en donde se va a ejecutar nuestro cliente de ejecución, la consola en la que estamos ejecutando el clef debe quedar abierta.</p>
+
+
+
+<p class="wp-block-paragraph">Ahora vamos a ejecutar nuestro cliente de ejecución en una consola nueva, antes debemos crear una carpeta data para los datos mas pesados de nuestro cliente que se van a guardar en el disco HDD </p>
+
+
+
+<pre class="wp-block-code"><code>mkdir /mnt/sda1/ethereum/data
+geth --mainnet --datadir geth-tutorial --datadir.ancient=/mnt/sda1/ethereum/data --authrpc.addr localhost --authrpc.port 8551 --authrpc.vhosts localhost --authrpc.jwtsecret /tmp/jwtsecret --http --http.api eth,net --signer=geth-tutorial/clef/clef.ipc --http</code></pre>
+
+
+
+<p class="wp-block-paragraph">Una vez ejecutado vemos que comenzara a sincronizar y descargar información necesaria de la blockchain, mientras el cliente de ejecución comienza la sincronización ejecutaremos el cliente de consenso. Importante no cerrar la consola del cliente de ejecución.</p>
+
+
+
+<p class="wp-block-paragraph">Nos posicionamos en la carpeta Descktop/ethereum/consensus y ejecutamos:</p>
+
+
+
+<pre class="wp-block-code"><code>./prysm.sh beacon-chain --execution-endpoint=http://localhost:8551 --mainnet --jwt-secret=/tmp/jwtsecret --checkpoint-sync-url=https://beaconstate.info --genesis-beacon-api-url=https://beaconstate.info</code></pre>
+
+
+
+<p class="wp-block-paragraph">Si todo se ejecuto correctamente sin errores el nodo va a estar descargando datos de la blockchain y sincronizándose. Este proceso en nuestro caso tardo unas 36hs y ocupo alrededor de 300Gb en el disco SSD y 800Gb en el disco HDD.</p>
+
+
+
+<p class="wp-block-paragraph">Una ves terminada la sincronización puede probar ejecutando en una nueva consola el siguiente comando</p>
+
+
+
+<pre class="wp-block-code"><code>geth attach http://127.0.0.1:8545</code></pre>
+
+
+
+<p class="wp-block-paragraph">Esta consola nos va a dejar ejecutar comandos de utilidad como </p>
+
+
+
+<pre class="wp-block-code"><code>eth.accounts;
+o
+web3.fromWei(eth.getBalance('0xca57F3b40B42FCce3c37B8D18aDBca5260ca72EC'), 'ether');</code></pre>
+
+
+
+<p class="wp-block-paragraph">Con esto veremos la cuenta que esta asociada a nuestro nodo y con el otro comando podremos ver el balance de la billetera que queramos siendo ejecutada esta consulta en nuestro nodo</p>
+
+
+
+<h2 class="wp-block-heading">Consideraciones</h2>
+
+
+
+<p class="wp-block-paragraph">Esta es una guía rápida para la instalación de un nodo de etehreum en mainnet , un nodo solo para consultas sobre la blockchain que podría servir para no depende de un nodo remoto como infura, pero no es una guía para un nodo de staking en el cual debe depositar 32ETH para poder validar bloques.</p>
+
+
+
+<p class="wp-block-paragraph">Además notamos que nuestro nodo esta muy justo con la memoria RAM habiendo momentos en los cuales supera los 16GB recomendaríamos tener mas de 16GB y de ser posible usar un disco SSD de 2TB para tener mejor estabilidad en el nodo.</p>
+
+
+
+<h2 class="wp-block-heading">Documentacion</h2>
+
+
+
+<p class="wp-block-paragraph"><a href="https://ethereum.org/es/developers/docs/nodes-and-clients/run-a-node/" target="_blank" rel="noreferrer noopener">ethereum.org</a></p>
+
+
+
+<p class="wp-block-paragraph"><a href="https://docs.prylabs.network/docs/install/install-with-script" target="_blank" rel="noreferrer noopener">docs.prylabs.network</a></p>
+
+
+
+<p class="wp-block-paragraph"><a href="https://geth.ethereum.org/docs/getting-started" target="_blank" rel="noreferrer noopener">geth.ethereum.org</a></p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

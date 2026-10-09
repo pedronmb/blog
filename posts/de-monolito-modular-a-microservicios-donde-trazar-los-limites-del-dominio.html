@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>De Monolito Modular a Microservicios: Dónde trazar los límites del dominio</title>
+<meta name="description" content="Criterios prácticos de DDD para pasar de un monolito modular a microservicios: límites del dominio, consistencia, datos y autonomía sin nanoservicios.">
+<meta property="article:published_time" content="2026-09-19T18:41:52Z">
+<meta property="article:modified_time" content="2026-09-19T18:45:13Z">
+<meta property="article:section" content="Arquitectura">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2026/09/19/de-monolito-modular-a-microservicios-donde-trazar-los-limites-del-dominio/">
+<meta name="blog:wordpress-id" content="220">
+<meta property="og:type" content="article">
+<meta property="og:title" content="De Monolito Modular a Microservicios: Dónde trazar los límites del dominio">
+<meta property="og:description" content="Criterios prácticos de DDD para pasar de un monolito modular a microservicios: límites del dominio, consistencia, datos y autonomía sin nanoservicios.">
+<meta property="og:url" content="https://solidchain.ar/posts/de-monolito-modular-a-microservicios-donde-trazar-los-limites-del-dominio.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2026/09/03-portada-monolito-microservicios-768x432.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/de-monolito-modular-a-microservicios-donde-trazar-los-limites-del-dominio.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Arquitectura</p><h1>De Monolito Modular a Microservicios: Dónde trazar los límites del dominio</h1><p class="article-date"><time datetime="2026-09-19T18:41:52Z">19 sep 2026</time></p></header>
+<img class="article-cover" src="../media/uploads/2026/09/03-portada-monolito-microservicios.png" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph"><strong>Dividir una aplicación es fácil. Dividirla de manera que cada parte pueda cambiar sin arrastrar a las demás exige entender el negocio.</strong></p>
+
+
+
+<p class="wp-block-paragraph">Imaginemos un equipo que extrae del monolito cuatro servicios: pedidos, líneas de pedido, descuentos y totales. El diagrama parece ordenado. Sin embargo, incorporar una promoción requiere modificar tres repositorios, coordinar despliegues y seguir una cadena de llamadas para descubrir por qué falla una compra.</p>
+
+
+
+<p class="wp-block-paragraph">La aplicación tiene más piezas, pero el equipo sigue trabajando sobre una única unidad de cambio. Ahora, además, esa unidad depende de la red.</p>
+
+
+
+<p class="wp-block-paragraph">El paso de un monolito modular a microservicios empieza por una decisión anterior a la infraestructura: <strong>qué reglas pertenecen juntas y qué responsabilidades pueden evolucionar con autonomía</strong>. Domain-Driven Design (DDD) aporta herramientas para explorar esa frontera. El tamaño del servicio viene después.</p>
+
+
+
+<h2 class="wp-block-heading">1. Separar el modelo y separar el despliegue son dos decisiones</h2>
+
+
+
+<p class="wp-block-paragraph">Un <strong>bounded context</strong>, o contexto delimitado, define dónde tiene validez un modelo de dominio y su lenguaje. Dentro de ese límite, los conceptos deben conservar un significado coherente. Entre contextos puede ser necesario traducirlos. Esta es la función del patrón en el diseño estratégico de DDD, como explica Martin Fowler en <a href="https://martinfowler.com/bliki/BoundedContext.html">Bounded Context</a>.</p>
+
+
+
+<p class="wp-block-paragraph">Conviene distinguir cuatro conceptos:</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Subdominio:</strong> una parte del problema de negocio, como gestionar existencias o procesar cobros.</li>
+
+
+<li><strong>Bounded context:</strong> el límite dentro del cual construimos un modelo coherente para abordar parte de ese problema.</li>
+
+
+<li><strong>Módulo:</strong> una unidad de organización y encapsulación del código que puede ayudar a implementar ese límite.</li>
+
+
+<li><strong>Microservicio:</strong> una unidad que se ejecuta y despliega de forma independiente, con las responsabilidades operativas que eso implica.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">Varios contextos pueden convivir en un mismo monolito modular. Un contexto también puede implementarse mediante varios servicios si existe una razón concreta. <strong>Ni el contexto, ni la entidad, ni el agregado se convierten automáticamente en un despliegue.</strong></p>
+
+
+
+<figure class="wp-block-image"><img decoding="async" src="../media/uploads/2026/09/01-limites-dominio-despliegues.png" alt="Comparación entre un monolito modular con Ventas, Inventario y Pagos, y una extracción selectiva donde solo Pagos pasa a un servicio independiente."><figcaption class="wp-element-caption">Los mismos límites de dominio pueden mantenerse mientras cambia la forma de desplegar la aplicación. Pagos es un candidato ilustrativo, no una primera extracción obligatoria.</figcaption></figure>
+
+
+
+<p class="wp-block-paragraph">El monolito modular permite poner a prueba esas fronteras mientras mover comportamiento sigue siendo relativamente sencillo. Esa ventaja de aprendizaje está detrás de la propuesta <a href="https://martinfowler.com/bliki/MonolithFirst.html">Monolith First</a>. La modularidad, de todos modos, hay que construirla y sostenerla: una colección de carpetas no alcanza.</p>
+
+
+
+<h2 class="wp-block-heading">2. Empezar por las decisiones del negocio</h2>
+
+
+
+<p class="wp-block-paragraph">Antes de dibujar servicios, conviene recorrer casos concretos con quienes conocen la operación: tomar una compra, reservar unidades, rechazar un cobro, cancelar una entrega. Para cada paso, hay que identificar quién decide, qué información necesita y qué regla debe preservar.</p>
+
+
+
+<p class="wp-block-paragraph">El análisis de dominio propuesto por <a href="https://learn.microsoft.com/en-us/azure/architecture/microservices/model/domain-analysis">Microsoft</a> parte de las capacidades del negocio y del lenguaje compartido con sus expertos. Los contextos se identifican antes de elegir los servicios.</p>
+
+
+
+<p class="wp-block-paragraph">En nuestra tienda de ejemplo, el mapa inicial podría ser este:</p>
+
+
+
+<figure class="wp-block-table"><table><thead><tr><th>Contexto</th><th>Decisión que le pertenece</th><th>Información bajo su autoridad</th></tr></thead><tbody>
+<tr><td><strong>Ventas</strong></td><td>Qué compra acepta y bajo qué condiciones.</td><td>Pedido, importes acordados y estado comercial.</td></tr>
+<tr><td><strong>Inventario</strong></td><td>Qué unidades puede comprometer.</td><td>Existencias, reservas y vencimientos.</td></tr>
+<tr><td><strong>Pagos</strong></td><td>Cómo procesa y registra un intento de cobro.</td><td>Operaciones, resultados y referencias del proveedor.</td></tr>
+</tbody></table></figure>
+
+
+
+<p class="wp-block-paragraph">Incluso una palabra compartida cambia de significado. Para Ventas, un producto es algo ofrecido bajo determinadas condiciones; para Inventario, es una referencia cuyas unidades se almacenan y reservan. Pueden compartir un identificador sin compartir la misma clase ni todas sus reglas.</p>
+
+
+
+<p class="wp-block-paragraph">Ese cambio de significado ayuda a detectar una frontera. Después hay que comprobar si las responsabilidades y las dependencias sostienen la separación.</p>
+
+
+
+<h2 class="wp-block-heading">3. Seis criterios para trazar un límite útil</h2>
+
+
+
+<h3 class="wp-block-heading">¿Qué necesita permanecer consistente?</h3>
+
+
+
+<p class="wp-block-paragraph">Una <strong>invariante</strong> es una regla que debe mantenerse válida al completar una operación. En DDD, un agregado reúne los elementos cuyo cambio debe controlar conjuntamente para proteger esas reglas. Es una frontera de consistencia dentro del modelo; no equivale a todo el contexto. La <a href="https://learn.microsoft.com/en-us/azure/architecture/microservices/model/tactical-domain-driven-design">guía de DDD táctico</a> desarrolla esta distinción.</p>
+
+
+
+<p class="wp-block-paragraph">En el ejemplo, al aceptar un pedido deben quedar guardadas sus líneas y sus condiciones económicas acordadas. Extraer el cálculo del total a otro servicio solo porque tiene una clase propia podría convertir una regla local en una coordinación remota.</p>
+
+
+
+<p class="wp-block-paragraph">La pregunta decisiva es: <strong>¿el negocio admite un estado intermedio y sabe cómo resolverlo?</strong> Si no lo admite, conviene revisar el corte. Si lo admite, esa transición debe formar parte explícita del diseño. Una transacción enorme heredada tampoco demuestra que todo pertenezca al mismo contexto: puede estar mezclando reglas que toleran resolverse por separado.</p>
+
+
+
+<h3 class="wp-block-heading">¿Qué cambia junto y por qué?</h3>
+
+
+
+<p class="wp-block-paragraph">Conviene tomar cambios recientes y seguir su recorrido. Si modificar una política de descuentos exige tocar pedidos, líneas y totales, hay evidencia de cohesión entre esas piezas. Si cambiar el proveedor de pagos apenas afecta su integración, aparece una oportunidad distinta.</p>
+
+
+
+<p class="wp-block-paragraph">Esta es una heurística de diagnóstico: <strong>la frecuencia de cambios conjuntos sirve cuando también entendemos su causa</strong>. Una librería compartida mal diseñada puede forzar cambios simultáneos entre responsabilidades que sí deberían separarse. El historial muestra dónde investigar; no decide la arquitectura por sí solo.</p>
+
+
+
+<h3 class="wp-block-heading">¿Quién tiene autoridad sobre los datos?</h3>
+
+
+
+<p class="wp-block-paragraph">En nuestra tienda, Ventas puede pedir una reserva, pero Inventario decide si la concede. Ventas no debería actualizar directamente el campo de stock. Esa autoridad tiene que quedar protegida por una interfaz, incluso dentro del monolito.</p>
+
+
+
+<p class="wp-block-paragraph">Al extraer servicios, los datos persistentes de cada uno deben permanecer privados. Esto no exige un servidor de base de datos por servicio: pueden usarse esquemas o tablas privadas con permisos adecuados, aunque compartir infraestructura mantiene riesgos operativos comunes. El patrón <a href="https://microservices.io/patterns/data/database-per-service.html">Database per Service</a> describe estas opciones.</p>
+
+
+
+<p class="wp-block-paragraph">Una copia de consulta puede ser válida. Por ejemplo, Ventas puede conservar una descripción y el precio acordados al comprar. Hay que definir qué copia es histórica, cuál se actualiza y quién resuelve una discrepancia.</p>
+
+
+
+<h3 class="wp-block-heading">¿Cuánta conversación cruza la frontera?</h3>
+
+
+
+<p class="wp-block-paragraph">Una operación como <code>reservarUnidades(pedidoId, cantidades)</code> expresa una intención de negocio. Una secuencia remota de leer stock, restar unidades y guardar el resultado obliga al consumidor a conocer reglas internas y abre problemas de concurrencia.</p>
+
+
+
+<p class="wp-block-paragraph">Las llamadas frecuentes y pequeñas, junto con la necesidad de desplegar varios servicios a la vez, son señales para revisar el límite. La <a href="https://learn.microsoft.com/en-us/azure/architecture/microservices/model/microservice-boundaries">guía de identificación de microservicios</a> recomienda evaluar precisamente esa conversación y la independencia de despliegue.</p>
+
+
+
+<p class="wp-block-paragraph">Para nuestro checkout, mediría cuántas dependencias remotas bloquean la compra y cuánto agregan a su latencia. Una llamada necesaria puede ser razonable; diez intercambios para reconstruir un pedido merecen otra conversación de diseño.</p>
+
+
+
+<h3 class="wp-block-heading">¿Qué beneficio concreto aporta otro despliegue?</h3>
+
+
+
+<p class="wp-block-paragraph">Supongamos que Pagos necesita publicar cambios de integración con mayor frecuencia y controlar por separado sus recursos. Esa necesidad puede justificar una extracción. Pero hay que formular el resultado esperado: reducir la espera para publicar esos cambios, contener ciertos fallos o ajustar capacidad sin replicar toda la aplicación.</p>
+
+
+
+<p class="wp-block-paragraph">El aislamiento depende del flujo. Si cada compra espera sin límite a Pagos, su caída seguirá afectando al checkout. Separar procesos permite construir aislamiento; no lo garantiza.</p>
+
+
+
+<h3 class="wp-block-heading">¿Quién puede operarlo de principio a fin?</h3>
+
+
+
+<p class="wp-block-paragraph">Un candidato necesita responsables que puedan modificarlo, desplegarlo, observarlo y responder cuando falla. El costo incluye alertas, compatibilidad de contratos, secretos, recuperación y seguimiento de incidentes.</p>
+
+
+
+<p class="wp-block-paragraph">Fowler plantea la automatización de despliegues y la capacidad de monitoreo entre los <a href="https://martinfowler.com/bliki/MicroservicePrerequisites.html">prerrequisitos operativos de los microservicios</a>. En un equipo pequeño, conservar módulos juntos puede ser una decisión acertada mientras esa capacidad madura.</p>
+
+
+
+<h2 class="wp-block-heading">4. El nanoservicio aparece cuando la autonomía no compensa la fragmentación</h2>
+
+
+
+<p class="wp-block-paragraph">Uso aquí <em>nanoservicio</em> para describir una unidad de despliegue cuya responsabilidad resulta demasiado fragmentada para la coordinación que introduce. No hay una cantidad universal de líneas de código que permita identificarlo.</p>
+
+
+
+<p class="wp-block-paragraph">En el checkout inicial, Pedido, Líneas, Descuento y Total son sospechosos porque cada cambio relevante recorre varias piezas. El servicio de Total podría ser diminuto y estar perfectamente probado; aun así, puede resultar una mala frontera.</p>
+
+
+
+<figure class="wp-block-image"><img decoding="async" src="../media/uploads/2026/09/02-autonomia-nanoservicios.png" alt="Arriba, Pedido, Líneas, Descuento y Total separados en cuatro servicios conectados por llamadas de red. Abajo, las mismas piezas dentro de Ventas, con reglas e invariantes locales."><figcaption class="wp-element-caption">En este ejemplo, agrupar comportamiento cohesivo reduce la coordinación entre despliegues. La decisión depende del dominio: una plataforma compleja de precios podría justificar otro contexto.</figcaption></figure>
+
+
+
+<p class="wp-block-paragraph">Antes de sostener esa división, plantearía tres pruebas:</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Prueba del cambio:</strong> incorporar una promoción y comprobar cuántos equipos y despliegues deben coordinarse.</li>
+
+
+<li><strong>Prueba del fallo:</strong> interrumpir una dependencia y observar qué puede seguir funcionando y qué estado ve el usuario.</li>
+
+
+<li><strong>Prueba del contrato:</strong> explicar qué promete cada servicio sin describir sus tablas ni sus clases internas.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">Estas pruebas son una propuesta práctica para el ejemplo, no una fórmula de DDD. Si exponen una dependencia permanente, conviene ampliar el límite o rediseñar la interacción. Un servicio pequeño puede ser útil; tiene que justificar su existencia como unidad operable.</p>
+
+
+
+<h2 class="wp-block-heading">5. Desacoplar contextos antes de moverlos a la red</h2>
+
+
+
+<p class="wp-block-paragraph">Volvamos al monolito. Supongamos que Ventas lee tablas de Pagos, interpreta sus códigos y modifica el pedido dentro de la misma transacción. Antes de extraer Pagos, conviene hacer visibles esas dependencias.</p>
+
+
+
+<p class="wp-block-paragraph">Un primer paso sería introducir un contrato con operaciones como <code>solicitarCobro</code> y <code>consultarResultado</code>. Pagos concentra la traducción de códigos del proveedor a resultados que el resto del sistema entiende. Ventas deja de depender de detalles de esa integración.</p>
+
+
+
+<p class="wp-block-paragraph">El mapa de contextos debe documentar quién publica ese contrato, quién lo consume y cómo se negocian cambios. Cuando un modelo externo amenaza con imponer sus conceptos, una <strong>capa anticorrupción</strong> puede traducirlos y proteger el modelo propio. Es uno de los patrones de integración recogidos en la <a href="https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf">referencia de DDD de Eric Evans</a>.</p>
+
+
+
+<p class="wp-block-paragraph">Los eventos también requieren un contrato. <code>PagoConfirmado</code> comunica un hecho de negocio; el consumidor necesita saber qué garantiza, cómo se identifica y qué versiones entiende. Cambiar llamadas por mensajes no elimina la dependencia semántica.</p>
+
+
+
+<h2 class="wp-block-heading">6. La consistencia eventual debe poder explicarse al negocio</h2>
+
+
+
+<p class="wp-block-paragraph">Imaginemos que la tienda acepta una compra inicialmente pendiente. Un flujo posible sería:</p>
+
+
+
+<ol class="wp-block-list">
+<li>Ventas registra el pedido pendiente, con sus condiciones económicas fijadas.</li>
+
+
+<li>Inventario intenta reservar las unidades por un plazo acordado.</li>
+
+
+<li>Si la reserva se obtiene, Pagos procesa el intento de cobro.</li>
+
+
+<li>El coordinador confirma la compra cuando conoce los resultados necesarios.</li>
+
+
+<li>Ante un rechazo definitivo, inicia la cancelación y libera la reserva.</li>
+</ol>
+
+
+
+<p class="wp-block-paragraph">Un timeout no demuestra que el cobro falló. El resultado puede haber quedado desconocido. Por eso, el flujo necesita consultar o reconciliar la operación antes de repetirla, y contemplar qué ocurre si llega una confirmación cuando la reserva ya venció.</p>
+
+
+
+<p class="wp-block-paragraph">Este tipo de coordinación puede implementarse con una <a href="https://microservices.io/patterns/data/saga.html">saga</a>: transacciones locales y acciones compensatorias. Una compensación es una nueva operación de negocio; no ofrece el rollback ni el aislamiento automáticos de una transacción ACID. Incluso puede fallar y requerir reintentos o intervención.</p>
+
+
+
+<p class="wp-block-paragraph">También hay que resolver cómo publicar los eventos. Con <a href="https://microservices.io/patterns/data/transactional-outbox.html">Transactional Outbox</a>, el cambio de estado y el mensaje pendiente se guardan en la misma transacción local. Otro proceso publica el mensaje después. Como puede haber duplicados, los consumidores deben ser idempotentes: procesar otra vez el mismo mensaje no debe repetir su efecto.</p>
+
+
+
+<p class="wp-block-paragraph">En Pagos, además, la clave de idempotencia debe proteger el intento ante el proveedor cuando este lo permita. El flujo necesita plazos, estados visibles y una vía de recuperación. Si el equipo no puede explicar qué verá el comprador durante la espera, todavía falta diseñar parte de la separación.</p>
+
+
+
+<h2 class="wp-block-heading">7. Una extracción que permita aprender</h2>
+
+
+
+<p class="wp-block-paragraph">Para llevar estas ideas a una migración, propongo una secuencia incremental:</p>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Formular una hipótesis.</strong> Por ejemplo: extraer Pagos debería permitir cambiar de integración sin esperar un despliegue completo. Registrar cómo se medirá ese beneficio.</li>
+
+
+<li><strong>Ordenar la frontera interna.</strong> Encapsular reglas y acceso a datos, eliminar accesos cruzados y hacer explícitos los contratos. Incorporar comprobaciones que detecten nuevas dependencias prohibidas.</li>
+
+
+<li><strong>Diseñar los fallos.</strong> Acordar qué sucede ante timeouts, duplicados, resultados tardíos e incompatibilidades. Verificar el comportamiento observable de esos casos.</li>
+
+
+<li><strong>Transferir los datos con un dueño claro.</strong> Preparar la carga inicial, sincronizar los cambios necesarios y verificar la consistencia antes del corte. Evitar escrituras independientes en ambas implementaciones sin un mecanismo de reconciliación.</li>
+
+
+<li><strong>Redirigir de forma gradual.</strong> Mantener identificada qué implementación atiende cada operación. En cobros, comparar lecturas o usar pruebas controladas; duplicar tráfico no debe duplicar efectos.</li>
+
+
+<li><strong>Evaluar el resultado.</strong> Observar tiempo de entrega, despliegues coordinados, latencia y esfuerzo de operación. Definir cómo volver atrás, incluyendo los datos escritos durante la transición.</li>
+</ol>
+
+
+
+<p class="wp-block-paragraph">Puede que Pagos sea un buen candidato y Ventas e Inventario deban seguir juntos. Puede que el costo de la extracción supere su beneficio y convenga mantener todo como módulos. Ambos resultados son válidos si responden a evidencia del sistema y del equipo.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Un límite útil permite expresar una responsabilidad, proteger sus reglas y cambiarla con una coordinación razonable.</strong> Primero hay que encontrar y sostener ese límite. La decisión de desplegarlo por separado debería reforzar esa autonomía.</p>
+
+
+
+<p class="wp-block-paragraph">Antes de extraer el próximo servicio, vale la pena elegir un cambio real del negocio y seguir su recorrido: ¿la nueva frontera lo vuelve más sencillo o agrega otra coordinación al mismo problema?</p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

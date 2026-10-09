@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ElGamal</title>
+<meta name="description" content="El algoritmo criptográfico ElGamal es un sistema de cifrado asimétrico que se utiliza para garantizar">
+<meta property="article:published_time" content="2024-12-31T15:32:50Z">
+<meta property="article:modified_time" content="2026-09-19T17:59:40Z">
+<meta property="article:section" content="Criptografía">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/12/31/elgamal/">
+<meta name="blog:wordpress-id" content="140">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElGamal">
+<meta property="og:description" content="El algoritmo criptográfico ElGamal es un sistema de cifrado asimétrico que se utiliza para garantizar">
+<meta property="og:url" content="https://solidchain.ar/posts/elgamal.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/12/elgamal-768x461.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/elgamal.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Criptografía</p><h1>ElGamal</h1><p class="article-date"><time datetime="2024-12-31T15:32:50Z">31 dic 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/12/elgamal.png" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph">El algoritmo criptográfico <strong>ElGamal</strong> es un sistema de cifrado asimétrico que se utiliza para garantizar la seguridad y privacidad de las comunicaciones. Fue desarrollado en 1985 por Taher ElGamal y se basa en los principios de la teoría de números y en la dificultad de resolver el problema del logaritmo discreto en grupos finitos.</p>
+
+
+
+<h3 class="wp-block-heading">Características principales de ElGamal</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Cifrado asimétrico</strong>:
+<ul class="wp-block-list">
+<li>Utiliza un par de claves: una clave <strong>privada</strong> (secreta) y una clave <strong>pública</strong> (compartida).</li>
+
+
+
+<li>La clave pública se usa para cifrar los mensajes y la clave privada se usa para descifrarlos.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Problema del logaritmo discreto</strong>:
+<ul class="wp-block-list">
+<li>Su seguridad se basa en la dificultad de resolver el logaritmo discreto en grupos finitos, lo que hace que descifrar los mensajes sin la clave privada sea computacionalmente inviable.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Esquema probabilístico</strong>:
+<ul class="wp-block-list">
+<li>Introduce aleatoriedad durante el proceso de cifrado, lo que significa que un mismo mensaje cifrado dos veces puede generar resultados diferentes.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Aplicaciones</strong>:
+<ul class="wp-block-list">
+<li>Se utiliza tanto para <strong>cifrado de datos</strong> como para <strong>firmas digitales</strong>, aunque para firmas digitales el algoritmo se suele derivar en esquemas como DSA (Digital Signature Algorithm).</li>
+</ul>
+</li>
+</ol>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h3 class="wp-block-heading">Componentes del algoritmo</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Configuración inicial</strong>:
+<ul class="wp-block-list">
+<li>Se elige un número primo grande <em>p</em> y un generador <em>g</em> de un grupo cíclico multiplicativo <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-d4907955b0bf785cf895e5406af68e1a_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="\mathbb{Z}_p^*" title="Rendered by QuickLaTeX.com" height="19" width="19" style="vertical-align: -7px;">​.</li>
+
+
+
+<li>El remitente elige una clave privada xxx (un número aleatorio tal que <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-cd9de64f3368f489b5ce04504d78565c_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="1&lt;x &lt; p-1" title="Rendered by QuickLaTeX.com" height="16" width="104" style="vertical-align: -4px;">).</li>
+
+
+
+<li>La clave pública se calcula como <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-84d4c4ac876184e20e0201633b29cc72_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt=" y = g^x \mod p " title="Rendered by QuickLaTeX.com" height="16" width="111" style="vertical-align: -4px;">.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Cifrado</strong>:
+<ul class="wp-block-list">
+<li>Para cifrar un mensaje mmm:
+<ul class="wp-block-list">
+<li>Se convierte mmm en un número dentro del rango de <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-2aea0e137bb163fe3be32c6ad03b6ea1_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="\mathbb{Z}_p^*​ " title="Rendered by QuickLaTeX.com" height="19" width="19" style="vertical-align: -7px;">.</li>
+
+
+
+<li>Se elige un número aleatorio <em>k</em> (número efímero, <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-56d6c01764988a075c3706c334b68a1b_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="1&lt;k &lt; p-1" title="Rendered by QuickLaTeX.com" height="16" width="104" style="vertical-align: -4px;">).</li>
+
+
+
+<li>Se calcula <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-cdd644bb25747b2d14a83f323baf8333_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="c1 = g^k \mod p​" title="Rendered by QuickLaTeX.com" height="19" width="118" style="vertical-align: -4px;">.</li>
+
+
+
+<li>Se calcula <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-b25cc7ba95cf108ab3d514e7f12dd946_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="c2= m \cdot y^k \mod p" title="Rendered by QuickLaTeX.com" height="19" width="147" style="vertical-align: -4px;">.</li>
+</ul>
+</li>
+
+
+
+<li>El texto cifrado es el par <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-7be9b65ad06e6b546fb45c949801dea7_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="(c1,c2)(c_1, c_2)(c1​,c2​)" title="Rendered by QuickLaTeX.com" height="19" width="160" style="vertical-align: -5px;">.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Descifrado</strong>:
+<ul class="wp-block-list">
+<li>El destinatario usa la clave privada <em>x</em> para descifrar:
+<ul class="wp-block-list">
+<li>Calcula <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-2a937a848a20e7c628378de837e2064f_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="s= c_1^x \mod p" title="Rendered by QuickLaTeX.com" height="17" width="109" style="vertical-align: -5px;">.</li>
+
+
+
+<li>Calcula el mensaje original como <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-0beb88e44df093389fd911e515c6d6e8_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="m= c_2 \cdot s^{-1} \mod p" title="Rendered by QuickLaTeX.com" height="19" width="155" style="vertical-align: -4px;">, donde <img loading="lazy" decoding="async" src="../media/ql-cache/quicklatex.com-49032645e31e7c4e10556ffa4ba9ed97_l3.png" class="ql-img-inline-formula quicklatex-auto-format" alt="s^{-1}" title="Rendered by QuickLaTeX.com" height="15" width="25" style="vertical-align: 0px;"> es el inverso modular de <em>s</em>.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h3 class="wp-block-heading">Ventajas de ElGamal</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Seguridad robusta</strong>: La seguridad se basa en problemas matemáticos bien estudiados y difíciles de resolver.</li>
+
+
+
+<li><strong>Cifrado semántico</strong>: Gracias a la aleatoriedad introducida por <em>k</em>, un atacante no puede deducir el mensaje original observando textos cifrados repetidos.</li>
+
+
+
+<li><strong>Versatilidad</strong>: Se usa tanto para cifrado como para generación de firmas digitales.</li>
+</ol>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h3 class="wp-block-heading">Desventajas de ElGamal</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Largo del texto cifrado</strong>: El tamaño del texto cifrado es aproximadamente el doble del texto original, lo que puede ser una desventaja en sistemas con limitaciones de almacenamiento o transmisión.</li>
+
+
+
+<li><strong>Eficiencia</strong>: Es más lento en comparación con otros algoritmos como RSA debido a la necesidad de realizar múltiples operaciones de exponenciación modular.</li>
+
+
+
+<li><strong>Generación de claves efímeras</strong>: La seguridad depende de generar valores <em>k</em> únicos y verdaderamente aleatorios; reutilizar <em>k</em> puede comprometer el sistema.</li>
+</ol>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h3 class="wp-block-heading">Comparación con otros algoritmos</h3>
+
+
+
+<ul class="wp-block-list">
+<li><strong>RSA</strong>: Ambos son algoritmos asimétricos, pero ElGamal depende del problema del logaritmo discreto, mientras que RSA se basa en la factorización de números enteros grandes.</li>
+
+
+
+<li><strong>ECC (Criptografía de curva elíptica)</strong>: Una variante de ElGamal se utiliza en curvas elípticas, lo que permite obtener la misma seguridad con claves más pequeñas y mayor eficiencia.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph"></p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

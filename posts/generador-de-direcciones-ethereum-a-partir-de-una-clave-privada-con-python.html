@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de Direcciones Ethereum a Partir de una Clave Privada con Python</title>
+<meta name="description" content="Introducción En el mundo de las criptomonedas, la generación de claves privadas y direcciones públicas">
+<meta property="article:published_time" content="2024-10-21T00:19:39Z">
+<meta property="article:modified_time" content="2025-07-26T18:09:59Z">
+<meta property="article:section" content="Blockchain">
+<meta property="article:section" content="Criptografía">
+<meta property="article:section" content="Proyectos">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/10/20/generador-de-direcciones-ethereum-a-partir-de-una-clave-privada-con-python/">
+<meta name="blog:wordpress-id" content="134">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Generador de Direcciones Ethereum a Partir de una Clave Privada con Python">
+<meta property="og:description" content="Introducción En el mundo de las criptomonedas, la generación de claves privadas y direcciones públicas">
+<meta property="og:url" content="https://solidchain.ar/posts/generador-de-direcciones-ethereum-a-partir-de-una-clave-privada-con-python.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/10/portada-768x256.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/generador-de-direcciones-ethereum-a-partir-de-una-clave-privada-con-python.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Blockchain / Criptografía / Proyectos</p><h1>Generador de Direcciones Ethereum a Partir de una Clave Privada con Python</h1><p class="article-date"><time datetime="2024-10-21T00:19:39Z">20 oct 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/10/portada.png" alt="" decoding="async">
+<div class="article-content ">
+
+<h3 class="wp-block-heading">Introducción</h3>
+
+
+
+<p class="wp-block-paragraph">En el mundo de las criptomonedas, la generación de claves privadas y direcciones públicas es uno de los primeros pasos que los desarrolladores y usuarios deben realizar para interactuar con redes blockchain como Ethereum. En este artículo, presentamos una aplicación sencilla desarrollada en Python utilizando las librerías <code>secp256k1</code>, <code>eth_account</code> y <code>Tkinter</code> para crear una interfaz gráfica de usuario (GUI) que genera una dirección de Ethereum a partir de una clave privada.</p>
+
+
+
+<h3 class="wp-block-heading">Librerías Utilizadas</h3>
+
+
+
+<p class="wp-block-paragraph">El código hace uso de varias librerías importantes:</p>
+
+
+
+<ol class="wp-block-list">
+<li><strong>secp256k1</strong>: Una librería utilizada para trabajar con criptografía de curvas elípticas, en este caso, para la generación de claves públicas y privadas.</li>
+
+
+
+<li><strong>eth_account</strong>: Proporciona herramientas para interactuar con cuentas de Ethereum, generando direcciones públicas a partir de claves privadas.</li>
+
+
+
+<li><strong>Tkinter</strong>: La librería estándar de Python para crear interfaces gráficas de usuario, que permite a los usuarios interactuar con la aplicación de manera visual.</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Funcionalidad de la Aplicación</h3>
+
+
+
+<p class="wp-block-paragraph">Esta aplicación permite a los usuarios generar una dirección pública de Ethereum y su clave pública asociada, ya sea ingresando una clave privada o generando una de manera aleatoria. La aplicación consta de una interfaz gráfica donde el usuario puede interactuar con diferentes botones y campos de entrada para realizar esta operación.</p>
+
+
+
+<h4 class="wp-block-heading">Componentes de la Aplicación</h4>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Clave privada (input)</strong>: El usuario puede ingresar una clave privada de 64 caracteres en un campo de texto. Esta clave es verificada antes de ser utilizada para evitar errores.</li>
+
+
+
+<li><strong>Clave pública (output)</strong>: Una vez que se genera la clave pública, esta se muestra en el campo correspondiente.</li>
+
+
+
+<li><strong>Dirección de Ethereum (output)</strong>: También se genera y muestra la dirección de Ethereum derivada de la clave privada.</li>
+
+
+
+<li><strong>Generador de clave privada aleatoria</strong>: Con un botón, el usuario puede generar una clave privada aleatoria válida, siguiendo las reglas de la curva elíptica <code>secp256k1</code> usada por Ethereum.</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Código Explicado</h3>
+
+
+
+<p class="wp-block-paragraph">El código principal de la aplicación se puede dividir en dos funciones principales:</p>
+
+
+
+<h4 class="wp-block-heading">1. <strong>Función para generar dirección a partir de una clave privada</strong></h4>
+
+
+
+<pre class="wp-block-preformatted">pythonCopiar código<code>def on_button_click():
+    key = entry1.get()  # Obtiene la clave privada ingresada por el usuario
+    if len(key) != 64:
+        messagebox.showerror("Error", "La clave privada debe tener 64 caracteres")
+        return
+    # Genera la clave pública y la dirección a partir de la clave privada
+    privkey = PrivateKey(bytes(bytearray.fromhex(key)))
+    pubkey_ser_uncompressed = privkey.pubkey.serialize(compressed=False)
+    entry2.delete(0, tk.END)
+    entry2.insert(0, pubkey_ser_uncompressed.hex())
+    
+    # Genera la dirección de Ethereum
+    key = "0x" + key
+    acct = Account.from_key(key)
+    entry3.delete(0, tk.END)
+    entry3.insert(0, acct.address)
+</code></pre>
+
+
+
+<p class="wp-block-paragraph">Esta función se ejecuta cuando el usuario hace clic en el botón “Aceptar”. Toma la clave privada ingresada por el usuario, genera la clave pública utilizando la librería <code>secp256k1</code>, y muestra tanto la clave pública como la dirección de Ethereum en los campos correspondientes.</p>
+
+
+
+<h4 class="wp-block-heading">2. <strong>Función para generar clave privada aleatoria</strong></h4>
+
+
+
+<pre class="wp-block-preformatted">pythonCopiar código<code>def on_button_random_click():
+    key = random.randint(1, 115792089237316195423570985008687907852837564279074904382605163141518161494337)
+    key = hex(key)[2:].zfill(64)
+    entry1.delete(0, tk.END)
+    entry1.insert(0, key)
+</code></pre>
+
+
+
+<p class="wp-block-paragraph">Esta función permite generar una clave privada aleatoria válida, que luego se muestra en el campo de entrada correspondiente. La clave se genera siguiendo el estándar del protocolo Ethereum, asegurando que esté dentro del rango permitido para la curva <code>secp256k1</code>.</p>
+
+
+
+<h3 class="wp-block-heading">Interfaz Gráfica</h3>
+
+
+
+<p class="wp-block-paragraph">La interfaz gráfica de la aplicación se construye con Tkinter, que proporciona una ventana simple con campos de entrada para la clave privada, clave pública y dirección, así como botones para aceptar la clave ingresada o generar una nueva clave aleatoria.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Campos de texto</strong>: Los usuarios pueden ingresar o ver información sobre las claves y direcciones generadas.</li>
+
+
+
+<li><strong>Botón “Random”</strong>: Genera una clave privada aleatoria y la muestra en el campo correspondiente.</li>
+
+
+
+<li><strong>Botón “Aceptar”</strong>: Toma la clave privada ingresada, genera la clave pública y dirección de Ethereum, y las muestra en pantalla.</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">Conclusión</h3>
+
+
+
+<p class="wp-block-paragraph">Este proyecto es un excelente punto de partida para cualquiera que quiera entender el proceso de generación de claves y direcciones en Ethereum, mientras explora el uso de interfaces gráficas con Tkinter en Python. A partir de esta base, se podrían añadir funcionalidades como la validación de direcciones, la firma de mensajes o transacciones, o incluso la conexión con una blockchain real para interactuar con contratos inteligentes.</p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

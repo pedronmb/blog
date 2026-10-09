@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cookies Web</title>
+<meta name="description" content="Una cookie es simplemente un pequeño archivo de texto que almacena pares de valores clave.">
+<meta property="article:published_time" content="2024-06-30T17:26:02Z">
+<meta property="article:modified_time" content="2024-06-30T17:41:42Z">
+<meta property="article:section" content="Web">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/06/30/cookies-web/">
+<meta name="blog:wordpress-id" content="95">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cookies Web">
+<meta property="og:description" content="Una cookie es simplemente un pequeño archivo de texto que almacena pares de valores clave.">
+<meta property="og:url" content="https://solidchain.ar/posts/cookies-web.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/06/00028-2392653385.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/cookies-web.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Web</p><h1>Cookies Web</h1><p class="article-date"><time datetime="2024-06-30T17:26:02Z">30 jun 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/06/00028-2392653385.png" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph">Una cookie es simplemente un pequeño archivo de texto que almacena pares de valores clave. La información que contiene puede variar, pero generalmente sigue una estructura estándar. A continuación, se detalla la estructura técnica de una cookie:</p>
+
+
+
+<h3 class="wp-block-heading">Componentes de una Cookie</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Nombre (Name)</strong>:
+<ul class="wp-block-list">
+<li>El nombre de la cookie. Es un identificador único para la cookie dentro del dominio.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Valor (Value)</strong>:
+<ul class="wp-block-list">
+<li>El contenido o valor asociado al nombre de la cookie. Puede ser una cadena de texto, datos codificados en base64, etc.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Fecha de Expiración (Expires) o Tiempo de Vida (Max-Age)</strong>:
+<ul class="wp-block-list">
+<li><strong>Expires</strong>: Especifica la fecha y hora exacta en que la cookie expirará. Si no se establece, la cookie se considera una cookie de sesión y se eliminará cuando se cierre el navegador.</li>
+
+
+
+<li><strong>Max-Age</strong>: Especifica el tiempo en segundos durante el cual la cookie será válida. Después de este período, la cookie expirará.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Dominio (Domain)</strong>:
+<ul class="wp-block-list">
+<li>Especifica el dominio para el cual la cookie es válida. La cookie se enviará en solicitudes HTTP a este dominio y a sus subdominios.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Ruta (Path)</strong>:
+<ul class="wp-block-list">
+<li>Especifica la ruta en el dominio para la cual la cookie es válida. La cookie se enviará en solicitudes HTTP a las URL que coincidan con esta ruta.</li>
+</ul>
+</li>
+
+
+
+<li><strong>Seguro (Secure)</strong>:
+<ul class="wp-block-list">
+<li>Un indicador que especifica que la cookie solo debe enviarse a través de conexiones seguras (HTTPS).</li>
+</ul>
+</li>
+
+
+
+<li><strong>Solo HTTP (HttpOnly)</strong>:
+<ul class="wp-block-list">
+<li>Un indicador que especifica que la cookie no debe estar accesible mediante JavaScript a través de <code>document.cookie</code>. Esto ayuda a mitigar ciertos ataques como el cross-site scripting (XSS).</li>
+</ul>
+</li>
+
+
+
+<li><strong>SameSite</strong>:
+<ul class="wp-block-list">
+<li>Especifica restricciones adicionales sobre cómo se envía la cookie junto con las solicitudes originadas desde sitios web de terceros. Puede tomar los valores <code>Strict</code>, <code>Lax</code> o <code>None</code>.</li>
+</ul>
+</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Ejemplo de una Cookie</h3>
+
+
+
+<p class="wp-block-paragraph">Aquí hay un ejemplo de una cookie con varios de estos atributos establecidos:</p>
+
+
+
+<pre class="wp-block-code"><code><code>Set-Cookie: sessionId=abc123; Expires=Wed, 21 Oct 2023 07:28:00 GMT; Domain=example.com; Path=/; Secure; HttpOnly; SameSite=Lax</code></code></pre>
+
+
+
+<h3 class="wp-block-heading">Desglose del Ejemplo</h3>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Nombre</strong>: <code>sessionId</code></li>
+
+
+
+<li><strong>Valor</strong>: <code>abc123</code></li>
+
+
+
+<li><strong>Expires</strong>: <code>Wed, 21 Oct 2023 07:28:00 GMT</code> (La cookie expirará el 21 de octubre de 2023 a las 07:28:00 GMT)</li>
+
+
+
+<li><strong>Domain</strong>: <code>example.com</code> (La cookie es válida para el dominio <code>example.com</code>)</li>
+
+
+
+<li><strong>Path</strong>: <code>/</code> (La cookie es válida para todas las rutas del dominio)</li>
+
+
+
+<li><strong>Secure</strong>: (La cookie solo se enviará a través de conexiones HTTPS)</li>
+
+
+
+<li><strong>HttpOnly</strong>: (La cookie no es accesible a través de JavaScript)</li>
+
+
+
+<li><strong>SameSite</strong>: <code>Lax</code> (La cookie se envía con solicitudes de primer y tercer origen en ciertas condiciones)</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">Uso en HTTP</h3>
+
+
+
+<p class="wp-block-paragraph">Las cookies se envían y reciben mediante encabezados HTTP:</p>
+
+
+
+<h4 class="wp-block-heading">Enviado por el Servidor</h4>
+
+
+
+<pre class="wp-block-code"><code>HTTP/1.1 200 OK
+Set-Cookie: sessionId=abc123; Expires=Wed, 21 Oct 2023 07:28:00 GMT; Domain=example.com; Path=/; Secure; HttpOnly; SameSite=Lax</code></pre>
+
+
+
+<h4 class="wp-block-heading">Enviado por el Navegador</h4>
+
+
+
+<pre class="wp-block-code"><code>GET /index.html HTTP/1.1
+Host: example.com
+Cookie: sessionId=abc123</code></pre>
+
+
+
+<h3 class="wp-block-heading">Consideraciones de Seguridad</h3>
+
+
+
+<ul class="wp-block-list">
+<li><strong>HttpOnly</strong>: Asegura que las cookies no sean accesibles a través de JavaScript, mitigando ataques XSS.</li>
+
+
+
+<li><strong>Secure</strong>: Asegura que las cookies solo se envíen a través de HTTPS, protegiéndolas contra ataques de red.</li>
+
+
+
+<li><strong>SameSite</strong>: Ayuda a prevenir ataques de CSRF (Cross-Site Request Forgery) restringiendo cuándo se envían las cookies.</li>
+</ul>
+
+
+
+<h2 class="wp-block-heading">Algunas funciones y características clave de las cookies</h2>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Autenticación</strong>: Las cookies se utilizan para reconocer a los usuarios registrados y mantener sus sesiones iniciadas mientras navegan por el sitio.</li>
+
+
+
+<li><strong>Personalización</strong>: Permiten a los sitios web recordar las preferencias del usuario, como el idioma preferido o la configuración de visualización.</li>
+
+
+
+<li><strong>Seguimiento</strong>: Las cookies de seguimiento recopilan datos sobre el comportamiento de navegación del usuario, lo que ayuda a los propietarios de sitios web a entender cómo los usuarios interactúan con su sitio.</li>
+
+
+
+<li><strong>Cesta de compras</strong>: En los sitios de comercio electrónico, las cookies se utilizan para recordar los artículos que el usuario ha agregado a su carrito de compras.</li>
+
+
+
+<li><strong>Publicidad</strong>: Las cookies publicitarias rastrean el comportamiento del usuario para mostrar anuncios más relevantes basados en sus intereses.</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Tipos de cookies</h3>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Cookies de sesión</strong>: Estas cookies son temporales y se eliminan cuando el usuario cierra el navegador.</li>
+
+
+
+<li><strong>Cookies persistentes</strong>: Permanecen en el dispositivo del usuario durante un período de tiempo especificado o hasta que el usuario las elimine.</li>
+
+
+
+<li><strong>Cookies propias</strong>: Establecidas por el sitio web que el usuario está visitando.</li>
+
+
+
+<li><strong>Cookies de terceros</strong>: Establecidas por dominios diferentes al sitio web que el usuario está visitando, a menudo utilizados para publicidad y análisis.</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Gestión de cookies</h3>
+
+
+
+<p class="has-text-align-left wp-block-paragraph">Los usuarios pueden gestionar las cookies a través de la configuración de su navegador web. Pueden optar por aceptar o rechazar cookies, así como eliminar cookies almacenadas. Sin embargo, es importante tener en cuenta que bloquear o eliminar cookies puede afectar la funcionalidad de algunos sitios web.</p>
+
+
+
+<p class="wp-block-paragraph"></p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

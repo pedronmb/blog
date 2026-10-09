@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Las 12 palabras de una billetera criptográfica: El núcleo de tu seguridad financiera</title>
+<meta name="description" content="¿Qué son las 12 palabras de una billetera criptográfica? Las 12 palabras, también conocidas como">
+<meta property="article:published_time" content="2024-04-26T01:55:15Z">
+<meta property="article:modified_time" content="2024-07-02T17:08:11Z">
+<meta property="article:section" content="Blockchain">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/04/25/las-12-palabras-de-una-billetera-criptografica-el-nucleo-de-tu-seguridad-financiera/">
+<meta name="blog:wordpress-id" content="50">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Las 12 palabras de una billetera criptográfica: El núcleo de tu seguridad financiera">
+<meta property="og:description" content="¿Qué son las 12 palabras de una billetera criptográfica? Las 12 palabras, también conocidas como">
+<meta property="og:url" content="https://solidchain.ar/posts/las-12-palabras-de-una-billetera-criptografica-el-nucleo-de-tu-seguridad-financiera.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/04/00031-164891168.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/las-12-palabras-de-una-billetera-criptografica-el-nucleo-de-tu-seguridad-financiera.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Blockchain</p><h1>Las 12 palabras de una billetera criptográfica: El núcleo de tu seguridad financiera</h1><p class="article-date"><time datetime="2024-04-26T01:55:15Z">25 abr 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/04/00031-164891168.png" alt="" decoding="async">
+<div class="article-content ">
+
+<h2 class="wp-block-heading">¿Qué son las 12 palabras de una billetera criptográfica?</h2>
+
+
+
+<p class="wp-block-paragraph">Las 12 palabras, también conocidas como frase de recuperación o seed phrase en inglés, son una serie de palabras aleatorias que actúan como la llave maestra para acceder a tus fondos criptográficos. Estas palabras son generadas por el software de tu billetera cuando la creas por primera vez y te permiten restaurar tu billetera en caso de pérdida, robo o daño del dispositivo.</p>
+
+
+
+<h2 class="wp-block-heading">Generando las 12 palabras</h2>
+
+
+
+<p class="wp-block-paragraph">La generación de las 12 palabras en Ethereum se basa en el <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank" rel="noreferrer noopener">BIP-39</a> de Bitcoin para crear una secuencia única de palabras. Estas palabras se eligen de una lista de palabras predefinida, generalmente conformada por un conjunto de 2048 palabras. El proceso es completamente aleatorio y las palabras no tienen relación entre sí, lo que garantiza una mayor seguridad.</p>
+
+
+
+<p class="wp-block-paragraph">1 – <strong>Elegir un número aleatorio</strong>: Se selecciona un número aleatorio de 128 bits. La aleatoriedad de este número es fundamental para la seguridad de la billetera. Cuanto más aleatorio sea, más segura será la billetera contra ataques de fuerza bruta. En nuestro ejemplo vamos a elegir el numero <strong>3cb42e670bf4f338dd415ebfd0789159</strong> el numero se encuentra en hexadecimal, lo escribiremos en binario porque nos va a ayudar luego <strong>0011110010110100001011100110011100001011111101001111001100111 0001101110101000001010111101011111111010000011110001001000101 011001</strong></p>
+
+
+
+<p class="wp-block-paragraph">2 – <strong>Generar el checksum</strong>: Se aplica el algoritmo SHA256 al número raíz para generar un checksum. Este checksum es una cadena de bits que actúa como una capa adicional de seguridad. Aplicándolo nos queda este numero <strong>92713e715af3145d6148548739bfc1504a80c193411fc577e81ac63347326b7d</strong> también vamos a transformar este numero de hexadecimal a binario <strong>1001001001110001001111100111000101011010111100110001010001011 1010110000101001000010101001000011100111001101111111100000101 0100000100101010000000110000011001001101000001000111111100010 1011101111110100000011010110001100011001101000111001100100110 101101111101</strong></p>
+
+
+
+<p class="wp-block-paragraph">3 – <strong>Agregar bits de checksum al número raíz</strong>: Se agregan los primeros 4 bits del checksum al final del número raíz. Esto asegura que el número resultante pueda dividirse en grupos de 11 bits, lo que facilita la asignación de palabras. Realizando estos pasos nos queda el siguiente numero: <strong>00111100101-10100001011-10011001110-00010111111-01001111001-10011100011-01110101000-00101011110-10111111110-10000011110-00100100010-1011001</strong><mark style="background-color:rgba(0, 0, 0, 0);color:#ae1212" class="has-inline-color"><strong>1001</strong></mark></p>
+
+
+
+<p class="wp-block-paragraph">4 – Ultimo paso, como vemos en nuestro nuevo numero lo pudimos dividir en 12 bloques de 11bits, ahora lo único que nos queda es usar alguna de las listas de palabras que se encuentran en el BIP-39(<a rel="noreferrer noopener" href="https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt" target="_blank">wordlist</a>), usaremos la lista de palabras en ingles ya que es la mas comúnmente utilizada y asignarle a cada bloque de números la palabra correspondiente. La lista se compone de 2048 palabras que van desde el numero 0 hasta 2047</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>00111100101</strong> – 485 – device</li>
+
+
+
+<li><strong>10100001011</strong> – 1291 – pause</li>
+
+
+
+<li><strong>10011001110</strong> – 1230 – oil</li>
+
+
+
+<li><strong>00010111111</strong> – 191 – blood</li>
+
+
+
+<li><strong>01001111001</strong> – 633 – execute</li>
+
+
+
+<li><strong>10011100011</strong> – 1251 – organ</li>
+
+
+
+<li><strong>01110101000</strong> – 936 – insect</li>
+
+
+
+<li><strong>00101011110</strong> – 350 – cloth</li>
+
+
+
+<li><strong>10111111110</strong> – 1534 – save</li>
+
+
+
+<li><strong>10000011110</strong> – 1054 – long</li>
+
+
+
+<li><strong>00100100010</strong> – 290 – cattle</li>
+
+
+
+<li><strong>1011001</strong><mark style="background-color:rgba(0, 0, 0, 0);color:#ae1212" class="has-inline-color"><strong>1001</strong></mark> – 1433 – rebel</li>
+</ul>
+
+
+
+<h2 class="wp-block-heading">¿Qué pasa si quiero más de 12 palabras?</h2>
+
+
+
+<p class="wp-block-paragraph">Si buscas aún más seguridad, puedes generar frases de 24 palabras. Esto implica partir de un número aleatorio de 256 bits en lugar de 128 bits, lo que aumenta la complejidad y la seguridad de la frase de recuperación.</p>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>LONG BITS</td><td>CS</td><td>PALABRAS</td></tr><tr><td>128</td><td>4</td><td>12</td></tr><tr><td>160</td><td>5</td><td>15</td></tr><tr><td>192</td><td>6</td><td>18</td></tr><tr><td>224</td><td>7</td><td>21</td></tr><tr><td>256</td><td>8</td><td>24</td></tr></tbody></table></figure>
+
+
+
+<p class="wp-block-paragraph">En la tabla podemos observar de cuantos bits debe ser el numero aleatorio, cuantos dígitos del checksum SHA256 debemos agregar al final del numero para obtener 12, 15, 18, 21 o 24 palabras.</p>
+
+
+
+<p class="wp-block-paragraph">En resumen, las 12 palabras de una billetera criptográfica son el cimiento de tu seguridad financiera en el mundo de las criptomonedas. Comprender cómo se generan y por qué son importantes es crucial para proteger tus activos digitales y garantizar un acceso seguro en todo momento.</p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

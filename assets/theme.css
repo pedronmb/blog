@@ -1,0 +1,86 @@
+/* Theme overrides keep the original light palette and article-specific styling. */
+:root { color-scheme: light; }
+.main-nav { align-items: center; }
+.main-nav a { white-space: nowrap; }
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+}
+.theme-toggle:hover { background: var(--blue-soft); border-color: var(--blue); }
+.theme-toggle svg { width: 19px; height: 19px; }
+.theme-sun { display: none; }
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #e6edf7;
+    --muted: #a0adbe;
+    --blue: #91b3ff;
+    --blue-soft: #202d45;
+    --line: #2a3545;
+    --paper: #101720;
+    --white: #18212e;
+}
+[data-theme="dark"] .theme-moon { display: none; }
+[data-theme="dark"] .theme-sun { display: block; }
+[data-theme="dark"] ::selection { color: #edf3ff; background: #334c76; }
+[data-theme="dark"] .brand-mark { background: transparent; }
+[data-theme="dark"] .status-dot { box-shadow: 0 0 0 4px #202d45; }
+[data-theme="dark"] .aside-label,
+[data-theme="dark"] .aside-caption { color: var(--muted); }
+[data-theme="dark"] .code-symbol { color: #53667f; }
+[data-theme="dark"] .code-symbol span { color: #91b3ff; }
+[data-theme="dark"] .search-form { border-color: var(--line); }
+[data-theme="dark"] .search-icon,
+[data-theme="dark"] .search-form button,
+[data-theme="dark"] .search-form input::placeholder { color: var(--muted); }
+[data-theme="dark"] .search-form:focus-within { border-color: var(--blue); }
+[data-theme="dark"] .category-chip { color: #bac7d9; }
+[data-theme="dark"] .category-chip:hover { background: var(--blue-soft); border-color: #556b8b; }
+[data-theme="dark"] .category-chip.active,
+[data-theme="dark"] .page-numbers a[aria-current],
+[data-theme="dark"] .button { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+[data-theme="dark"] .card-image-link,
+[data-theme="dark"] .article-cover { background: var(--white); }
+[data-theme="dark"] .image-arrow { background: #18212ee8; color: var(--ink); }
+[data-theme="dark"] .card-read { color: #bacbed; }
+[data-theme="dark"] .card-read:hover { color: var(--blue); }
+[data-theme="dark"] .site-footer { background: #0c121a; }
+[data-theme="dark"] .empty-state { border-color: var(--line); }
+[data-theme="dark"] .article-content blockquote { color: #b9c7db; border-color: #6387c7; }
+[data-theme="dark"] .article-content pre { background: #080f18; color: #e6edf6; }
+[data-theme="dark"] .article-content code { background: #202d40; color: #adc8ff; }
+[data-theme="dark"] .article-content pre code { background: transparent; color: inherit; }
+[data-theme="dark"] .article-content th,
+[data-theme="dark"] .article-content td { border-color: var(--line); }
+[data-theme="dark"] .article-content th { background: var(--white); }
+[data-theme="dark"] .article-content .ql-img-inline-formula,
+[data-theme="dark"] .article-content .ql-img-displayed-equation { filter: invert(1); }
+[data-theme="dark"] .interactive-demo { background: var(--white); }
+@media (max-width: 650px) {
+    .main-nav { gap: 12px; }
+    .theme-toggle { width: 34px; height: 34px; }
+}
+@media (max-width: 370px) {
+    .main-nav { gap: 7px; font-size: 10px; }
+    .brand { font-size: 17px; gap: 6px; }
+    .brand-mark { width: 28px; height: 28px; }
+    .theme-toggle { width: 32px; height: 32px; }
+}
+@media print {
+    :root[data-theme="dark"] { color-scheme: light; --ink: #172332; --muted: #647183; --blue: #315db3; --paper: #fff; --white: #fff; --line: #e4e8ed; }
+    [data-theme="dark"] .article-content pre { color: #000; background: #eee; }
+    [data-theme="dark"] .article-content pre code { color: inherit; background: transparent; }
+    [data-theme="dark"] .article-content code,
+    [data-theme="dark"] .article-content th { color: #172332; background: #edf1f7; }
+    [data-theme="dark"] .article-content blockquote { color: #596b84; }
+    [data-theme="dark"] .article-content .ql-img-inline-formula,
+    [data-theme="dark"] .article-content .ql-img-displayed-equation { filter: none; }
+}

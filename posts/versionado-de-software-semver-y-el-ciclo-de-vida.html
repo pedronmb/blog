@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Versionado de Software: SemVer y el Ciclo de Vida</title>
+<meta name="description" content="El “Contrato” del Versionado Semántico El SemVer no es solo un número; es un compromiso.">
+<meta property="article:published_time" content="2026-02-28T18:38:29Z">
+<meta property="article:modified_time" content="2026-02-28T18:38:30Z">
+<meta property="article:section" content="Web">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2026/02/28/versionado-de-software-semver-y-el-ciclo-de-vida/">
+<meta name="blog:wordpress-id" content="181">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Versionado de Software: SemVer y el Ciclo de Vida">
+<meta property="og:description" content="El “Contrato” del Versionado Semántico El SemVer no es solo un número; es un compromiso.">
+<meta property="og:url" content="https://solidchain.ar/posts/versionado-de-software-semver-y-el-ciclo-de-vida.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2026/02/unnamed-768x419.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/versionado-de-software-semver-y-el-ciclo-de-vida.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Web</p><h1>Versionado de Software: SemVer y el Ciclo de Vida</h1><p class="article-date"><time datetime="2026-02-28T18:38:29Z">28 feb 2026</time></p></header>
+<img class="article-cover" src="../media/uploads/2026/02/unnamed.jpg" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph"></p>
+
+
+
+<h2 class="wp-block-heading">El “Contrato” del Versionado Semántico</h2>
+
+
+
+<p class="wp-block-paragraph">El SemVer no es solo un número; es un compromiso. Al usar el formato <strong>X.Y.Z</strong>, le estás diciendo a quien use tu código (ya sea un cliente o un colega) qué esperar al actualizar.</p>
+
+
+
+<h3 class="wp-block-heading">El Número MAYOR (X): La Ruptura (Breaking Changes)</h3>
+
+
+
+<p class="wp-block-paragraph">Este número cambia cuando el código nuevo <strong>no es compatible</strong> con el anterior. Si alguien actualiza a una nueva versión “Major”, es muy probable que su aplicación deje de funcionar a menos que haga cambios manuales.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Cambios en la Firma:</strong> Renombrar una función principal o cambiar el orden/tipo de los parámetros requeridos.</li>
+
+
+
+<li><strong>Esquema de Base de Datos:</strong> Eliminar columnas de una tabla o cambiar tipos de datos que afectan consultas existentes.</li>
+
+
+
+<li><strong>Eliminación de Funciones:</strong> Quitar una parte del código que habías marcado como “obsoleta” (deprecated) en versiones anteriores.</li>
+
+
+
+<li><strong>Cambios de Dependencias:</strong> Migrar de un framework a otro (por ejemplo, pasar de una librería de renderizado a otra totalmente distinta).</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">El Número MENOR (Y): La Evolución (New Features)</h3>
+
+
+
+<p class="wp-block-paragraph">Se incrementa cuando añades valor al producto sin romper lo que ya existe. Es una actualización “segura”.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Nuevos Endpoints:</strong> Agregar una nueva ruta a una API (ej. <code>/api/v1/users</code> sigue funcionando, pero ahora existe <code>/api/v1/reports</code>).</li>
+
+
+
+<li><strong>Parámetros Opcionales:</strong> Agregar una nueva funcionalidad a una función existente que, si no se usa, no afecta el resultado previo.</li>
+
+
+
+<li><strong>Nuevas Vistas o Componentes:</strong> En el frontend, agregar una nueva pantalla o un botón que antes no estaba.</li>
+
+
+
+<li><strong>Optimizaciones de Rendimiento:</strong> Si el código ahora corre más rápido pero se llama igual, es un cambio menor.</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">El Número PARCHE (Z): La Estabilidad (Bug Fixes)</h3>
+
+
+
+<p class="wp-block-paragraph">Este es el número que más se mueve. Representa el mantenimiento diario y la corrección de errores que no alteran cómo se usa la aplicación.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Corrección de Seguridad:</strong> Parchear una vulnerabilidad.</li>
+
+
+
+<li><strong>Refactorización Interna:</strong> Limpiar el código para que sea más legible sin cambiar su comportamiento externo.</li>
+
+
+
+<li><strong>Errores de Lógica:</strong> Corregir un cálculo matemático que devolvía un resultado erróneo bajo ciertas condiciones.</li>
+
+
+
+<li><strong>Ajustes Visuales:</strong> Corregir un error de alineación en el CSS o una falta de ortografía en la interfaz.</li>
+</ul>
+
+
+
+<h2 class="wp-block-heading">El Mapa de Ruta: Del Código al Usuario Final</h2>
+
+
+
+<p class="wp-block-paragraph">La relación entre el versionado y el ciclo de vida se visualiza mejor como una línea de tiempo donde el número de versión va ganando “apellidos” (sufijos) antes de quedar limpio para el público.</p>
+
+
+
+<h3 class="wp-block-heading">Fase 1: El Nacimiento (Alpha y la Versión 0)</h3>
+
+
+
+<p class="wp-block-paragraph">Cuando empiezas un proyecto nuevo (como cuando inicias el backend en .NET o la estructura en PHP de tus aplicaciones), no tienes una versión estable.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Estado:</strong> Alpha.</li>
+
+
+
+<li><strong>Versión Sugerida:</strong> <code>0.1.0-alpha</code>.</li>
+
+
+
+<li><strong>Lógica:</strong> Estás en la “Versión Cero”. Aquí, el número <strong>Menor</strong> (1) sube cada vez que terminas una funcionalidad básica, y el <strong>Parche</strong> (0) sube con cada corrección interna. El sufijo <code>-alpha</code> advierte que el código puede romperse en cualquier momento.</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">Fase 2: El Pulido (Beta y el Salto a la 1.0.0)</h3>
+
+
+
+<p class="wp-block-paragraph">Una vez que la aplicación tiene todas las funciones principales y es “funcionalmente completa”, pasamos a las pruebas externas.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Estado:</strong> Beta.</li>
+
+
+
+<li><strong>Versión Sugerida:</strong> <code>1.0.0-beta.1</code>.</li>
+
+
+
+<li><strong>Lógica:</strong> Ya te estás preparando para el gran lanzamiento (v1.0.0). Las versiones Beta sirven para recolectar feedback. Si encuentras errores durante las pruebas de usuario, subes el sufijo: <code>1.0.0-beta.2</code>, <code>1.0.0-beta.3</code>, etc.</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">Fase 3: La Recta Final (Release Candidate)</h3>
+
+
+
+<p class="wp-block-paragraph">Es el último filtro. La aplicación ya no debería recibir funciones nuevas, solo correcciones críticas.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Estado:</strong> RC (Release Candidate).</li>
+
+
+
+<li><strong>Versión Sugerida:</strong> <code>1.0.0-rc.1</code>.</li>
+
+
+
+<li><strong>Lógica:</strong> Si esta versión no presenta errores graves en un periodo de tiempo (por ejemplo, una semana), se le quita el sufijo y se convierte oficialmente en la versión <strong>Stable</strong>.</li>
+</ul>
+
+
+
+<h3 class="wp-block-heading">Fase 4: Producción y Mantenimiento (Stable/GA)</h3>
+
+
+
+<p class="wp-block-paragraph">El software ya está en manos del usuario final. Aquí es donde el SemVer brilla en su forma pura.</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Estado:</strong> Stable / GA.</li>
+
+
+
+<li><strong>Versión:</strong> <code>1.0.0</code>.</li>
+
+
+
+<li><strong>Lógica de mantenimiento:</strong>
+<ul class="wp-block-list">
+<li>¿Un error visual en el CSS? → Lanzas la <code>1.0.1</code>.</li>
+
+
+
+<li>¿Añadiste un nuevo reporte o vista? → Lanzas la <code>1.1.0</code>.</li>
+
+
+
+<li>¿Cambiaste la estructura de la base de datos y las versiones viejas ya no conectan? → Lanzas la <code>2.0.0</code>.</li>
+</ul>
+</li>
+</ul>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

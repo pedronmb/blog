@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /tools/
+Disallow: /tests/
+Disallow: /templates/
+
+Sitemap: https://solidchain.ar/sitemap.xml

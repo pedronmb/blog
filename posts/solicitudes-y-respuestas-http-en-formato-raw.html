@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solicitudes y Respuestas HTTP en Formato RAW</title>
+<meta name="description" content="El protocolo HTTP (HyperText Transfer Protocol) es la base de la comunicación en la web.">
+<meta property="article:published_time" content="2024-07-28T19:31:52Z">
+<meta property="article:modified_time" content="2025-03-03T00:29:33Z">
+<meta property="article:section" content="Web">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2024/07/28/solicitudes-y-respuestas-http-en-formato-raw/">
+<meta name="blog:wordpress-id" content="100">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solicitudes y Respuestas HTTP en Formato RAW">
+<meta property="og:description" content="El protocolo HTTP (HyperText Transfer Protocol) es la base de la comunicación en la web.">
+<meta property="og:url" content="https://solidchain.ar/posts/solicitudes-y-respuestas-http-en-formato-raw.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2024/07/4aafc0fc-43c3-4766-a622-f1edefb4e2c9-768x768.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/solicitudes-y-respuestas-http-en-formato-raw.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Web</p><h1>Solicitudes y Respuestas HTTP en Formato RAW</h1><p class="article-date"><time datetime="2024-07-28T19:31:52Z">28 jul 2024</time></p></header>
+<img class="article-cover" src="../media/uploads/2024/07/4aafc0fc-43c3-4766-a622-f1edefb4e2c9.png" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph">El protocolo HTTP (HyperText Transfer Protocol) es la base de la comunicación en la web. Entender cómo funcionan las solicitudes y respuestas HTTP en formato RAW es crucial para desarrolladores web y profesionales de TI. En este artículo, desglosaremos la estructura de las solicitudes y respuestas HTTP en formato RAW, proporcionando ejemplos claros y concisos para ayudarte a dominar este tema.</p>
+
+
+
+<h4 class="wp-block-heading"><strong>Solicitudes HTTP en Formato RAW</strong></h4>
+
+
+
+<p class="wp-block-paragraph">Una solicitud HTTP en formato RAW contiene varias partes clave que permiten al cliente (por ejemplo, un navegador web) comunicarse con el servidor. Estas partes son:</p>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Línea de Solicitud (Request Line)</strong></li>
+
+
+
+<li><strong>Encabezados de Solicitud (Request Headers)</strong></li>
+
+
+
+<li><strong>Cuerpo de la Solicitud (Request Body)</strong></li>
+</ol>
+
+
+
+<h5 class="wp-block-heading"><strong>1. Línea de Solicitud (Request Line)</strong></h5>
+
+
+
+<p class="wp-block-paragraph">La línea de solicitud es la primera línea de cualquier solicitud HTTP y sigue este formato:</p>
+
+
+
+<pre class="wp-block-code"><code><code>Método URL Versión-HTTP</code></code></pre>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo:</strong></p>
+
+
+
+<pre class="wp-block-code"><code><code>POST /api/v1/resource HTTP/1.1</code></code></pre>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Método HTTP:</strong> Indica la acción a realizar (e.g., <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>).</li>
+
+
+
+<li><strong>URL del Recurso:</strong> La ruta del recurso en el servidor.</li>
+
+
+
+<li><strong>Versión HTTP:</strong> La versión del protocolo HTTP que se está utilizando (e.g., <code>HTTP/1.1</code>).</li>
+</ul>
+
+
+
+<h5 class="wp-block-heading"><strong>2. Encabezados de Solicitud (Request Headers)</strong></h5>
+
+
+
+<p class="wp-block-paragraph">Los encabezados proporcionan metadatos adicionales sobre la solicitud. Cada encabezado está en una nueva línea seguido de un valor.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplos Comunes:</strong></p>
+
+
+
+<pre class="wp-block-code"><code><code>Host: www.example.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Content-Type: application/json
+Content-Length: 48</code></code></pre>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Host:</strong> Especifica el nombre de dominio del servidor y, opcionalmente, el puerto.</li>
+
+
+
+<li><strong>User-Agent:</strong> Identifica el software del cliente.</li>
+
+
+
+<li><strong>Content-Type:</strong> Indica el tipo de contenido del cuerpo de la solicitud.</li>
+
+
+
+<li><strong>Content-Length:</strong> Especifica la longitud del cuerpo de la solicitud en bytes.</li>
+</ul>
+
+
+
+<h5 class="wp-block-heading"><strong>3. Cuerpo de la Solicitud (Request Body)</strong></h5>
+
+
+
+<p class="wp-block-paragraph">El cuerpo de la solicitud contiene los datos que se envían al servidor. No todas las solicitudes HTTP tienen un cuerpo; su presencia depende del método HTTP que se esté utilizando.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo (JSON):</strong></p>
+
+
+
+<pre class="wp-block-code"><code><code>{
+  "name": "John Doe",
+  "email": "johndoe@example.com"
+}</code></code></pre>
+
+
+
+<h5 class="wp-block-heading"><strong>Ejemplo Completo de una Solicitud HTTP en Formato RAW</strong></h5>
+
+
+
+<pre class="wp-block-code"><code><code>POST /api/v1/resource HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+Content-Type: application/json
+Content-Length: 48
+
+{
+  "name": "John Doe",
+  "email": "johndoe@example.com"
+}</code></code></pre>
+
+
+
+<h4 class="wp-block-heading"><strong>Respuestas HTTP en Formato RAW</strong></h4>
+
+
+
+<p class="wp-block-paragraph">Una respuesta HTTP en formato RAW se compone de las siguientes partes:</p>
+
+
+
+<ol class="wp-block-list">
+<li><strong>Línea de Estado (Status Line)</strong></li>
+
+
+
+<li><strong>Encabezados de Respuesta (Response Headers)</strong></li>
+
+
+
+<li><strong>Cuerpo de la Respuesta (Response Body)</strong></li>
+</ol>
+
+
+
+<h5 class="wp-block-heading"><strong>1. Línea de Estado (Status Line)</strong></h5>
+
+
+
+<p class="wp-block-paragraph">La línea de estado es la primera línea de cualquier respuesta HTTP y sigue este formato:</p>
+
+
+
+<pre class="wp-block-code"><code><code>Versión-HTTP Código-de-Estado Descripción-del-Estado</code></code></pre>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo:</strong></p>
+
+
+
+<pre class="wp-block-code"><code><code>HTTP/1.1 200 OK</code></code></pre>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Versión HTTP:</strong> La versión del protocolo HTTP utilizada.</li>
+
+
+
+<li><strong>Código de Estado:</strong> Indica el resultado de la solicitud (e.g., <code>200</code> para éxito, <code>404</code> para no encontrado).</li>
+
+
+
+<li><strong>Descripción del Estado:</strong> Una descripción textual del código de estado.</li>
+</ul>
+
+
+
+<h5 class="wp-block-heading"><strong>2. Encabezados de Respuesta (Response Headers)</strong></h5>
+
+
+
+<p class="wp-block-paragraph">Los encabezados proporcionan metadatos adicionales sobre la respuesta.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplos Comunes:</strong></p>
+
+
+
+<pre class="wp-block-code"><code><code>Date: Tue, 15 Nov 1994 08:12:31 GMT
+Server: Apache/2.4.1 (Unix)
+Content-Type: text/html; charset=UTF-8
+Content-Length: 138
+Set-Cookie: sessionId=abc123; Path=/; HttpOnly</code></code></pre>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Date:</strong> La fecha y hora en que se generó la respuesta.</li>
+
+
+
+<li><strong>Server:</strong> Información sobre el servidor.</li>
+
+
+
+<li><strong>Content-Type:</strong> El tipo de contenido del cuerpo de la respuesta.</li>
+
+
+
+<li><strong>Content-Length:</strong> La longitud del cuerpo de la respuesta.</li>
+
+
+
+<li><strong>Set-Cookie:</strong> Instrucciones para almacenar cookies en el cliente.</li>
+</ul>
+
+
+
+<h5 class="wp-block-heading"><strong>3. Cuerpo de la Respuesta (Response Body)</strong></h5>
+
+
+
+<p class="wp-block-paragraph">El cuerpo de la respuesta contiene los datos solicitados, como el contenido de una página web, datos JSON, etc.</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Ejemplo (HTML):</strong></p>
+
+
+
+<pre class="wp-block-code"><code><code>&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Example&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;&lt;h1&gt;Hello, World!&lt;/h1&gt;&lt;/body&gt;
+&lt;/html&gt;</code></code></pre>
+
+
+
+<h5 class="wp-block-heading"><strong>Ejemplo Completo de una Respuesta HTTP en Formato RAW</strong></h5>
+
+
+
+<pre class="wp-block-code"><code>HTTP/1.1 200 OK
+Date: Tue, 15 Nov 1994 08:12:31 GMT
+Server: Apache/2.4.1 (Unix)
+Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Length: 138
+Set-Cookie: sessionId=abc123; Path=/; HttpOnly
+Connection: close
+
+&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Example&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;&lt;h1&gt;Hello, World!&lt;/h1&gt;&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+
+
+<h3 class="wp-block-heading">Conclusión</h3>
+
+
+
+<p class="wp-block-paragraph">Entender las solicitudes y respuestas HTTP en formato RAW es crucial para desarrollar y depurar aplicaciones web. Cada componente tiene un propósito específico que facilita la comunicación efectiva entre el cliente y el servidor. Esperamos que este artículo te haya proporcionado una visión clara y detallada de cómo funcionan las solicitudes y respuestas HTTP.</p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

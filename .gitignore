@@ -1,0 +1,43 @@
+# Paquetes y respaldos locales del sitio.
+/*.zip
+/*.tar
+/*.tar.gz
+/backups/
+
+# Estado e informes generados por el importador de WordPress.
+/tools/import-state.json
+/tools/migration-report.json
+
+# Archivos temporales, registros y cargas incompletas.
+*.log
+*.bak
+*.tmp
+*.part
+*.swp
+*.swo
+*~
+
+# Archivos temporales de las pruebas existentes.
+/tests/fixtures-*/
+/posts/prueba-ejecucion.php
+/posts/prueba-ejecucion.php.html
+/media/prueba-ejecucion.php
+/assets/prueba-ejecucion.php.jpg
+/posts/prueba-interactiva.html
+/posts/prueba-escape.html
+
+# Configuracion privada y preferencias locales.
+.env
+.env.*
+!.env.example
+/.vscode/
+/.idea/
+/.codex/
+
+# Archivos del sistema operativo.
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# media/uploads/ y media/ql-cache/ son recursos publicados del sitio.
+# Deben permanecer versionados junto con los articulos.

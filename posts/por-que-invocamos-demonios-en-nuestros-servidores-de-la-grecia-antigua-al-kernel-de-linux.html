@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Por qué invocamos “Demonios” en nuestros servidores? De la Grecia Antigua al Kernel de Linux</title>
+<meta name="description" content="Si alguna vez has administrado un servidor o curioseado los procesos de tu sistema, habrás">
+<meta property="article:published_time" content="2026-03-16T01:08:30Z">
+<meta property="article:modified_time" content="2026-03-16T01:08:30Z">
+<meta property="article:section" content="Ciberseguridad">
+<meta property="article:section" content="Web">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2026/03/15/por-que-invocamos-demonios-en-nuestros-servidores-de-la-grecia-antigua-al-kernel-de-linux/">
+<meta name="blog:wordpress-id" content="185">
+<meta property="og:type" content="article">
+<meta property="og:title" content="¿Por qué invocamos “Demonios” en nuestros servidores? De la Grecia Antigua al Kernel de Linux">
+<meta property="og:description" content="Si alguna vez has administrado un servidor o curioseado los procesos de tu sistema, habrás">
+<meta property="og:url" content="https://solidchain.ar/posts/por-que-invocamos-demonios-en-nuestros-servidores-de-la-grecia-antigua-al-kernel-de-linux.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2026/03/deimon-768x429.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/por-que-invocamos-demonios-en-nuestros-servidores-de-la-grecia-antigua-al-kernel-de-linux.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Ciberseguridad / Web</p><h1>¿Por qué invocamos “Demonios” en nuestros servidores? De la Grecia Antigua al Kernel de Linux</h1><p class="article-date"><time datetime="2026-03-16T01:08:30Z">15 mar 2026</time></p></header>
+<img class="article-cover" src="../media/uploads/2026/03/deimon.jpg" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph">Si alguna vez has administrado un servidor o curioseado los procesos de tu sistema, habrás notado nombres extraños terminados en la letra <strong>“d”</strong>: <code>httpd</code>, <code>sshd</code>, <code>systemd</code> o <code>crond</code>. En el argot técnico, los llamamos <strong>daemons</strong> (demonios).</p>
+
+
+
+<p class="wp-block-paragraph">Pero, antes de que busques un exorcista, déjame decirte que no tiene nada que ver con lo oculto. La razón es una mezcla fascinante de física del siglo XIX y mitología griega.</p>
+
+
+
+<h2 class="wp-block-heading">El origen ancestral: ¿Qué eran los Daimones griegos?</h2>
+
+
+
+<p class="wp-block-paragraph">Para entender el nombre, hay que viajar a la Antigua Grecia. La palabra original es <strong>daimōn</strong> (<em>δαίμων</em>), y su significado es radicalmente distinto al que Hollywood nos ha vendido.</p>
+
+
+
+<p class="wp-block-paragraph">En la filosofía de Platón o Hesíodo, un <em>daimōn</em> no era un ser maligno, sino una <strong>entidad intermedia</strong> entre los dioses y los hombres. Tenían tres características clave:</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong>Los Ejecutores:</strong> Eran seres que realizaban tareas en el mundo físico para que el universo funcionara correctamente.</li>
+
+
+
+<li><strong>El “Genio” Invisible:</strong> Sócrates hablaba de su <em>daimōn</em> como una guía interna que lo ayudaba a tomar decisiones sin que otros lo notaran.</li>
+
+
+
+<li><strong>Neutralidad:</strong> A diferencia del concepto religioso actual, el <em>daimōn</em> era éticamente neutro. Su valor residía en su <strong>función</strong>, no en su moralidad. Eran, esencialmente, “procesos” que corrían en el fondo de la realidad.</li>
+</ul>
+
+
+
+<h2 class="wp-block-heading">El salto a la ciencia: El Demonio de Maxwell</h2>
+
+
+
+<p class="wp-block-paragraph">En 1867, el físico <strong>James Clerk Maxwell</strong> rescató este concepto para un experimento mental de termodinámica. Imaginó a un “ser invisible” capaz de ver moléculas individuales.</p>
+
+
+
+<p class="wp-block-paragraph">Este “demonio” controlaba una pequeña puerta entre dos cámaras de gas, dejando pasar solo las moléculas rápidas a un lado y las lentas al otro. Al separar el calor del frío de forma autónoma y constante, el demonio estaba <strong>creando orden en el caos</strong> en segundo plano.</p>
+
+
+
+<p class="wp-block-paragraph">Maxwell eligió el término <em>daemon</em> precisamente por esa naturaleza de “ayudante invisible” que realiza una tarea mecánica y necesaria sin intervención externa.</p>
+
+
+
+<h2 class="wp-block-heading">3. Del laboratorio al código: El Proyecto MAC</h2>
+
+
+
+<p class="wp-block-paragraph">Casi cien años después, en 1963, los programadores del <strong>MIT</strong> adoptaron el término. Estaban creando procesos que trabajaban en el <em>background</em> (segundo plano), realizando tareas repetitivas como indexar archivos o gestionar la memoria.</p>
+
+
+
+<p class="wp-block-paragraph">Recordando el experimento de Maxwell, llamaron a estos programas <strong>daemons</strong>. La analogía era perfecta:</p>
+
+
+
+<ol start="1" class="wp-block-list">
+<li><strong>Son autónomos:</strong> Se ejecutan sin una interfaz directa con el usuario.</li>
+
+
+
+<li><strong>Son persistentes:</strong> Están ahí desde que el sistema arranca hasta que se apaga.</li>
+
+
+
+<li><strong>Son invisibles:</strong> No los ves trabajar, pero notarías de inmediato si dejaran de hacerlo.</li>
+</ol>
+
+
+
+<h2 class="wp-block-heading">La “d” al final: El sello del guardián</h2>
+
+
+
+<p class="wp-block-paragraph">En sistemas Unix y Linux, la convención dicta que si un programa es un daemon, su nombre debe terminar en <strong>d</strong>. Es su “marca de nacimiento”:</p>
+
+
+
+<ul class="wp-block-list">
+<li><strong><code>sshd</code></strong>: El guardián que espera conexiones seguras.</li>
+
+
+
+<li><strong><code>httpd</code></strong>: El servidor que entrega páginas web.</li>
+
+
+
+<li><strong><code>crond</code></strong>: El encargado de ejecutar tareas programadas en el tiempo.</li>
+</ul>
+
+
+
+<h2 class="wp-block-heading">Un guía en tu sistema</h2>
+
+
+
+<p class="wp-block-paragraph">Aunque la palabra evolucionó hacia “demon” con una carga negativa, en informática mantenemos la <strong>“a”</strong> (<em>daemon</em>) para honrar esa raíz griega. No estamos ante presencias oscuras, sino ante <strong>espíritus servidores</strong>.</p>
+
+
+
+<p class="wp-block-paragraph">La próxima vez que veas un proceso terminado en <strong>“d”</strong> en tu terminal, recuerda que es un heredero de los antiguos daimones: un guía invisible que mantiene el orden en tu universo digital mientras tú te enfocas en lo importante.</p>
+
+
+
+<p class="wp-block-paragraph"></p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>

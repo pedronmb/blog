@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrón Outbox: evitando la inconsistencia de datos en sistemas distribuidos y microservicios</title>
+<meta name="description" content="Cuando empezamos a trabajar con microservicios aparece un problema que, a primera vista, parece sencillo:">
+<meta property="article:published_time" content="2026-08-23T19:01:47Z">
+<meta property="article:modified_time" content="2026-08-23T19:14:30Z">
+<meta property="article:section" content="Arquitectura">
+<meta name="blog:legacy-url" content="https://solidchain.ar/index.php/2026/08/23/patron-outbox-evitando-la-inconsistencia-de-datos-en-sistemas-distribuidos-y-microservicios/">
+<meta name="blog:wordpress-id" content="199">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Patrón Outbox: evitando la inconsistencia de datos en sistemas distribuidos y microservicios">
+<meta property="og:description" content="Cuando empezamos a trabajar con microservicios aparece un problema que, a primera vista, parece sencillo:">
+<meta property="og:url" content="https://solidchain.ar/posts/patron-outbox-evitando-la-inconsistencia-de-datos-en-sistemas-distribuidos-y-microservicios.html">
+<meta property="og:image" content="https://solidchain.ar/media/uploads/2026/08/Imagen-de-Codex-23-ago-2026-16_13_47-768x768.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/patron-outbox-evitando-la-inconsistencia-de-datos-en-sistemas-distribuidos-y-microservicios.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<header class="article-header "><p class="eyebrow">Arquitectura</p><h1>Patrón Outbox: evitando la inconsistencia de datos en sistemas distribuidos y microservicios</h1><p class="article-date"><time datetime="2026-08-23T19:01:47Z">23 ago 2026</time></p></header>
+<img class="article-cover" src="../media/uploads/2026/08/Imagen-de-Codex-23-ago-2026-16_13_47.png" alt="" decoding="async">
+<div class="article-content ">
+
+<p class="wp-block-paragraph">Cuando empezamos a trabajar con microservicios aparece un problema que, a primera vista, parece sencillo:</p>
+
+
+
+<blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">
+<p class="wp-block-paragraph"><strong>Guardar información en una base de datos y, al mismo tiempo, publicar un mensaje en RabbitMQ o Kafka.</strong></p>
+</blockquote>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo, imaginemos un microservicio de <strong>Pedidos</strong>. Cuando un usuario confirma una compra necesitamos:</p>
+
+
+
+<ol start="1" class="wp-block-list">
+<li>Guardar el pedido en la base de datos.</li>
+
+
+
+<li>Publicar un evento <code>PedidoCreado</code>.</li>
+
+
+
+<li>Permitir que otros servicios —Facturación, Stock, Notificaciones, etc.— reaccionen a ese evento.</li>
+</ol>
+
+
+
+<p class="wp-block-paragraph">El código podría parecer conceptualmente así:</p>
+
+
+
+<pre class="wp-block-code"><code>BEGIN TRANSACTION
+
+INSERT INTO pedidos (...)
+
+COMMIT
+
+PublicarEvento("PedidoCreado")</code></pre>
+
+
+
+<p class="wp-block-paragraph">El problema está justamente entre el <code>COMMIT</code> y la publicación del evento.</p>
+
+
+
+<p class="wp-block-paragraph">¿Qué pasa si la base de datos confirma correctamente la transacción, pero RabbitMQ o Kafka no están disponibles?</p>
+
+
+
+<p class="wp-block-paragraph">Terminamos con un pedido que <strong>existe en nuestra base de datos pero que ningún otro sistema sabe que existe</strong>.</p>
+
+
+
+<p class="wp-block-paragraph">Y eso es uno de los problemas clásicos de consistencia en arquitecturas distribuidas.</p>
+
+
+
+<h2 class="wp-block-heading">El problema de las dos transacciones</h2>
+
+
+
+<p class="wp-block-paragraph">Cuando una operación involucra dos sistemas diferentes tenemos, en realidad, dos transacciones independientes:</p>
+
+
+
+<p class="wp-block-paragraph">La base de datos puede confirmar su transacción, pero eso no significa que el broker vaya a aceptar posteriormente el mensaje.</p>
+
+
+
+<figure class="wp-block-image size-full"><img loading="lazy" decoding="async" width="844" height="312" src="../media/uploads/2026/08/image.png" alt="" class="wp-image-201" srcset="../media/uploads/2026/08/image.png 844w, ../media/uploads/2026/08/image-300x111.png 300w, ../media/uploads/2026/08/image-768x284.png 768w" sizes="auto, (max-width: 844px) 100vw, 844px"></figure>
+
+
+
+<p class="wp-block-paragraph">También podría ocurrir lo contrario:</p>
+
+
+
+<pre class="wp-block-code"><code>1. Publicamos el mensaje
+2. El broker confirma
+3. Intentamos guardar en la base
+4. La transacción de base de datos falla</code></pre>
+
+
+
+<p class="wp-block-paragraph">Ahora otros servicios reciben un evento indicando que ocurrió algo que, desde el punto de vista de nuestro sistema, <strong>nunca ocurrió</strong>.</p>
+
+
+
+<figure class="wp-block-image size-full"><img loading="lazy" decoding="async" width="839" height="368" src="../media/uploads/2026/08/image-1.png" alt="" class="wp-image-202" srcset="../media/uploads/2026/08/image-1.png 839w, ../media/uploads/2026/08/image-1-300x132.png 300w, ../media/uploads/2026/08/image-1-768x337.png 768w" sizes="auto, (max-width: 839px) 100vw, 839px"></figure>
+
+
+
+<h2 class="wp-block-heading">¿Por qué no meter todo dentro de una única transacción?</h2>
+
+
+
+<p class="wp-block-paragraph">Sería ideal poder hacer algo así:</p>
+
+
+
+<pre class="wp-block-code"><code>BEGIN TRANSACTION
+
+INSERT INTO pedidos (...)
+
+PUBLISH PedidoCreado
+
+COMMIT</code></pre>
+
+
+
+<p class="wp-block-paragraph">El problema es que el <code>COMMIT</code> de nuestra base de datos solamente controla recursos pertenecientes a esa base de datos.</p>
+
+
+
+<p class="wp-block-paragraph">RabbitMQ o Kafka son sistemas externos.</p>
+
+
+
+<p class="wp-block-paragraph">Para intentar garantizar atomicidad entre ambos podríamos utilizar mecanismos de <strong>transacciones distribuidas</strong>, generalmente asociados a protocolos como:</p>
+
+
+
+<pre class="wp-block-code"><code>Two-Phase Commit (2PC)</code></pre>
+
+
+
+<p class="wp-block-paragraph">Pero esto introduce bastante complejidad.</p>
+
+
+
+<p class="wp-block-paragraph">Entre otras cosas:</p>
+
+
+
+<ul class="wp-block-list">
+<li>mayor acoplamiento entre componentes;</li>
+
+
+
+<li>peor disponibilidad;</li>
+
+
+
+<li>bloqueo de recursos;</li>
+
+
+
+<li>infraestructura adicional;</li>
+
+
+
+<li>mayor dificultad operativa;</li>
+
+
+
+<li>problemas de compatibilidad entre tecnologías;</li>
+
+
+
+<li>menor tolerancia a fallas.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">En arquitecturas modernas de microservicios normalmente intentamos evitar este tipo de coordinación distribuida.</p>
+
+
+
+<p class="wp-block-paragraph">Y es justamente aquí donde aparece el <strong>Transactional Outbox Pattern</strong>.</p>
+
+
+
+<h1 class="wp-block-heading">¿Qué es el patrón Outbox?</h1>
+
+
+
+<p class="wp-block-paragraph">La idea es sorprendentemente simple.</p>
+
+
+
+<p class="wp-block-paragraph">En lugar de intentar guardar información en la base de datos <strong>y publicar directamente el mensaje</strong>, guardamos ambas cosas en la misma base de datos y dentro de la misma transacción.</p>
+
+
+
+<figure class="wp-block-image size-full"><img loading="lazy" decoding="async" width="797" height="341" src="../media/uploads/2026/08/image-2.png" alt="" class="wp-image-203" srcset="../media/uploads/2026/08/image-2.png 797w, ../media/uploads/2026/08/image-2-300x128.png 300w, ../media/uploads/2026/08/image-2-768x329.png 768w" sizes="auto, (max-width: 797px) 100vw, 797px"></figure>
+
+
+
+<p class="wp-block-paragraph">Para eso agregamos una tabla llamada, por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>Outbox</code></pre>
+
+
+
+<p class="wp-block-paragraph">El flujo pasa a ser:</p>
+
+
+
+<pre class="wp-block-code"><code>BEGIN TRANSACTION
+
+INSERT INTO pedidos (...)
+
+INSERT INTO outbox (...)
+
+COMMIT</code></pre>
+
+
+
+<p class="wp-block-paragraph">La tabla podría tener una estructura similar a esta:</p>
+
+
+
+<pre class="wp-block-code"><code>CREATE TABLE outbox_messages (
+    id UUID PRIMARY KEY,
+    event_type VARCHAR(100) NOT NULL,
+    aggregate_id VARCHAR(100) NOT NULL,
+    payload JSONB NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    processed_at TIMESTAMP NULL
+);</code></pre>
+
+
+
+<p class="wp-block-paragraph">Cuando creamos un pedido:</p>
+
+
+
+<pre class="wp-block-code"><code>INSERT INTO pedidos (
+    id,
+    cliente_id,
+    total
+)
+VALUES (
+    'PED-123',
+    'CLI-456',
+    25000
+);</code></pre>
+
+
+
+<p class="wp-block-paragraph">dentro de la misma transacción insertamos:</p>
+
+
+
+<pre class="wp-block-code"><code>INSERT INTO outbox_messages (
+    id,
+    event_type,
+    aggregate_id,
+    payload,
+    created_at
+)
+VALUES (
+    'EVT-789',
+    'PedidoCreado',
+    'PED-123',
+    '{
+        "pedidoId": "PED-123",
+        "clienteId": "CLI-456",
+        "total": 25000
+    }',
+    NOW()
+);</code></pre>
+
+
+
+<p class="wp-block-paragraph">Entonces ocurre algo importante:</p>
+
+
+
+<pre class="wp-block-code"><code>Pedido + Evento</code></pre>
+
+
+
+<p class="wp-block-paragraph">se guardan dentro de <strong>una única transacción ACID</strong>.</p>
+
+
+
+<p class="wp-block-paragraph">Si la transacción falla:</p>
+
+
+
+<pre class="wp-block-code"><code>Pedido      ❌
+Evento      ❌</code></pre>
+
+
+
+<p class="wp-block-paragraph">Si la transacción funciona:</p>
+
+
+
+<pre class="wp-block-code"><code>Pedido      ✅
+Evento      ✅</code></pre>
+
+
+
+<p class="wp-block-paragraph">Desde el punto de vista de nuestra base de datos ya no puede existir uno sin el otro.</p>
+
+
+
+<h1 class="wp-block-heading">Pero todavía no publicamos nada</h1>
+
+
+
+<p class="wp-block-paragraph">Exactamente.</p>
+
+
+
+<p class="wp-block-paragraph">El registro de la tabla Outbox todavía está solamente en nuestra base de datos.</p>
+
+
+
+<p class="wp-block-paragraph">Ahora necesitamos otro componente que se encargue de leer los eventos pendientes y publicarlos.</p>
+
+
+
+<p class="wp-block-paragraph">Podemos llamarlo:</p>
+
+
+
+<pre class="wp-block-code"><code>Outbox Publisher</code></pre>
+
+
+
+<p class="wp-block-paragraph">o:</p>
+
+
+
+<pre class="wp-block-code"><code>Message Relay</code></pre>
+
+
+
+<p class="wp-block-paragraph">La arquitectura queda así:</p>
+
+
+
+<figure class="wp-block-image size-large"><img loading="lazy" decoding="async" width="1024" height="768" src="../media/uploads/2026/08/image-3-1024x768.png" alt="" class="wp-image-205" srcset="../media/uploads/2026/08/image-3-1024x768.png 1024w, ../media/uploads/2026/08/image-3-300x225.png 300w, ../media/uploads/2026/08/image-3-768x576.png 768w, ../media/uploads/2026/08/image-3.png 1448w" sizes="auto, (max-width: 1024px) 100vw, 1024px"></figure>
+
+
+
+<p class="wp-block-paragraph">El publisher busca periódicamente mensajes pendientes:</p>
+
+
+
+<pre class="wp-block-code"><code>SELECT *
+FROM outbox_messages
+WHERE processed_at IS NULL
+ORDER BY created_at;</code></pre>
+
+
+
+<p class="wp-block-paragraph">Luego publica cada mensaje en el broker.</p>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>Exchange / Topic:
+
+pedidos.events</code></pre>
+
+
+
+<p class="wp-block-paragraph">con:</p>
+
+
+
+<pre class="wp-block-code"><code>{
+  "eventId": "EVT-789",
+  "eventType": "PedidoCreado",
+  "pedidoId": "PED-123",
+  "clienteId": "CLI-456",
+  "total": 25000
+}</code></pre>
+
+
+
+<p class="wp-block-paragraph">Una vez confirmado por RabbitMQ o Kafka, podemos marcarlo como procesado:</p>
+
+
+
+<pre class="wp-block-code"><code>UPDATE outbox_messages
+SET processed_at = NOW()
+WHERE id = 'EVT-789';</code></pre>
+
+
+
+<h1 class="wp-block-heading">¿Qué ocurre si RabbitMQ está caído?</h1>
+
+
+
+<p class="wp-block-paragraph">Acá aparece una de las principales ventajas del patrón.</p>
+
+
+
+<p class="wp-block-paragraph">Supongamos que tenemos:</p>
+
+
+
+<figure class="wp-block-image size-large"><img loading="lazy" decoding="async" width="1024" height="320" src="../media/uploads/2026/08/image-5-1024x320.png" alt="" class="wp-image-207" srcset="../media/uploads/2026/08/image-5-1024x320.png 1024w, ../media/uploads/2026/08/image-5-300x94.png 300w, ../media/uploads/2026/08/image-5-768x240.png 768w, ../media/uploads/2026/08/image-5.png 1416w" sizes="auto, (max-width: 1024px) 100vw, 1024px"></figure>
+
+
+
+<p class="wp-block-paragraph">No perdemos el evento.</p>
+
+
+
+<p class="wp-block-paragraph">Simplemente queda pendiente:</p>
+
+
+
+<pre class="wp-block-code"><code>processed_at = NULL</code></pre>
+
+
+
+<p class="wp-block-paragraph">Cuando RabbitMQ vuelva a estar disponible, el publisher podrá volver a intentarlo</p>
+
+
+
+<p class="wp-block-paragraph">Esto desacopla completamente la disponibilidad del broker de la transacción del negocio.</p>
+
+
+
+<p class="wp-block-paragraph">La creación del pedido <strong>no necesita que RabbitMQ esté disponible exactamente en ese instante</strong>.</p>
+
+
+
+<h1 class="wp-block-heading">Entonces conseguimos consistencia eventual</h1>
+
+
+
+<p class="wp-block-paragraph">Es importante entender que Outbox no proporciona consistencia inmediata entre todos los microservicios.</p>
+
+
+
+<p class="wp-block-paragraph">Proporciona algo diferente:</p>
+
+
+
+<h2 class="wp-block-heading">Consistencia eventual</h2>
+
+
+
+<p class="wp-block-paragraph">Durante algunos segundos podríamos tener:</p>
+
+
+
+<pre class="wp-block-code"><code>Servicio Pedidos
+Pedido PED-123 → existente
+
+Servicio Facturación
+Pedido PED-123 → todavía desconocido</code></pre>
+
+
+
+<p class="wp-block-paragraph">Después de que el evento sea publicado y procesado:</p>
+
+
+
+<pre class="wp-block-code"><code>Servicio Pedidos
+Pedido PED-123 → existente
+
+Servicio Facturación
+Pedido PED-123 → factura generada</code></pre>
+
+
+
+<p class="wp-block-paragraph">Los sistemas terminan convergiendo hacia un estado consistente.</p>
+
+
+
+<p class="wp-block-paragraph">Este modelo encaja mucho mejor con arquitecturas distribuidas donde buscamos:</p>
+
+
+
+<pre class="wp-block-code"><code>desacoplamiento + resiliencia + escalabilidad</code></pre>
+
+
+
+<p class="wp-block-paragraph">en lugar de intentar que todos los componentes participen en una única transacción global.</p>
+
+
+
+<h1 class="wp-block-heading">Hay un problema adicional: mensajes duplicados</h1>
+
+
+
+<p class="wp-block-paragraph">Imaginemos esta situación:</p>
+
+
+
+<figure class="wp-block-image size-large"><img loading="lazy" decoding="async" width="1024" height="542" src="../media/uploads/2026/08/image-6-1024x542.png" alt="" class="wp-image-208" srcset="../media/uploads/2026/08/image-6-1024x542.png 1024w, ../media/uploads/2026/08/image-6-300x159.png 300w, ../media/uploads/2026/08/image-6-768x406.png 768w, ../media/uploads/2026/08/image-6.png 1397w" sizes="auto, (max-width: 1024px) 100vw, 1024px"></figure>
+
+
+
+<p class="wp-block-paragraph">Cuando el proceso vuelva a levantarse encontrará:</p>
+
+
+
+<pre class="wp-block-code"><code>EVT-789
+processed_at = NULL</code></pre>
+
+
+
+<p class="wp-block-paragraph">y volverá a publicarlo.</p>
+
+
+
+<p class="wp-block-paragraph">Resultado:</p>
+
+
+
+<pre class="wp-block-code"><code>PedidoCreado
+PedidoCreado</code></pre>
+
+
+
+<p class="wp-block-paragraph">dos veces.</p>
+
+
+
+<p class="wp-block-paragraph">Por eso un sistema basado en Outbox normalmente trabaja con una garantía similar a:</p>
+
+
+
+<pre class="wp-block-code"><code>At Least Once Delivery</code></pre>
+
+
+
+<p class="wp-block-paragraph">Es decir:</p>
+
+
+
+<blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">
+<p class="wp-block-paragraph">El evento se publicará al menos una vez, pero podría publicarse más de una vez.</p>
+</blockquote>
+
+
+
+<p class="wp-block-paragraph">Y esto introduce otro concepto fundamental.</p>
+
+
+
+<h1 class="wp-block-heading">Los consumidores deben ser idempotentes</h1>
+
+
+
+<p class="wp-block-paragraph">Supongamos que Facturación recibe:</p>
+
+
+
+<pre class="wp-block-code"><code>eventId = EVT-789</code></pre>
+
+
+
+<p class="wp-block-paragraph">La primera vez:</p>
+
+
+
+<pre class="wp-block-code"><code>Genera factura</code></pre>
+
+
+
+<p class="wp-block-paragraph">Si recibe nuevamente:</p>
+
+
+
+<pre class="wp-block-code"><code>eventId = EVT-789</code></pre>
+
+
+
+<p class="wp-block-paragraph">no debería generar otra factura.</p>
+
+
+
+<p class="wp-block-paragraph">Una estrategia habitual consiste en guardar los eventos ya procesados:</p>
+
+
+
+<pre class="wp-block-code"><code>processed_events</code></pre>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>CREATE TABLE processed_events (
+    event_id UUID PRIMARY KEY,
+    processed_at TIMESTAMP NOT NULL
+);</code></pre>
+
+
+
+<p class="wp-block-paragraph">Antes de procesar:</p>
+
+
+
+<pre class="wp-block-code"><code>SELECT event_id
+FROM processed_events
+WHERE event_id = 'EVT-789';</code></pre>
+
+
+
+<p class="wp-block-paragraph">Si existe:</p>
+
+
+
+<pre class="wp-block-code"><code>ignorar evento</code></pre>
+
+
+
+<p class="wp-block-paragraph">Si no existe:</p>
+
+
+
+<pre class="wp-block-code"><code>procesar evento
+guardar event_id</code></pre>
+
+
+
+<p class="wp-block-paragraph">De esta forma podemos hacer que:</p>
+
+
+
+<pre class="wp-block-code"><code>Procesar 1 vez
+Procesar 2 veces
+Procesar 10 veces</code></pre>
+
+
+
+<p class="wp-block-paragraph">termine produciendo el mismo resultado.</p>
+
+
+
+<p class="wp-block-paragraph">Esta propiedad se conoce como:</p>
+
+
+
+<h2 class="wp-block-heading">Idempotencia</h2>
+
+
+
+<p class="wp-block-paragraph">Y es uno de los conceptos más importantes cuando trabajamos con sistemas orientados a eventos.</p>
+
+
+
+<h1 class="wp-block-heading">Outbox + Idempotencia</h1>
+
+
+
+<p class="wp-block-paragraph">En la práctica ambos patrones suelen aparecer juntos.</p>
+
+
+
+<p class="wp-block-paragraph">El productor utiliza:</p>
+
+
+
+<pre class="wp-block-code"><code>Transactional Outbox</code></pre>
+
+
+
+<p class="wp-block-paragraph">para garantizar que el evento no se pierda.</p>
+
+
+
+<p class="wp-block-paragraph">El consumidor utiliza:</p>
+
+
+
+<pre class="wp-block-code"><code>Idempotent Consumer</code></pre>
+
+
+
+<p class="wp-block-paragraph">para garantizar que un evento duplicado no genere inconsistencias.</p>
+
+
+
+<p class="wp-block-paragraph">El flujo completo queda:</p>
+
+
+
+<figure class="wp-block-image size-large"><img loading="lazy" decoding="async" width="819" height="1024" src="../media/uploads/2026/08/image-9-819x1024.png" alt="" class="wp-image-211" srcset="../media/uploads/2026/08/image-9-819x1024.png 819w, ../media/uploads/2026/08/image-9-240x300.png 240w, ../media/uploads/2026/08/image-9-768x960.png 768w, ../media/uploads/2026/08/image-9.png 1122w" sizes="auto, (max-width: 819px) 100vw, 819px"></figure>
+
+
+
+<h1 class="wp-block-heading">¿Cómo ejecutar el Outbox Publisher?</h1>
+
+
+
+<p class="wp-block-paragraph">Hay varias estrategias.</p>
+
+
+
+<figure class="wp-block-image size-large"><img loading="lazy" decoding="async" width="1024" height="628" src="../media/uploads/2026/08/image-7-1024x628.png" alt="" class="wp-image-209" srcset="../media/uploads/2026/08/image-7-1024x628.png 1024w, ../media/uploads/2026/08/image-7-300x184.png 300w, ../media/uploads/2026/08/image-7-768x471.png 768w, ../media/uploads/2026/08/image-7.png 1370w" sizes="auto, (max-width: 1024px) 100vw, 1024px"></figure>
+
+
+
+<h2 class="wp-block-heading">1. Polling</h2>
+
+
+
+<p class="wp-block-paragraph">La opción más sencilla.</p>
+
+
+
+<p class="wp-block-paragraph">Un proceso ejecuta periódicamente:</p>
+
+
+
+<pre class="wp-block-code"><code>SELECT *
+FROM outbox_messages
+WHERE processed_at IS NULL
+LIMIT 100;</code></pre>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>cada 1 segundo</code></pre>
+
+
+
+<p class="wp-block-paragraph">o:</p>
+
+
+
+<pre class="wp-block-code"><code>cada 5 segundos</code></pre>
+
+
+
+<p class="wp-block-paragraph">Ventajas:</p>
+
+
+
+<ul class="wp-block-list">
+<li>simple;</li>
+
+
+
+<li>fácil de implementar;</li>
+
+
+
+<li>fácil de diagnosticar;</li>
+
+
+
+<li>prácticamente independiente de la tecnología.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">Desventajas:</p>
+
+
+
+<ul class="wp-block-list">
+<li>agrega consultas periódicas;</li>
+
+
+
+<li>introduce cierta latencia;</li>
+
+
+
+<li>necesita controlar concurrencia.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">Para muchos sistemas empresariales esta solución es más que suficiente.</p>
+
+
+
+<h2 class="wp-block-heading">2. Worker permanente</h2>
+
+
+
+<p class="wp-block-paragraph">En lugar de un proceso periódico podemos tener un servicio dedicado:</p>
+
+
+
+<pre class="wp-block-code"><code>Outbox Worker</code></pre>
+
+
+
+<p class="wp-block-paragraph">que se ejecuta permanentemente.</p>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>.NET Worker Service
+Java Spring Worker
+Node.js Worker
+PHP Worker</code></pre>
+
+
+
+<p class="wp-block-paragraph">El worker puede procesar registros constantemente y aplicar políticas de retry.</p>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>retry 1 → 5 segundos
+retry 2 → 30 segundos
+retry 3 → 2 minutos
+retry 4 → 10 minutos</code></pre>
+
+
+
+<p class="wp-block-paragraph">Esto suele implementarse mediante:</p>
+
+
+
+<pre class="wp-block-code"><code>exponential backoff</code></pre>
+
+
+
+<h2 class="wp-block-heading">3. Change Data Capture</h2>
+
+
+
+<p class="wp-block-paragraph">Una alternativa más sofisticada consiste en no consultar constantemente la tabla.</p>
+
+
+
+<p class="wp-block-paragraph">Podemos utilizar:</p>
+
+
+
+<pre class="wp-block-code"><code>Change Data Capture</code></pre>
+
+
+
+<p class="wp-block-paragraph">para detectar nuevos registros.</p>
+
+
+
+<p class="wp-block-paragraph">Herramientas como:</p>
+
+
+
+<pre class="wp-block-code"><code>Debezium
+Kafka Connect</code></pre>
+
+
+
+<p class="wp-block-paragraph">pueden leer directamente el transaction log de la base de datos.</p>
+
+
+
+<p class="wp-block-paragraph">La arquitectura podría ser:</p>
+
+
+
+<figure class="wp-block-image size-large"><img loading="lazy" decoding="async" width="819" height="1024" src="../media/uploads/2026/08/image-10-819x1024.png" alt="" class="wp-image-212" srcset="../media/uploads/2026/08/image-10-819x1024.png 819w, ../media/uploads/2026/08/image-10-240x300.png 240w, ../media/uploads/2026/08/image-10-768x960.png 768w, ../media/uploads/2026/08/image-10.png 1122w" sizes="auto, (max-width: 819px) 100vw, 819px"></figure>
+
+
+
+<p class="wp-block-paragraph">La aplicación sigue escribiendo:</p>
+
+
+
+<pre class="wp-block-code"><code>Negocio + Outbox</code></pre>
+
+
+
+<p class="wp-block-paragraph">en una única transacción, pero la publicación de eventos puede realizarse observando los cambios del log de la base de datos.</p>
+
+
+
+<p class="wp-block-paragraph">Esto evita gran parte del polling y puede funcionar muy bien en arquitecturas de gran volumen.</p>
+
+
+
+<p class="wp-block-paragraph">A cambio introduce más infraestructura y complejidad operativa.</p>
+
+
+
+<h1 class="wp-block-heading">Un Outbox real necesita algo más que un payload</h1>
+
+
+
+<p class="wp-block-paragraph">En producción probablemente nuestra tabla termine teniendo más información.</p>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>CREATE TABLE outbox_messages (
+    id UUID PRIMARY KEY,
+    aggregate_type VARCHAR(100),
+    aggregate_id VARCHAR(100),
+    event_type VARCHAR(100),
+    payload JSONB,
+    created_at TIMESTAMP,
+    processed_at TIMESTAMP,
+    retry_count INT DEFAULT 0,
+    last_error TEXT
+);</code></pre>
+
+
+
+<p class="wp-block-paragraph">Esto nos permite observar cosas como:</p>
+
+
+
+<pre class="wp-block-code"><code>Evento: PedidoCreado
+Pedido: PED-123
+Intentos: 4
+Último error: RabbitMQ unavailable
+Estado: Pending</code></pre>
+
+
+
+<p class="wp-block-paragraph">Y ahí aparece algo que muchas veces se subestima:</p>
+
+
+
+<h2 class="wp-block-heading">El Outbox también se convierte en una herramienta de observabilidad.</h2>
+
+
+
+<p class="wp-block-paragraph">Podemos saber exactamente qué eventos:</p>
+
+
+
+<ul class="wp-block-list">
+<li>fueron generados;</li>
+
+
+
+<li>fueron publicados;</li>
+
+
+
+<li>están pendientes;</li>
+
+
+
+<li>fallaron;</li>
+
+
+
+<li>fueron reintentados.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">Esto facilita muchísimo investigar problemas en producción.</p>
+
+
+
+<h1 class="wp-block-heading">¿Y qué hacemos con los registros procesados?</h1>
+
+
+
+<p class="wp-block-paragraph">Una tabla Outbox puede crecer rápidamente.</p>
+
+
+
+<p class="wp-block-paragraph">Supongamos:</p>
+
+
+
+<pre class="wp-block-code"><code>100 eventos por segundo</code></pre>
+
+
+
+<p class="wp-block-paragraph">Eso representa aproximadamente:</p>
+
+
+
+<pre class="wp-block-code"><code>8.640.000 eventos diarios</code></pre>
+
+
+
+<p class="wp-block-paragraph">Por eso normalmente necesitamos una política de limpieza.</p>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>DELETE FROM outbox_messages
+WHERE processed_at &lt; NOW() - INTERVAL '7 days';</code></pre>
+
+
+
+<p class="wp-block-paragraph">También podemos:</p>
+
+
+
+<ul class="wp-block-list">
+<li>archivar eventos;</li>
+
+
+
+<li>mover registros históricos;</li>
+
+
+
+<li>particionar la tabla;</li>
+
+
+
+<li>ejecutar jobs de housekeeping.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">La estrategia dependerá de cuánto valor tenga conservar el historial.</p>
+
+
+
+<h1 class="wp-block-heading">Outbox no significa exactamente once</h1>
+
+
+
+<p class="wp-block-paragraph">Es común escuchar:</p>
+
+
+
+<blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">
+<p class="wp-block-paragraph">“Con Outbox conseguimos exactamente una entrega.”</p>
+</blockquote>
+
+
+
+<p class="wp-block-paragraph">No necesariamente.</p>
+
+
+
+<p class="wp-block-paragraph">El patrón Outbox garantiza principalmente que:</p>
+
+
+
+<pre class="wp-block-code"><code>Cambio de negocio
+      +
+Creación del evento</code></pre>
+
+
+
+<p class="wp-block-paragraph">ocurran atómicamente.</p>
+
+
+
+<p class="wp-block-paragraph">Pero la comunicación con un broker sigue teniendo las características propias de los sistemas distribuidos.</p>
+
+
+
+<p class="wp-block-paragraph">Por eso el diseño más realista suele ser:</p>
+
+
+
+<pre class="wp-block-code"><code>Transactional Outbox
+        +
+At-Least-Once Delivery
+        +
+Idempotent Consumers</code></pre>
+
+
+
+<p class="wp-block-paragraph">En muchos sistemas esta combinación es muchísimo más robusta que intentar construir una garantía global de <code>exactly-once</code>.</p>
+
+
+
+<h1 class="wp-block-heading">Ejemplo completo</h1>
+
+
+
+<p class="wp-block-paragraph">Imaginemos un e-commerce.</p>
+
+
+
+<p class="wp-block-paragraph">Un usuario realiza una compra.</p>
+
+
+
+<figure class="wp-block-image size-large"><img loading="lazy" decoding="async" width="1024" height="625" src="../media/uploads/2026/08/image-8-1024x625.png" alt="" class="wp-image-210" srcset="../media/uploads/2026/08/image-8-1024x625.png 1024w, ../media/uploads/2026/08/image-8-300x183.png 300w, ../media/uploads/2026/08/image-8-768x469.png 768w, ../media/uploads/2026/08/image-8.png 1398w" sizes="auto, (max-width: 1024px) 100vw, 1024px"></figure>
+
+
+
+<h2 class="wp-block-heading">Paso 1 — Pedidos</h2>
+
+
+
+<p class="wp-block-paragraph">El servicio de Pedidos ejecuta:</p>
+
+
+
+<pre class="wp-block-code"><code>BEGIN TRANSACTION
+
+crear Pedido PED-123
+
+crear evento EVT-789
+PedidoCreado
+
+COMMIT</code></pre>
+
+
+
+<p class="wp-block-paragraph">Tenemos:</p>
+
+
+
+<pre class="wp-block-code"><code>pedidos
+──────────────
+PED-123
+
+outbox
+──────────────────────
+EVT-789 | PedidoCreado</code></pre>
+
+
+
+<h2 class="wp-block-heading">Paso 2 — Publicación</h2>
+
+
+
+<p class="wp-block-paragraph">El Outbox Publisher lee:</p>
+
+
+
+<pre class="wp-block-code"><code>EVT-789</code></pre>
+
+
+
+<p class="wp-block-paragraph">y publica:</p>
+
+
+
+<pre class="wp-block-code"><code>pedidos.creado</code></pre>
+
+
+
+<p class="wp-block-paragraph">en Kafka o RabbitMQ.</p>
+
+
+
+<p class="wp-block-paragraph">Luego marca:</p>
+
+
+
+<pre class="wp-block-code"><code>EVT-789 → processed</code></pre>
+
+
+
+<h2 class="wp-block-heading">Paso 3 — Consumidores</h2>
+
+
+
+<p class="wp-block-paragraph">El evento llega a:</p>
+
+
+
+<pre class="wp-block-code"><code>Stock
+Facturación
+Notificaciones
+Analytics</code></pre>
+
+
+
+<p class="wp-block-paragraph">Cada sistema reacciona de manera independiente:</p>
+
+
+
+<pre class="wp-block-code"><code>Stock
+→ reserva productos
+
+Facturación
+→ genera factura
+
+Notificaciones
+→ envía email
+
+Analytics
+→ registra la compra</code></pre>
+
+
+
+<p class="wp-block-paragraph">Ninguno necesita que el servicio de Pedidos llame directamente a los demás.</p>
+
+
+
+<h1 class="wp-block-heading">¿Cuándo usar Transactional Outbox?</h1>
+
+
+
+<p class="wp-block-paragraph">Es especialmente útil cuando tenemos:</p>
+
+
+
+<ul class="wp-block-list">
+<li>microservicios;</li>
+
+
+
+<li>arquitectura event-driven;</li>
+
+
+
+<li>RabbitMQ;</li>
+
+
+
+<li>Apache Kafka;</li>
+
+
+
+<li>Azure Service Bus;</li>
+
+
+
+<li>AWS SQS/SNS;</li>
+
+
+
+<li>procesos de integración;</li>
+
+
+
+<li>sincronización entre sistemas;</li>
+
+
+
+<li>operaciones que no pueden perder eventos.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">Por ejemplo:</p>
+
+
+
+<pre class="wp-block-code"><code>Pedido creado
+Pago confirmado
+Usuario registrado
+Factura emitida
+Stock actualizado
+Alumno inscripto
+Documento generado
+Transferencia iniciada</code></pre>
+
+
+
+<p class="wp-block-paragraph">Si perder uno de estos eventos puede dejar distintos sistemas en estados inconsistentes, Outbox es un patrón que vale la pena considerar.</p>
+
+
+
+<h1 class="wp-block-heading">¿Cuándo quizás no hace falta?</h1>
+
+
+
+<p class="wp-block-paragraph">No toda aplicación necesita Outbox.</p>
+
+
+
+<p class="wp-block-paragraph">Si tenemos:</p>
+
+
+
+<pre class="wp-block-code"><code>Frontend
+   ↓
+Backend monolítico
+   ↓
+Una única base de datos</code></pre>
+
+
+
+<p class="wp-block-paragraph">y todas las operaciones ocurren dentro de esa misma base de datos, probablemente una transacción tradicional sea suficiente.</p>
+
+
+
+<p class="wp-block-paragraph">Agregar:</p>
+
+
+
+<pre class="wp-block-code"><code>Outbox
+Workers
+Broker
+Retries
+Idempotencia
+Observabilidad</code></pre>
+
+
+
+<p class="wp-block-paragraph">sin una necesidad real simplemente aumenta la complejidad.</p>
+
+
+
+<p class="wp-block-paragraph">Como casi siempre en arquitectura:</p>
+
+
+
+<blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">
+<p class="wp-block-paragraph"><strong>un patrón resuelve un problema; no debería utilizarse solamente porque está de moda.</strong></p>
+</blockquote>
+
+
+
+<p class="wp-block-paragraph"></p>
+
+</div>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>
