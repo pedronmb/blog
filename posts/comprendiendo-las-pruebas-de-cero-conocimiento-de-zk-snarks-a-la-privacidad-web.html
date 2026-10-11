@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comprendiendo las Pruebas de Cero Conocimiento (Zero-Knowledge Proofs): De zk-SNARKs a la Privacidad Web</title>
+    <meta name="description" content="Cómo demostrar sin revelar: fundamentos de las pruebas de cero conocimiento, un ejemplo matemático, zk-SNARKs, zk-rollups de capa 2 y privacidad web.">
+    <meta property="article:published_time" content="2026-10-09T22:40:00-03:00">
+    <meta property="article:section" content="Criptografía">
+    <meta property="article:section" content="Blockchain">
+    <meta property="article:section" content="Web">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Comprendiendo las Pruebas de Cero Conocimiento (Zero-Knowledge Proofs): De zk-SNARKs a la Privacidad Web">
+    <meta property="og:description" content="De la intuición a las ecuaciones: pruebas de cero conocimiento, zk-SNARKs, escalabilidad en capa 2 y privacidad web.">
+    <meta property="og:image" content="../media/zero-knowledge/portada.svg">
+    <meta property="og:url" content="https://solidchain.ar/posts/comprendiendo-las-pruebas-de-cero-conocimiento-de-zk-snarks-a-la-privacidad-web.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://solidchain.ar/posts/comprendiendo-las-pruebas-de-cero-conocimiento-de-zk-snarks-a-la-privacidad-web.html">
+    <script src="../assets/theme.js"></script>
+    <link rel="stylesheet" href="../assets/site.css?v=3">
+    <link rel="stylesheet" href="../assets/theme.css?v=3">
+    <link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+    <link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+    <style>
+        .zk-equation { margin: 1.5em 0; padding: 18px 22px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); overflow-x: auto; font-family: Georgia, "Times New Roman", serif; font-size: 1.12em; text-align: center; }
+        .zk-equation var { font-style: italic; }
+        .zk-note { padding: 19px 23px; border-left: 3px solid var(--blue); background: var(--blue-soft); border-radius: 0 9px 9px 0; margin: 1.5em 0; }
+        .article-content .zk-note p:last-child { margin-bottom: 0; }
+        .zk-demo { padding: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); margin: 1.8em 0; }
+        .article-content .zk-demo h3 { margin: 0 0 12px; }
+        .zk-demo label { display: block; font-size: 15px; }
+        .zk-demo input { width: 100%; accent-color: var(--blue); margin: 18px 0; }
+        .zk-demo output { display: block; color: var(--blue); font-size: clamp(22px, 3vw, 30px); line-height: 1.4; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        .article-content .zk-small { color: var(--muted); font-size: 14px; line-height: 1.7; margin: 13px 0 0; }
+        .zk-rounds { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin: 18px 0; }
+        .zk-rounds span { height: 7px; border-radius: 2px; background: var(--line); }
+        .zk-rounds span.active { background: var(--blue); }
+        .zk-table { overflow-x: auto; margin: 1.6em 0; }
+        .zk-table:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+        .zk-table table { margin: 0; min-width: 570px; }
+        .zk-table caption { text-align: left; margin-bottom: 12px; font-weight: 650; color: var(--ink); }
+        .zk-toc { border: 1px solid var(--line); border-radius: 9px; padding: 19px 23px; margin: 1.7em 0; font-size: 15px; }
+        .zk-toc summary { cursor: pointer; font-weight: 650; }
+        .article-content .zk-toc ol { margin: 16px 0 0; }
+        .zk-sources { font-size: 15px; }
+        @media (max-width: 650px) { .zk-demo { padding: 20px; } .zk-equation { padding: 15px; font-size: 1em; } }
+        @media print { .zk-demo input, .zk-rounds, .zk-toc { display: none; } .zk-equation, .zk-note, .zk-demo { break-inside: avoid; } .zk-table { overflow: visible; } .zk-table table { min-width: 0; } }
+    </style>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+    <nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+    <header class="article-header">
+        <p class="eyebrow">Criptografía / Blockchain / Web</p>
+        <h1>Comprendiendo las Pruebas de Cero Conocimiento (Zero-Knowledge Proofs): De zk-SNARKs a la Privacidad Web</h1>
+        <p class="article-date"><time datetime="2026-10-09T22:40:00-03:00">9 oct 2026</time> · Lectura: 13 minutos</p>
+    </header>
+    <img class="article-cover" src="../media/zero-knowledge/portada.svg" alt="Un dato privado permite generar una prueba; el verificador recibe la afirmación pública y la prueba, sin recibir el dato secreto." width="1280" height="720" decoding="async">
+    <div class="article-content">
+        <p><strong>Para comprobar que alguien cumple una condición, muchas aplicaciones piden más información de la que necesitan.</strong> Un sitio podría solicitar una foto del documento para verificar la edad, aunque su única pregunta sea si la persona supera un umbral. La respuesta termina acompañada de nombre, fecha de nacimiento y otros datos que el servicio deberá custodiar.</p>
+        <p>Las <strong>pruebas de cero conocimiento</strong>, o <em>Zero-Knowledge Proofs</em> (ZKP), permiten demostrar que una afirmación es verdadera sin revelar el secreto que la respalda. Con un protocolo adecuado, podemos acreditar una propiedad de un dato y conservar ese dato en privado.</p>
+        <p>Esta idea conecta dos problemas: compartir menos información y verificar cálculos sin repetir todo el trabajo. Para entender cómo llega desde la criptografía hasta los zk-SNARKs y la capa 2, empezaremos con una intuición y después seguiremos las ecuaciones.</p>
+
+        <details class="zk-toc">
+            <summary>Recorrido del artículo</summary>
+            <ol>
+                <li><a href="#afirmacion">Qué se demuestra y qué permanece privado</a></li>
+                <li><a href="#propiedades">Las tres propiedades de una ZKP</a></li>
+                <li><a href="#cueva">La cueva y la probabilidad de engañar</a></li>
+                <li><a href="#schnorr">Un ejemplo matemático con Schnorr</a></li>
+                <li><a href="#snarks">De un cálculo a un zk-SNARK</a></li>
+                <li><a href="#sistemas">Groth16, PLONK y STARKs</a></li>
+                <li><a href="#capa2">Qué verifican los rollups de capa 2</a></li>
+                <li><a href="#privacidad">Aplicaciones en privacidad web</a></li>
+                <li><a href="#limites">Qué garantiza la prueba y qué depende del diseño</a></li>
+            </ol>
+        </details>
+
+        <h2 id="afirmacion">1. Qué se demuestra y qué permanece privado</h2>
+        <p>En una prueba intervienen dos roles: el <strong>demostrador</strong> (<em>prover</em>), que posee información privada, y el <strong>verificador</strong> (<em>verifier</em>), que comprueba la evidencia. La información privada se llama <strong>testigo</strong> (<em>witness</em>).</p>
+        <p>Una forma compacta de escribir el problema es:</p>
+        <div class="zk-equation"><var>R</var>(<var>x</var>, <var>w</var>) = 1</div>
+        <p><var>x</var> representa las entradas públicas; <var>w</var>, el testigo privado; y <var>R</var>, la relación que debe cumplirse. El demostrador produce una prueba <var>π</var>. El verificador recibe <var>x</var> y <var>π</var>, y comprueba la relación sin recibir <var>w</var>.</p>
+        <p>Por ejemplo, la afirmación podría ser: «Conozco un valor que produce este hash público». El testigo sería ese valor. En una credencial de edad, el testigo podría incluir una fecha de nacimiento y una firma del emisor; las entradas públicas, la clave del emisor y la fecha límite aceptada.</p>
+        <div class="zk-note"><p><strong>Demostrar que un dato cumple una regla exige definir la regla.</strong> Probar que una fecha corresponde a una persona adulta no acredita, por sí solo, que esa fecha sea auténtica. La relación también debe comprobar su vínculo con una fuente aceptada, por ejemplo una credencial firmada.</p></div>
+
+        <h2 id="propiedades">2. Las tres propiedades de una ZKP</h2>
+        <p>Un protocolo de cero conocimiento debe reunir tres propiedades:</p>
+        <ul>
+            <li><strong>Completitud:</strong> si la afirmación es verdadera y ambas partes siguen el protocolo, el verificador acepta, con la probabilidad prevista por el sistema.</li>
+            <li><strong>Solidez:</strong> una afirmación falsa no debe ser aceptada, salvo con una probabilidad suficientemente pequeña. En los argumentos criptográficos, esta garantía se formula frente a atacantes con recursos computacionales acotados.</li>
+            <li><strong>Cero conocimiento:</strong> la prueba no aporta información sobre el testigo más allá de lo que ya permiten deducir las entradas públicas y la afirmación demostrada.</li>
+        </ul>
+        <p>La última propiedad se formaliza mediante un <strong>simulador</strong>: un algoritmo que, sin conocer el testigo, puede generar una vista indistinguible de la que obtiene el verificador. Si esa vista puede reproducirse sin el secreto, la interacción no entrega conocimiento adicional sobre él. Esta formalización nace del trabajo de <a href="https://www.cs.miami.edu/home/burt/learning/csc609.221/goldwasser-micali-rackoff-knoweldge-complexity.pdf">Goldwasser, Micali y Rackoff</a>.</p>
+        <p>El resultado sí comunica algo: que se cumple la condición. Si las entradas públicas ya identifican a la persona, la prueba no elimina esa identificación.</p>
+
+        <h2 id="cueva">3. La cueva y la probabilidad de engañar</h2>
+        <p>Imaginá una cueva con dos caminos, A y B, unidos al fondo por una puerta que solo se abre con una palabra secreta. Querés demostrar que conocés la palabra sin pronunciarla delante de otra persona.</p>
+        <p>Entrás por uno de los caminos mientras el verificador espera afuera y no ve cuál elegiste. Después te pide, al azar, que regreses por A o por B. Si conocés el secreto, podés abrir la puerta y salir por el camino solicitado.</p>
+        <p>Si no lo conocés, solo podés volver por el lado por el que entraste. Acertarías por casualidad la mitad de las veces. Si cada desafío es independiente, impredecible y llega después de que elegiste el camino, la probabilidad de superar <var>k</var> rondas sin conocer el secreto es:</p>
+        <div class="zk-equation"><var>P</var>(engañar en todas las rondas) = (1/2)<sup><var>k</var></sup> = 2<sup>−<var>k</var></sup></div>
+        <section class="zk-demo" aria-labelledby="demo-title">
+            <h3 id="demo-title">Explorá el efecto de repetir el desafío</h3>
+            <label for="zk-round-count">Rondas independientes: <strong id="zk-round-label">10</strong></label>
+            <input id="zk-round-count" type="range" min="1" max="30" step="1" value="10" aria-describedby="demo-assumptions">
+            <div id="zk-round-marks" class="zk-rounds" aria-hidden="true"></div>
+            <output id="zk-probability" for="zk-round-count" aria-live="polite">1 entre 1.024 ≈ 0,09765625 %</output>
+            <p class="zk-small" id="demo-assumptions">Modelo de la cueva: una probabilidad de éxito de 1/2 por ronda, con desafíos independientes. Este control calcula la probabilidad; no genera una prueba criptográfica ni mide la seguridad de un zk-SNARK.</p>
+        </section>
+        <noscript><p>Con 10 rondas, la probabilidad es 1/1.024; con 20, 1/1.048.576. Activá JavaScript para mover el control.</p></noscript>
+        <p>El verificador gana confianza sin aprender la palabra. La cueva ayuda a entender la interacción, aunque un sistema real necesita una definición matemática de qué puede observar un atacante y de qué tan difícil resulta engañarlo.</p>
+
+        <h2 id="schnorr">4. Un ejemplo matemático con Schnorr</h2>
+        <p>El protocolo de Schnorr demuestra conocimiento de un exponente secreto. Usaremos números pequeños para seguir las cuentas: <var>p</var> = 23, <var>q</var> = 11 y <var>g</var> = 2. Las potencias de 2 módulo 23 forman un grupo de orden 11. «Módulo» significa tomar el resto de la división.</p>
+        <p>El secreto es <var>w</var> = 6. El valor público es <var>y</var> = 2<sup>6</sup> mod 23 = 18. En grupos adecuados y grandes, recuperar el exponente a partir de <var>y</var> es el problema del <strong>logaritmo discreto</strong>.</p>
+        <ol>
+            <li>El demostrador elige al azar <var>r</var> = 7 y envía <var>t</var> = 2<sup>7</sup> mod 23 = <strong>13</strong>.</li>
+            <li>El verificador envía un desafío aleatorio, aquí <var>c</var> = <strong>4</strong>.</li>
+            <li>El demostrador responde <var>s</var> = (<var>r</var> + <var>c</var> · <var>w</var>) mod 11 = (7 + 4 · 6) mod 11 = <strong>9</strong>.</li>
+        </ol>
+        <p>El verificador comprueba:</p>
+        <div class="zk-equation"><var>g</var><sup><var>s</var></sup> ≡ <var>t</var> · <var>y</var><sup><var>c</var></sup> (mod <var>p</var>)</div>
+        <pre aria-label="Comprobación numérica de Schnorr"><code>Izquierda: 2⁹ mod 23 = 6
+Derecha:   13 · 18⁴ mod 23 = 13 · 4 mod 23 = 6
+Resultado: ambos lados coinciden.</code></pre>
+        <p>La igualdad funciona porque <var>g</var><sup><var>r</var> + <var>c</var>·<var>w</var></sup> = <var>g</var><sup><var>r</var></sup> · (<var>g</var><sup><var>w</var></sup>)<sup><var>c</var></sup>. La aleatoriedad de <var>r</var> oculta el secreto en la respuesta. Esta variante interactiva tiene cero conocimiento frente a un verificador honesto que elige el desafío según el protocolo. Las <a href="https://berry.win.tue.nl/CryptographicProtocols/LectureSlides-handout.pdf#page=117">notas de Berry Schoenmakers</a> explican esta propiedad.</p>
+        <p>Usamos la convención de respuesta con suma; el <a href="https://www.rfc-editor.org/rfc/rfc8235.html#section-2.2">RFC 8235</a> describe la convención equivalente con resta. Estos parámetros permiten recuperar el secreto por enumeración: sirven para aprender, sin ofrecer seguridad.</p>
+
+        <h3>Del intercambio de mensajes a una prueba no interactiva</h3>
+        <p>La transformación <strong>Fiat–Shamir</strong> sustituye el desafío del verificador por un hash del compromiso, la afirmación y el contexto del protocolo. Así, cualquiera puede recalcularlo y verificar la prueba. La seguridad se analiza en el modelo de oráculo aleatorio; requiere una transformación adecuada al protocolo. El <a href="https://www.rfc-editor.org/rfc/rfc8235.html#section-2.3">RFC 8235</a> especifica este mecanismo para Schnorr.</p>
+        <p>Este paso introduce la idea de verificación no interactiva. Los zk-SNARKs para cálculos generales necesitan construcciones adicionales.</p>
+
+        <h2 id="snarks">5. De un cálculo a un zk-SNARK</h2>
+        <p><strong>zk-SNARK</strong> significa <em>Zero-Knowledge Succinct Non-Interactive Argument of Knowledge</em>. Cada parte describe una propiedad:</p>
+        <ul>
+            <li><strong>Zero-Knowledge:</strong> protege el testigo privado.</li>
+            <li><strong>Succinct:</strong> la prueba es compacta y su verificación requiere poco trabajo respecto del cálculo demostrado, según el esquema.</li>
+            <li><strong>Non-Interactive:</strong> no exige un diálogo de desafíos durante cada verificación, una vez establecidos los parámetros.</li>
+            <li><strong>Argument of Knowledge:</strong> ofrece una garantía computacional de conocimiento de un testigo válido, formalizada mediante un extractor.</li>
+        </ul>
+        <p>La definición y una aplicación a pagos privados aparecen en la <a href="https://z.cash/learn/what-are-zk-snarks/">explicación de zk-SNARKs de Zcash</a>. Para entender cómo se prueba un programa, hay que mirar primero cómo se representa.</p>
+
+        <h3>Convertir instrucciones en restricciones</h3>
+        <p>Supongamos que queremos demostrar que conocemos valores privados <var>a</var>, <var>b</var> y <var>c</var> que satisfacen <var>a</var> · <var>b</var> + <var>c</var> = 17. Podemos dividir el cálculo en dos restricciones:</p>
+        <pre aria-label="Restricciones de un circuito aritmético"><code>a · b = t
+t + c = 17
+
+Un testigo válido: a = 3, b = 4, c = 5, t = 12.</code></pre>
+        <p>El circuito describe las igualdades que deben cumplirse. El testigo incluye las entradas privadas y los valores intermedios. Sistemas como <strong>R1CS</strong> expresan restricciones como productos de combinaciones lineales, una representación utilizada por <a href="https://github.com/iden3/circom/blob/master/mkdocs/docs/circom-language/constraint-generation.md">Circom</a>.</p>
+        <p>Las operaciones se realizan en un <strong>campo finito</strong>, normalmente módulo un primo grande. Comparar edades o saldos exige restricciones adicionales de rango: un elemento del campo no se comporta automáticamente como un entero positivo de nuestra aplicación.</p>
+        <p>El ejemplo admite muchos testigos. Solo demuestra la existencia y el conocimiento de una solución; no que esos números provengan de una factura real. Para acreditar un origen, también deben incorporarse restricciones sobre firmas, compromisos u otra evidencia.</p>
+
+        <h3>Del circuito a la prueba compacta</h3>
+        <p>En construcciones como Groth16, las restricciones se transforman en relaciones entre polinomios: expresiones que suman términos como <var>x</var>, <var>x</var><sup>2</sup> o <var>x</var><sup>3</sup>, multiplicados por coeficientes. Su estructura permite reunir muchas restricciones en identidades algebraicas. La prueba las comprueba mediante operaciones sobre curvas elípticas llamadas <strong>emparejamientos</strong>. Se añade aleatoriedad para ocultar el testigo. El verificador comprueba una evidencia compacta en lugar de recibir todos los valores intermedios. La construcción está descrita en el <a href="https://eprint.iacr.org/2016/260">trabajo de Jens Groth</a>.</p>
+        <p>A nivel de aplicación, el flujo puede resumirse así:</p>
+        <pre aria-label="Flujo conceptual de generación y verificación"><code>π = Probar(parámetros_de_prueba, x, w)
+Verificar(parámetros_de_verificación, x, π) → aceptar o rechazar</code></pre>
+        <p>Generar la prueba suele requerir mucho más trabajo que verificarla. Esa asimetría permite delegar un cálculo y comprobar su resultado con un costo menor, aunque la generación tenga un costo significativo.</p>
+
+        <h2 id="sistemas">6. Groth16, PLONK y STARKs</h2>
+        <p>No hay una única construcción detrás de todas las pruebas ZK. Cambian sus supuestos, parámetros, tamaños y costos.</p>
+        <div class="zk-table" tabindex="0" role="region" aria-label="Comparación de sistemas de pruebas, desplazable horizontalmente">
+            <table>
+                <caption>Tres referencias para entender los compromisos de diseño</caption>
+                <thead><tr><th scope="col">Sistema</th><th scope="col">Configuración inicial</th><th scope="col">Características</th></tr></thead>
+                <tbody>
+                    <tr><th scope="row"><a href="https://eprint.iacr.org/2016/260">Groth16</a></th><td>Parámetros estructurados específicos del circuito.</td><td>Pruebas muy compactas; utiliza emparejamientos de curvas elípticas.</td></tr>
+                    <tr><th scope="row"><a href="https://eprint.iacr.org/2019/953">PLONK original</a></th><td>Referencia estructurada universal y actualizable, dentro de un límite de tamaño.</td><td>Permite reutilizar la configuración entre distintos circuitos.</td></tr>
+                    <tr><th scope="row"><a href="https://eprint.iacr.org/2018/046">STARKs</a></th><td>Transparente, sin un secreto de configuración que deba destruirse.</td><td>Usa técnicas basadas en hashes; las pruebas suelen ser mayores que las de SNARKs con emparejamientos.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p>En una <em>trusted setup</em> se generan parámetros públicos mediante aleatoriedad secreta. En esquemas que dependen de ella, conservar ciertos secretos de la configuración permitiría falsificar pruebas. Las ceremonias multipartitas distribuyen esa responsabilidad; su seguridad depende de las condiciones de la ceremonia y de que se eliminen las contribuciones secretas necesarias.</p>
+        <p><strong>Una configuración confiable no es un requisito de todos los zk-SNARKs.</strong> Por ejemplo, el sistema Halo 2 utilizado por Orchard en Zcash elimina esa necesidad. La <a href="https://zodl.com/technical-explainer-halo-on-zcash/">explicación técnica de sus desarrolladores</a> detalla cómo prescinde de las ceremonias. Tampoco conviene atribuir las mismas propiedades a toda variante de PLONK: el mecanismo que vincula la prueba con los polinomios, llamado <strong>compromiso polinómico</strong>, importa.</p>
+        <p>Los STARKs se diseñan con supuestos basados en hashes compatibles con seguridad poscuántica. Esa afirmación depende de las funciones y los parámetros utilizados; no constituye una garantía absoluta frente a cualquier ataque futuro. El <a href="https://eprint.iacr.org/2018/046">trabajo original sobre STARKs</a> desarrolla estos supuestos.</p>
+
+        <h2 id="capa2">7. Qué verifican los rollups de capa 2</h2>
+        <p>Un <strong>zk-rollup</strong> ejecuta un lote de transacciones fuera de Ethereum y presenta una prueba de que la transición de estado respeta sus reglas. Un contrato en la capa 1 verifica esa prueba antes de aceptar la actualización.</p>
+        <div class="zk-equation">Estado anterior + transacciones válidas → estado nuevo</div>
+        <p>Por ejemplo, el circuito puede exigir firmas válidas, saldos suficientes y actualizaciones correctas de las cuentas. Las raíces de estado funcionan como compromisos compactos sobre esos datos. La prueba debe vincular los estados y el lote correspondiente.</p>
+        <p>El ahorro aparece al verificar evidencia del cálculo agregado en lugar de repetir toda su ejecución en la capa 1. Un rollup también publica datos suficientes para reconstruir su estado; una prueba de validez no sustituye la disponibilidad de datos. Los <strong>validiums</strong> mantienen esos datos fuera de la capa 1, con supuestos adicionales. La <a href="https://ethereum.org/developers/docs/scaling/zk-rollups/">documentación de Ethereum sobre zk-rollups</a> explica esta separación.</p>
+        <div class="zk-note"><p><strong>La etiqueta «zk» no implica transacciones privadas.</strong> La misma documentación indica que los datos publicados por los rollups son públicos. Para ocultar participantes o importes, la aplicación necesita un diseño de privacidad adicional.</p></div>
+
+        <h2 id="privacidad">8. Aplicaciones en privacidad web</h2>
+        <h3>Acreditar una condición con una credencial</h3>
+        <p>Una aplicación podría comprobar «esta persona supera el umbral de edad» sin recibir su fecha de nacimiento. El <a href="https://www.w3.org/TR/vc-data-model-2.0/#zero-knowledge-proofs">modelo de credenciales verificables del W3C</a> contempla pruebas sobre atributos ocultos y presentaciones con menos información. Las capacidades concretas dependen del mecanismo criptográfico utilizado.</p>
+        <p>En un diseño ilustrativo, el navegador o una billetera conservaría la credencial y produciría una prueba que compruebe su firma, la condición de edad y su vínculo con el titular. El servidor recibiría la prueba y los datos públicos necesarios. La aceptación también debe considerar la vigencia, la revocación y el emisor en quien se confía.</p>
+        <p><strong>Revelar solo un atributo y demostrar una comparación son capacidades distintas.</strong> Un mecanismo de divulgación selectiva no permite automáticamente probar cualquier desigualdad sobre un atributo oculto. Otra opción es que el emisor firme directamente una afirmación como «mayor de 18».</p>
+        <p>Para una sesión web, la prueba debe vincularse a la solicitud y al servicio que la acepta. Por ejemplo, puede incluir un desafío de un solo uso y el dominio del verificador como parte del contexto comprobado. El servidor debe comprobar ese contexto y rechazar desafíos ya utilizados. Así, una evidencia copiada no funciona como una autorización reutilizable en otro contexto.</p>
+
+        <h3>Demostrar pertenencia sin revelar identidad</h3>
+        <p>Una comunidad puede querer aceptar un voto de cada integrante sin saber quién emitió cada uno. <a href="https://docs.semaphore.pse.dev/">Semaphore</a> permite demostrar pertenencia a un grupo y publicar un mensaje sin revelar la identidad del miembro.</p>
+        <p>Para impedir acciones duplicadas, emplea un <strong>nullifier</strong>: un valor derivado del secreto y de un ámbito de uso. El sistema registra los utilizados y rechaza repeticiones. Su ámbito importa: dentro de una misma votación permite detectar duplicados; reutilizar identificadores entre contextos puede facilitar correlaciones.</p>
+
+        <h3>Validar pagos con datos ocultos</h3>
+        <p>Las transacciones protegidas de <a href="https://z.cash/learn/what-are-zk-snarks/">Zcash</a> muestran otra aplicación: verificar reglas de pago sin publicar los detalles privados de la transacción. La prueba se combina con compromisos, cifrado y mecanismos contra el doble gasto. Ocultar datos y demostrar la validez de una operación son tareas que se complementan.</p>
+
+        <h2 id="limites">9. Qué garantiza la prueba y qué depende del diseño</h2>
+        <p>La garantía criptográfica se refiere a una relación concreta. Si un circuito omite comprobar una firma o una restricción de rango, una prueba válida puede acreditar algo más débil de lo que la aplicación necesita. Calcular un valor y restringirlo son operaciones diferentes; la <a href="https://github.com/iden3/circom/blob/master/mkdocs/docs/circom-language/constraint-generation.md">documentación de Circom</a> advierte sobre esa distinción.</p>
+        <p>La aleatoriedad también forma parte de la seguridad. En Schnorr, reutilizar el valor aleatorio con desafíos distintos puede revelar el exponente secreto, como explica el <a href="https://www.rfc-editor.org/rfc/rfc8235.html#section-6">RFC 8235</a>.</p>
+        <p>Y la privacidad de los atributos no resuelve toda la privacidad de una visita web. Las direcciones IP, los identificadores persistentes, los tiempos de acceso y los datos revelados por la propia aplicación pueden permitir correlaciones. El <a href="https://www.w3.org/TR/vc-data-model-2.0/#privacy-considerations">W3C analiza estos límites de privacidad</a> en el uso de credenciales.</p>
+        <p>Por eso, la pregunta práctica es precisa: <strong>¿qué afirmación acepta el verificador, qué entradas quedan públicas y qué información puede deducirse de ellas?</strong> Responderla permite evaluar si el sistema entrega la privacidad o la verificación que promete.</p>
+
+        <h2>Demostrar una propiedad sin entregar su evidencia privada</h2>
+        <p>El recorrido empieza con una idea sencilla: una persona puede responder desafíos que solo sabe resolver gracias a un secreto. Las ecuaciones convierten esa intuición en un protocolo; los circuitos permiten expresar reglas de programas; y los zk-SNARKs hacen posible verificar pruebas compactas sin un diálogo durante cada comprobación.</p>
+        <p>En capa 2, esa capacidad sirve para verificar ejecución. En privacidad web, permite compartir una condición comprobable en lugar de todos los datos que la sostienen. La utilidad depende de elegir bien la afirmación y de diseñar el resto de la aplicación para conservar esa separación.</p>
+
+        <h2>Fuentes y lecturas para profundizar</h2>
+        <ul class="zk-sources">
+            <li><a href="https://www.cs.miami.edu/home/burt/learning/csc609.221/goldwasser-micali-rackoff-knoweldge-complexity.pdf">Goldwasser, Micali y Rackoff: The Knowledge Complexity of Interactive Proof-Systems</a>. Fundamentos de las pruebas interactivas y el cero conocimiento.</li>
+            <li><a href="https://www.rfc-editor.org/rfc/rfc8235.html">RFC 8235: Schnorr Non-interactive Zero-Knowledge Proof</a>. Protocolo, transformación Fiat–Shamir y aleatoriedad.</li>
+            <li><a href="https://github.com/iden3/circom/blob/master/mkdocs/docs/circom-language/constraint-generation.md">Circom: generación de restricciones</a>. Representación de circuitos aritméticos.</li>
+            <li><a href="https://eprint.iacr.org/2016/260">Groth16</a>, <a href="https://eprint.iacr.org/2019/953">PLONK</a> y <a href="https://eprint.iacr.org/2018/046">STARKs</a>. Construcciones y supuestos de seguridad.</li>
+            <li><a href="https://ethereum.org/developers/docs/scaling/zk-rollups/">Ethereum: zero-knowledge rollups</a>. Pruebas de validez y disponibilidad de datos.</li>
+            <li><a href="https://www.w3.org/TR/vc-data-model-2.0/">W3C: Verifiable Credentials Data Model v2.0</a>. Atributos, presentaciones y privacidad.</li>
+            <li><a href="https://docs.semaphore.pse.dev/">Semaphore</a> y <a href="https://z.cash/learn/what-are-zk-snarks/">Zcash</a>. Pertenencia anónima a grupos y pagos protegidos.</li>
+        </ul>
+    </div>
+    <div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+<script>
+(() => {
+    const control = document.getElementById('zk-round-count');
+    const label = document.getElementById('zk-round-label');
+    const output = document.getElementById('zk-probability');
+    const marks = document.getElementById('zk-round-marks');
+    for (let index = 0; index < Number(control.max); index++) {
+        marks.appendChild(document.createElement('span'));
+    }
+    function updateProbability() {
+        const rounds = Number(control.value);
+        const denominator = 2 ** rounds;
+        const percentage = (100 / denominator).toLocaleString('es-AR', { maximumFractionDigits: 12 });
+        label.textContent = String(rounds);
+        control.setAttribute('aria-valuetext', rounds + ' rondas independientes');
+        output.textContent = '1 entre ' + denominator.toLocaleString('es-AR') + ' ≈ ' + percentage + ' %';
+        Array.from(marks.children).forEach((mark, index) => mark.classList.toggle('active', index < rounds));
+    }
+    control.addEventListener('input', updateProbability);
+    updateProbability();
+})();
+</script>
+</body>
+</html>
