@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title desc">
+  <title id="title">Calcular sin abrir los datos</title>
+  <desc id="desc">El cliente cifra sus datos, la nube opera sobre los cifrados y devuelve un resultado cifrado. La clave secreta permanece con el cliente.</desc>
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#26364c"/></pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#8fb4ff"/></marker>
+  </defs>
+  <rect width="1280" height="720" fill="#101b2b"/>
+  <rect width="1280" height="720" fill="url(#grid)" opacity=".6"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="80" y="92" fill="#a9c2ef" font-size="18" letter-spacing="4">CRIPTOGRAFÍA / PRIVACIDAD</text>
+    <text x="80" y="164" fill="#f2f6ff" font-size="52" font-weight="600">Calcular sin abrir los datos</text>
+    <text x="80" y="208" fill="#a8b8cd" font-size="23">Cifrado homomórfico: la nube procesa, el cliente descifra.</text>
+    <rect x="80" y="276" width="300" height="252" rx="20" fill="#17253a" stroke="#405b7e" stroke-width="2"/>
+    <rect x="490" y="276" width="300" height="252" rx="20" fill="#192d4a" stroke="#8fb4ff" stroke-width="2"/>
+    <rect x="900" y="276" width="300" height="252" rx="20" fill="#172d34" stroke="#80cbb7" stroke-width="2"/>
+    <g fill="none" stroke="#a9c2ef" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M207 362v-16a23 23 0 0 1 46 0v16"/>
+      <rect x="195" y="362" width="70" height="54" rx="8"/>
+      <path d="M230 382v15"/>
+      <path d="M594 386a23 23 0 0 1 8-45 38 38 0 0 1 72 0 23 23 0 0 1 8 45"/>
+      <rect x="617" y="366" width="46" height="42" rx="7"/>
+      <path d="M628 366v-10a12 12 0 0 1 24 0v10M640 383v9"/>
+    </g>
+    <text x="1050" y="396" text-anchor="middle" fill="#a3e3d1" font-size="47" font-family="Georgia, serif">f(x)</text>
+    <text x="230" y="463" text-anchor="middle" fill="#eef4ff" font-size="24" font-weight="600">Entradas cifradas</text>
+    <text x="230" y="498" text-anchor="middle" fill="#a8b8cd" font-size="19">Enc(x)</text>
+    <text x="640" y="463" text-anchor="middle" fill="#eef4ff" font-size="24" font-weight="600">Cálculo en la nube</text>
+    <text x="640" y="498" text-anchor="middle" fill="#a8b8cd" font-size="19">Eval(f, Enc(x))</text>
+    <text x="1050" y="463" text-anchor="middle" fill="#eef4ff" font-size="24" font-weight="600">Resultado cifrado</text>
+    <text x="1050" y="498" text-anchor="middle" fill="#a8b8cd" font-size="19">Enc(f(x))</text>
+    <path d="M396 389H472M806 389H882" fill="none" stroke="#8fb4ff" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="80" y="604" fill="#c6d5ea" font-size="23">La clave secreta permanece con el cliente.</text>
+    <text x="80" y="642" fill="#91a4bf" font-size="18">Solo el destinatario autorizado abre el resultado final.</text>
+    <text x="1200" y="642" text-anchor="end" fill="#91a4bf" font-size="20">Solidchain.</text>
+  </g>
+</svg>

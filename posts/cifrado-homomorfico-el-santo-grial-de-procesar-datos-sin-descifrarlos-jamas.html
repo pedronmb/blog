@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cifrado Homomórfico: El santo grial de procesar datos sin descifrarlos jamás</title>
+    <meta name="description" content="Cómo calcular sobre datos cifrados en la nube: de Paillier y el bootstrapping a FHE, privacidad en IA y salud, con una demo interactiva y sus límites.">
+    <meta property="article:published_time" content="2026-10-23T12:00:00-03:00">
+    <meta property="article:section" content="Criptografía">
+    <meta property="article:section" content="Privacidad">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Cifrado Homomórfico: El santo grial de procesar datos sin descifrarlos jamás">
+    <meta property="og:description" content="La nube puede calcular sin ver los datos: fundamentos matemáticos, una demo de Paillier y aplicaciones en inteligencia artificial y salud.">
+    <meta property="og:image" content="../media/cifrado-homomorfico/portada.svg">
+    <meta property="og:url" content="https://solidchain.ar/posts/cifrado-homomorfico-el-santo-grial-de-procesar-datos-sin-descifrarlos-jamas.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://solidchain.ar/posts/cifrado-homomorfico-el-santo-grial-de-procesar-datos-sin-descifrarlos-jamas.html">
+    <script src="../assets/theme.js"></script>
+    <link rel="stylesheet" href="../assets/site.css?v=3">
+    <link rel="stylesheet" href="../assets/theme.css?v=3">
+    <link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+    <link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+    <style>
+        .he-equation { margin: 1.5em 0; padding: 18px 22px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); overflow-x: auto; text-align: center; font-family: Georgia, "Times New Roman", serif; font-size: 1.1em; }
+        .he-note { margin: 1.5em 0; padding: 19px 23px; border-left: 3px solid var(--blue); border-radius: 0 9px 9px 0; background: var(--blue-soft); }
+        .article-content .he-note p:last-child { margin-bottom: 0; }
+        .he-toc { margin: 1.7em 0; padding: 19px 23px; border: 1px solid var(--line); border-radius: 9px; font-size: 15px; }
+        .he-toc summary, .he-parameters summary { cursor: pointer; font-weight: 650; }
+        .article-content .he-toc ol { margin: 16px 0 0; }
+        .he-table { overflow-x: auto; margin: 1.6em 0; }
+        .he-table:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+        .he-table table { margin: 0; min-width: 590px; }
+        .he-table caption { text-align: left; color: var(--ink); font-weight: 650; margin-bottom: 12px; }
+        .he-demo { margin: 1.8em 0; padding: 26px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+        .article-content .he-demo h3 { margin: 0 0 12px; }
+        .he-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 22px 0; }
+        .he-inputs label { display: block; font-size: 15px; }
+        .he-inputs input { width: 100%; accent-color: var(--blue); margin: 15px 0 0; }
+        .he-pipeline { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 22px 0; }
+        .he-stage { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 8px; }
+        .he-stage-label { color: var(--muted); display: block; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+        .he-stage code { display: block; font-size: 12px; margin: 6px 0; overflow-wrap: anywhere; }
+        .he-stage small { display: block; color: var(--muted); font-size: 12px; line-height: 1.6; margin-top: 10px; }
+        .he-stage output { display: block; color: var(--blue); font-size: 28px; line-height: 1.4; font-weight: 650; font-variant-numeric: tabular-nums; }
+        .he-demo button { padding: 11px 15px; color: var(--blue); background: var(--blue-soft); border: 1px solid var(--line); border-radius: 7px; font-size: 14px; line-height: 1.5; }
+        .he-demo button:hover { border-color: var(--blue); }
+        .article-content .he-small { color: var(--muted); font-size: 13px; line-height: 1.75; margin: 14px 0 0; }
+        .he-parameters { font-size: 14px; margin-top: 18px; }
+        .article-content .he-parameters p { margin: 12px 0 0; }
+        .he-sources { font-size: 15px; }
+        @media (max-width: 650px) { .he-demo { padding: 20px; } .he-pipeline { grid-template-columns: 1fr; } .he-inputs { gap: 16px; } .he-equation { padding: 15px; font-size: 1em; } }
+        @media print { .he-toc, .he-inputs, .he-demo button { display: none; } .he-note, .he-demo { break-inside: avoid; } .he-table { overflow: visible; } .he-table table { min-width: 0; } }
+    </style>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+    <nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+    <header class="article-header">
+        <p class="eyebrow">Criptografía / Privacidad</p>
+        <h1>Cifrado Homomórfico: El santo grial de procesar datos sin descifrarlos jamás</h1>
+        <p class="article-date"><time datetime="2026-10-23T12:00:00-03:00">23 oct 2026</time> · Lectura: 15 minutos</p>
+    </header>
+    <img class="article-cover" src="../media/cifrado-homomorfico/portada.svg" alt="Entradas cifradas llegan a la nube, que calcula y devuelve un resultado también cifrado. La clave secreta permanece con el cliente." width="1280" height="720" decoding="async">
+    <div class="article-content">
+        <p><strong>Un hospital quiere usar un modelo de inteligencia artificial alojado en la nube, pero necesita mantener privados los datos de sus pacientes.</strong> Cifrarlos durante el envío y al guardarlos resuelve parte del problema. En una aplicación convencional, el servidor termina descifrando las entradas para procesarlas: la protección se interrumpe justo cuando empieza el cálculo.</p>
+        <p>El <strong>cifrado homomórfico</strong> permite ejecutar ciertas operaciones directamente sobre los datos cifrados y obtener un resultado que también permanece cifrado. La nube aporta capacidad de cómputo sin recibir la clave secreta que abre las entradas.</p>
+        <p>En el <a href="comprendiendo-las-pruebas-de-cero-conocimiento-de-zk-snarks-a-la-privacidad-web.html">artículo sobre pruebas de cero conocimiento</a> exploramos cómo demostrar una afirmación sin revelar el secreto que la respalda. Ahora avanzamos hacia otra pregunta: ¿cómo delegar un cálculo sin entregar los datos con los que se hace?</p>
+        <div class="he-note"><p><strong>«Sin descifrarlos jamás» se refiere al procesamiento delegado.</strong> Los datos existen en claro en su origen y el destinatario autorizado puede descifrar la respuesta final. La propiedad relevante es que el servidor no necesita abrir las entradas ni los resultados intermedios para calcular.</p></div>
+
+        <details class="he-toc">
+            <summary>Recorrido del artículo</summary>
+            <ol>
+                <li><a href="#propiedad">La propiedad matemática y el viaje de los datos</a></li>
+                <li><a href="#paillier">Paillier: multiplicar cifrados para sumar mensajes</a></li>
+                <li><a href="#familias">De operaciones parciales a FHE</a></li>
+                <li><a href="#ruido">Ruido, profundidad y bootstrapping</a></li>
+                <li><a href="#esquemas">BFV, BGV, CKKS y TFHE</a></li>
+                <li><a href="#ia">Cómo ejecutar un modelo de IA sin ver sus entradas</a></li>
+                <li><a href="#salud">Salud y colaboración entre instituciones</a></li>
+                <li><a href="#garantias">Qué protege y cómo se complementa con ZKP</a></li>
+                <li><a href="#practica">El costo y las decisiones de implementación</a></li>
+            </ol>
+        </details>
+
+        <h2 id="propiedad">1. La propiedad matemática y el viaje de los datos</h2>
+        <p>Un homomorfismo conserva una estructura al pasar de una representación a otra. En este contexto, ciertas operaciones en el espacio de los cifrados corresponden a operaciones sobre los mensajes originales. La <a href="https://csrc.nist.gov/projects/pec/fhe">descripción de FHE del NIST</a> lo expresa mediante una función de evaluación:</p>
+        <div class="he-equation">Dec<sub>sk</sub>(Eval<sub>evk</sub>(f, Enc<sub>pk</sub>(x))) = f(x)</div>
+        <p><code>pk</code> es la clave pública para cifrar; <code>sk</code>, la clave secreta para descifrar; y <code>evk</code> representa las claves de evaluación que requiera el esquema. <code>Eval</code> ejecuta una versión homomórfica de la función <var>f</var>. En esquemas aproximados, la igualdad se reemplaza por una aproximación dentro de la precisión prevista.</p>
+        <ol>
+            <li><strong>El cliente genera las claves.</strong> Conserva la secreta en su entorno de confianza.</li>
+            <li><strong>Cifra las entradas.</strong> Envía a la nube los cifrados, los parámetros públicos y las claves de evaluación necesarias.</li>
+            <li><strong>La nube evalúa el circuito.</strong> Opera sobre esas representaciones sin recuperar los mensajes.</li>
+            <li><strong>Devuelve una respuesta cifrada.</strong> El cliente la descifra y obtiene el resultado del cálculo.</li>
+        </ol>
+        <p>Las claves de evaluación habilitan transformaciones como rotaciones o refrescos del cifrado. Están diseñadas para compartirse bajo los supuestos del esquema; no equivalen a entregar la clave secreta.</p>
+
+        <h2 id="paillier">2. Paillier: multiplicar cifrados para sumar mensajes</h2>
+        <p>Podemos ver la idea con <strong>Paillier</strong>, un esquema de cifrado aditivo. Su <a href="https://jhuisi.github.io/charm/_modules/pkenc_paillier99.html">implementación en Charm-Crypto</a> permite seguir la construcción. Para una elección habitual de parámetros, se toma <var>n</var> = <var>p</var> · <var>q</var>, con dos primos, y <var>g</var> = <var>n</var> + 1. Un mensaje <var>m</var> se cifra como:</p>
+        <div class="he-equation">Enc(m; r) = g<sup>m</sup> · r<sup>n</sup> mod n²</div>
+        <p>El valor <var>r</var> se elige al azar entre los enteros invertibles módulo <var>n</var>. Al multiplicar dos cifrados, los exponentes que contienen los mensajes se suman:</p>
+        <div class="he-equation">Enc(a; r₁) · Enc(b; r₂) mod n² = Enc((a + b) mod n; r₁r₂ mod n)</div>
+        <p><strong>El servidor multiplica números cifrados y el cliente recupera una suma.</strong> Eso no significa que multiplicar los mensajes originales sea también una operación disponible. La correspondencia depende del esquema.</p>
+
+        <section class="he-demo" aria-labelledby="demo-title">
+            <h3 id="demo-title">Probalo: una suma que viaja cifrada</h3>
+            <p>Mové los valores y observá qué números recibiría el servidor. Repetí el cifrado para cambiar sus representaciones sin cambiar la suma.</p>
+            <div class="he-inputs">
+                <div><label for="he-a">Entrada a: <strong id="he-a-label">12</strong></label><input id="he-a" type="range" min="0" max="40" step="1" value="12"></div>
+                <div><label for="he-b">Entrada b: <strong id="he-b-label">7</strong></label><input id="he-b" type="range" min="0" max="40" step="1" value="7"></div>
+            </div>
+            <div class="he-pipeline">
+                <div class="he-stage"><span class="he-stage-label">1 · Cliente cifra</span><code id="he-ca">c₁ = 78803</code><code id="he-cb">c₂ = 32969</code><small>Envía c₁ y c₂.</small></div>
+                <div class="he-stage"><span class="he-stage-label">2 · Nube calcula</span><code>c₁ × c₂ mod 104329</code><code id="he-csum">c = 55349</code><small>La respuesta sigue cifrada.</small></div>
+                <div class="he-stage"><span class="he-stage-label">3 · Cliente descifra</span><output id="he-result" for="he-a he-b" aria-live="polite" aria-atomic="true">12 + 7 = 19</output><small>Usa su clave secreta.</small></div>
+            </div>
+            <button type="button" id="he-repeat">Repetir cifrado de los mismos valores</button>
+            <p class="he-small"><strong>Paillier didáctico, sin seguridad real.</strong> Todo sucede en tu navegador; los roles están simulados y la clave está en el código. Usamos primos diminutos y una secuencia fija de valores r para reproducir el ejemplo. Un sistema real necesita parámetros seguros y aleatoriedad criptográfica fresca.</p>
+            <details class="he-parameters">
+                <summary>Ver parámetros y descifrado</summary>
+                <p>p = 17; q = 19; n = 323; g = 324; n² = 104329. La clave secreta usa λ = mcm(16, 18) = 144 y μ = 83, el inverso de 144 módulo 323. Se calcula L(u) = (u − 1) / n y Dec(c) = L(c<sup>λ</sup> mod n²) · μ mod n.</p>
+                <p id="he-randomness">Primera pareja didáctica: r₁ = 2; r₂ = 5.</p>
+            </details>
+            <noscript><p>Ejemplo fijo: cifrar 12 y 7 con r₁ = 2 y r₂ = 5 produce 78803 y 32969. Su producto módulo 104329 es 55349. Al descifrarlo se obtiene 19. Activá JavaScript para mover los controles.</p></noscript>
+        </section>
+
+        <p>La suma se interpreta módulo <var>n</var>: si se excede el rango, el resultado vuelve a empezar desde cero. En la demo las entradas llegan hasta 40 y su suma queda por debajo de 323. Esta elección evita confundir el efecto modular con un error de descifrado.</p>
+
+        <h2 id="familias">3. De operaciones parciales a FHE</h2>
+        <p>«Homomórfico» describe una propiedad, pero no todas sus variantes admiten los mismos programas:</p>
+        <ul>
+            <li><strong>Parcialmente homomórfico (PHE):</strong> permite una familia limitada de operaciones, como las sumas de Paillier.</li>
+            <li><strong>Somewhat homomorphic (SHE):</strong> admite sumas y multiplicaciones, con capacidad limitada antes de perder corrección.</li>
+            <li><strong>Leveled homomorphic:</strong> se configura para una profundidad de circuito prevista, sin necesitar bootstrapping durante esa evaluación.</li>
+            <li><strong>Totalmente homomórfico (FHE):</strong> permite evaluar circuitos de profundidad arbitraria mediante los mecanismos adecuados, sujeto al tiempo y la memoria disponibles.</li>
+        </ul>
+        <p>Sumar y multiplicar permite construir polinomios; las puertas booleanas universales permiten expresar cualquier cálculo finito. El desafío es sostener esas operaciones de forma segura y eficiente. El trabajo <a href="https://eprint.iacr.org/2009/616">Fully Homomorphic Encryption over the Integers</a> muestra cómo una construcción con capacidad limitada puede transformarse en FHE usando las técnicas de Gentry.</p>
+        <p>La palabra «totalmente» habla de expresividad. No promete que un programa convencional se ejecute sin adaptación ni que cualquier tamaño de cálculo resulte práctico.</p>
+
+        <h2 id="ruido">4. Ruido, profundidad y bootstrapping</h2>
+        <p>Muchos esquemas modernos se apoyan en problemas de retículas, como <strong>Learning With Errors</strong> (LWE) y sus variantes con estructura de anillo, descritos en las <a href="https://eprint.iacr.org/2024/463">guías de implementación de cifrado homomórfico</a>. La intuición es ocultar una relación algebraica añadiéndole un error pequeño: sin la clave, recuperar el secreto desde muchas relaciones perturbadas se considera difícil para los parámetros elegidos.</p>
+        <p>Ese <strong>ruido</strong> forma parte del diseño criptográfico. Las operaciones lo transforman y pueden hacerlo crecer hasta impedir un descifrado correcto. Las multiplicaciones suelen consumir más capacidad que las sumas, por lo que importa la <strong>profundidad multiplicativa</strong>: cuántas multiplicaciones dependientes atraviesa una ruta del circuito.</p>
+        <p>Por ejemplo, calcular <var>x</var><sup>8</sup> como <var>x</var>², luego <var>x</var>⁴ y finalmente <var>x</var>⁸ requiere tres multiplicaciones encadenadas. Tener muchas operaciones independientes no equivale a tener esa misma cantidad de niveles consecutivos.</p>
+        <p>El <strong>bootstrapping</strong> refresca un cifrado para recuperar capacidad de cálculo. Conceptualmente, evalúa homomórficamente un procedimiento de descifrado usando material de clave cifrado incluido en la clave de evaluación. El resultado es otra representación cifrada del mensaje, con ruido controlado. <strong>El servidor no obtiene el mensaje en claro.</strong></p>
+        <p>Este paso tiene costo y requiere los supuestos de seguridad correspondientes al material de evaluación. En familias como TFHE, el refresco puede combinarse con la evaluación de funciones; la <a href="https://www.zama.org/post/homomorphic-encryption-101">introducción técnica de Zama</a> explica el <em>programmable bootstrapping</em>. El <a href="https://eprint.iacr.org/2016/870">trabajo de Chillotti, Gama, Georgieva e Izabachène</a> desarrolla una de las construcciones que impulsaron esta familia.</p>
+
+        <h2 id="esquemas">5. BFV, BGV, CKKS y TFHE</h2>
+        <p>La elección comienza por los datos y las operaciones que necesita la aplicación. La <a href="https://github.com/microsoft/SEAL#homomorphic-encryption">documentación de Microsoft SEAL</a> distingue aritmética modular exacta y aritmética aproximada; <a href="https://tfhe.github.io/tfhe/">TFHE</a> ofrece otra vía basada en circuitos booleanos.</p>
+        <div class="he-table" tabindex="0" role="region" aria-label="Comparación de esquemas de cifrado homomórfico, desplazable horizontalmente">
+            <table>
+                <caption>Distintos esquemas, distintos compromisos</caption>
+                <thead><tr><th scope="col">Esquema o familia</th><th scope="col">Representación</th><th scope="col">Uso orientativo</th></tr></thead>
+                <tbody>
+                    <tr><th scope="row">BFV / BGV</th><td>Enteros con operaciones exactas módulo un entero.</td><td>Conteos y cálculos que necesitan exactitud dentro de un rango controlado.</td></tr>
+                    <tr><th scope="row">CKKS</th><td>Vectores de valores reales o complejos, con precisión aproximada.</td><td>Álgebra lineal, estadísticas e inferencia numérica que toleran error.</td></tr>
+                    <tr><th scope="row">TFHE y variantes</th><td>Bits y, mediante construcciones sobre ellos, enteros de precisión fija.</td><td>Lógica, comparaciones y funciones discretas; el costo depende de su representación.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p>En <a href="https://eprint.iacr.org/2016/421">CKKS</a>, los valores se codifican con una escala. Las multiplicaciones alteran esa escala y el <em>rescaling</em> ayuda a controlarla reduciendo el módulo, con pérdida de precisión. Un resultado como 18,9998 en lugar de 19 puede ser coherente con el esquema. El margen aceptable debe fijarlo la aplicación.</p>
+        <p>También existe el <strong>empaquetado</strong>: varios valores ocupan posiciones de un mismo cifrado y una operación actúa sobre muchas posiciones a la vez. Esto permite amortizar costos, aunque las rotaciones y la reorganización de los vectores también requieren trabajo. El artículo original de CKKS describe su técnica de empaquetado y sus límites de precisión.</p>
+
+        <h2 id="ia">6. Cómo ejecutar un modelo de IA sin ver sus entradas</h2>
+        <p>Consideremos un modelo lineal con entradas normalizadas <var>x</var> y coeficientes <var>w</var>:</p>
+        <div class="he-equation">z = w₁x₁ + w₂x₂ + … + w<sub>d</sub>x<sub>d</sub> + b</div>
+        <p>El cliente cifra el vector de características. El servidor puede mantener los pesos en claro y evaluar el producto escalar mediante multiplicaciones entre cifrados y constantes, más sumas. Devuelve un cifrado de <var>z</var>. El cliente descifra el puntaje y, si corresponde, aplica localmente una transformación final.</p>
+        <p>La siguiente secuencia es <strong>pseudocódigo conceptual</strong>; omite codificación, parámetros y gestión de niveles:</p>
+        <pre><code># Cliente
+pk, sk, evk = generar_claves(parametros)
+cx = cifrar(pk, codificar(caracteristicas))
+enviar_a_nube(cx, evk, parametros_publicos)
+
+# Nube: pesos y sesgo en claro, entradas cifradas
+cz = producto_escalar_homomorfico(cx, pesos, evk)
+cz = sumar_constante(cz, sesgo)
+devolver_al_cliente(cz)
+
+# Cliente
+puntaje = decodificar(descifrar(sk, cz))</code></pre>
+        <p><a href="https://openmined.github.io/TenSEAL/">TenSEAL</a> expone operaciones sobre vectores cifrados, productos escalares y multiplicaciones por matrices desde Python, sobre Microsoft SEAL. Estas piezas permiten reconocer la relación entre el álgebra de un modelo y el circuito cifrado que lo evalúa.</p>
+        <p>Una red neuronal introduce más trabajo. Las activaciones, las comparaciones y decisiones como <code>if x &gt; 0</code> necesitan una representación homomórfica. Una condición cifrada no puede controlar una rama visible sin revelar información sobre esa condición. Se utilizan aproximaciones polinómicas, selección cifrada o técnicas de evaluación de funciones, según el esquema.</p>
+        <p><a href="https://www.microsoft.com/en-us/research/publication/cryptonets-applying-neural-networks-to-encrypted-data-with-high-throughput-and-accuracy/">CryptoNets</a>, publicado en 2016, mostró cómo adaptar redes ya entrenadas para producir predicciones cifradas sobre entradas cifradas. Su demostración usó reconocimiento de dígitos de MNIST: es evidencia de viabilidad técnica, no una validación clínica.</p>
+        <p><strong>Inferencia y entrenamiento son cargas distintas.</strong> Entrenar implica repetir evaluaciones, calcular gradientes y actualizar parámetros. Puede investigarse bajo cifrado, pero el éxito de una inferencia pequeña no establece que entrenar un modelo grande con FHE sea viable para el mismo presupuesto. Tampoco se obtiene automáticamente privacidad de los pesos frente al cliente: ocultar el modelo requiere propiedades adicionales.</p>
+
+        <h2 id="salud">7. Salud y colaboración entre instituciones</h2>
+        <p>Volvamos al hospital. Una arquitectura ilustrativa podría extraer y normalizar ciertas características dentro de la institución, cifrarlas, delegar la evaluación de un modelo y recuperar un puntaje cifrado. La clave secreta quedaría bajo custodia del hospital y el resultado se abriría en su entorno autorizado.</p>
+        <p>El objetivo sería aprovechar un servicio de cómputo externo sin entregarle las mediciones originales. Esto exige validar tanto el modelo como su versión cifrada: cuantización, aproximaciones y errores numéricos pueden modificar una decisión cercana a un umbral. El cifrado protege la confidencialidad; la utilidad clínica depende de una evaluación independiente.</p>
+        <p>Para estadísticas compartidas entre hospitales aparece otra dificultad: <strong>los cifrados de claves independientes no se combinan automáticamente</strong> con una suma ordinaria del esquema. Se necesita acordar quién puede descifrar, usar un diseño con clave colectiva y descifrado distribuido, o adoptar construcciones multiclave. <a href="https://github.com/tuneinsight/lattigo">Lattigo</a>, por ejemplo, implementa protocolos homomórficos multipartitos con claves secretas compartidas. El protocolo elegido también fija qué ocurre si algunas instituciones colaboran entre sí.</p>
+        <p>Por último, obtener solo un agregado no garantiza anonimato. Si se permite consultar grupos que difieren en una única persona, la diferencia entre dos respuestas puede revelar su contribución. Dwork y Roth explican estos ataques por diferencias en <a href="https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf">The Algorithmic Foundations of Differential Privacy</a>. El diseño debe controlar las consultas y la divulgación de resultados; puede complementarse con privacidad diferencial cuando el objetivo sea limitar esa inferencia.</p>
+
+        <h2 id="garantias">8. Qué protege y cómo se complementa con ZKP</h2>
+        <p>La confidencialidad de las entradas es una garantía específica. Para diseñar un servicio conviene distinguirla de otras propiedades:</p>
+        <ul>
+            <li><strong>Corrección frente a un servidor malicioso.</strong> Un servidor puede devolver un cifrado equivocado. FHE por sí solo no aporta una prueba de ejecución correcta.</li>
+            <li><strong>Autenticidad.</strong> Poder transformar cifrados es parte de la funcionalidad. La procedencia y la integridad necesitan mecanismos de protocolo.</li>
+            <li><strong>Metadatos.</strong> Tamaños, tiempos y patrones de solicitudes pueden seguir siendo observables si no se protegen por separado.</li>
+            <li><strong>Extremos y claves.</strong> Un cliente comprometido o una clave secreta expuesta permite acceder a los datos que esa clave protege.</li>
+        </ul>
+        <p>La <a href="https://github.com/microsoft/SEAL/blob/main/SECURITY.md">guía de seguridad de SEAL</a> advierte que sus cifrados no están autenticados y que no ofrece privacidad del circuito. También señala riesgos al compartir descifrados, especialmente con CKKS: una aplicación no debe convertirse en un oráculo que descifra entradas elegidas por un atacante.</p>
+        <p>Aquí encaja la conexión con <strong>ZKP</strong>. FHE permite calcular manteniendo ocultas las entradas al evaluador; una prueba de conocimiento cero puede acreditar una relación sobre un cálculo y conservar privados los testigos. Un protocolo que combine ambas técnicas podría exigir una prueba de que la salida corresponde al circuito acordado aplicado a las entradas cifradas.</p>
+        <p>Esa composición necesita vincular la prueba con el circuito, los parámetros y los cifrados concretos. Verificar una prueba sobre una operación distinta no protege la solicitud real. Las dos herramientas resuelven problemas complementarios, y combinarlas añade costo y complejidad.</p>
+
+        <h2 id="practica">9. El costo y las decisiones de implementación</h2>
+        <p>El costo práctico incluye latencia, memoria, tamaño de los cifrados, claves de evaluación, transferencia y eventuales refrescos. Una cifra aislada de «operaciones por segundo» sirve de poco sin conocer el circuito, la precisión, el hardware y los parámetros de seguridad. El rendimiento por lotes tampoco equivale al tiempo que espera una solicitud individual.</p>
+        <p>Las <a href="https://homomorphicencryption.org/security-guidelines/">guías de seguridad de HomomorphicEncryption.org</a> reúnen recomendaciones de parámetros y herramientas para estimar la resistencia a ataques conocidos. Sus tablas relacionan decisiones que afectan capacidad, rendimiento y seguridad; ampliar un módulo para admitir más cálculo exige revisar el resto de los parámetros.</p>
+        <p>Para evaluar una aplicación concreta, el recorrido puede ser:</p>
+        <ol>
+            <li><strong>Definir el resultado y quién lo verá.</strong> Precisar entradas, circuito, custodios de las claves y modelo de amenaza.</li>
+            <li><strong>Fijar rangos y tolerancia al error.</strong> Decidir si se necesita aritmética modular exacta o aproximada y cómo se representan los datos.</li>
+            <li><strong>Medir un circuito representativo.</strong> Incluir cifrado, transferencia, evaluación y descifrado; comparar la salida con una referencia en claro.</li>
+            <li><strong>Diseñar el protocolo completo.</strong> Autenticación, validación de entradas, manejo de errores, divulgación de resultados y recuperación de claves también forman parte del sistema.</li>
+        </ol>
+        <p>El atractivo del cifrado homomórfico está en esa separación concreta: quien dispone de la infraestructura puede ejecutar un cálculo sin recibir los secretos que le dan sentido. Para IA y salud, abre una forma de colaboración que reduce la exposición de datos sensibles. Su utilidad aparece cuando el cálculo, las garantías y el presupuesto se diseñan juntos.</p>
+
+        <h2 id="fuentes">Fuentes y lecturas para profundizar</h2>
+        <ul class="he-sources">
+            <li><a href="https://csrc.nist.gov/projects/pec/fhe">NIST: Fully-Homomorphic Encryption</a>. Definición y funcionalidad ideal.</li>
+            <li><a href="https://jhuisi.github.io/charm/_modules/pkenc_paillier99.html">Charm-Crypto: implementación de Paillier</a>. Referencia para las operaciones de la demostración.</li>
+            <li><a href="https://eprint.iacr.org/2009/616">Van Dijk, Gentry, Halevi y Vaikuntanathan: Fully Homomorphic Encryption over the Integers</a>. De capacidad limitada a cifrado totalmente homomórfico.</li>
+            <li><a href="https://www.zama.org/post/homomorphic-encryption-101">Zama: Homomorphic Encryption 101</a>. Ruido, niveles y bootstrapping programable.</li>
+            <li><a href="https://eprint.iacr.org/2016/421">Cheon, Kim, Kim y Song: Homomorphic Encryption for Arithmetic of Approximate Numbers</a>. Construcción de CKKS.</li>
+            <li><a href="https://eprint.iacr.org/2016/870">Chillotti, Gama, Georgieva e Izabachène: Faster Fully Homomorphic Encryption</a> y <a href="https://tfhe.github.io/tfhe/">documentación de TFHE</a>.</li>
+            <li><a href="https://github.com/microsoft/SEAL">Microsoft SEAL</a> y su <a href="https://github.com/microsoft/SEAL/blob/main/SECURITY.md">modelo de seguridad</a>. Operaciones, límites y precauciones de protocolo.</li>
+            <li><a href="https://openmined.github.io/TenSEAL/">TenSEAL</a>. Operaciones sobre tensores cifrados.</li>
+            <li><a href="https://www.microsoft.com/en-us/research/publication/cryptonets-applying-neural-networks-to-encrypted-data-with-high-throughput-and-accuracy/">Dowlin y colaboradores: CryptoNets</a>. Inferencia sobre datos cifrados.</li>
+            <li><a href="https://homomorphicencryption.org/security-guidelines/">HomomorphicEncryption.org: Security Guidelines</a> y <a href="https://eprint.iacr.org/2024/463">Security Guidelines for Implementing Homomorphic Encryption</a>. Guías comunitarias y estimación de parámetros.</li>
+            <li><a href="https://github.com/tuneinsight/lattigo">Lattigo</a>. Esquemas y protocolos homomórficos multipartitos.</li>
+            <li><a href="https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf">Dwork y Roth: The Algorithmic Foundations of Differential Privacy</a>. Privacidad de los resultados y ataques sobre agregados.</li>
+        </ul>
+        <p class="he-small">Los escenarios de salud son ejemplos de arquitectura; no describen una implementación clínica desplegada. La demostración de Paillier ilustra una propiedad aditiva y no implementa FHE.</p>
+    </div>
+    <div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+<script>
+(() => {
+    'use strict';
+    const n = 323n;
+    const nSquared = n * n;
+    const g = n + 1n;
+    const lambda = 144n;
+    const mu = 83n;
+    // Secuencia reproducible de unidades módulo n. Solo para esta demo sin seguridad.
+    const pairs = [[2n, 5n], [7n, 11n], [13n, 23n], [29n, 31n]];
+    let pairIndex = 0;
+    const aInput = document.getElementById('he-a');
+    const bInput = document.getElementById('he-b');
+    const powerMod = (base, exponent, modulus) => {
+        let result = 1n;
+        base %= modulus;
+        while (exponent > 0n) {
+            if (exponent % 2n === 1n) result = result * base % modulus;
+            base = base * base % modulus;
+            exponent /= 2n;
+        }
+        return result;
+    };
+    const encrypt = (message, r) => powerMod(g, message, nSquared) * powerMod(r, n, nSquared) % nSquared;
+    const evaluateSum = (ca, cb) => ca * cb % nSquared;
+    const decrypt = ciphertext => ((powerMod(ciphertext, lambda, nSquared) - 1n) / n * mu) % n;
+    const update = () => {
+        const a = BigInt(aInput.value);
+        const b = BigInt(bInput.value);
+        const [r1, r2] = pairs[pairIndex];
+        const ca = encrypt(a, r1);
+        const cb = encrypt(b, r2);
+        const encryptedSum = evaluateSum(ca, cb);
+        document.getElementById('he-a-label').textContent = a.toString();
+        document.getElementById('he-b-label').textContent = b.toString();
+        document.getElementById('he-ca').textContent = 'c₁ = ' + ca;
+        document.getElementById('he-cb').textContent = 'c₂ = ' + cb;
+        document.getElementById('he-csum').textContent = 'c = ' + encryptedSum;
+        document.getElementById('he-result').textContent = a + ' + ' + b + ' = ' + decrypt(encryptedSum);
+        document.getElementById('he-randomness').textContent = 'Pareja didáctica ' + (pairIndex + 1) + ': r₁ = ' + r1 + '; r₂ = ' + r2 + '.';
+    };
+    aInput.addEventListener('input', update);
+    bInput.addEventListener('input', update);
+    document.getElementById('he-repeat').addEventListener('click', () => {
+        pairIndex = (pairIndex + 1) % pairs.length;
+        update();
+    });
+    update();
+})();
+</script>
+</body>
+</html>
