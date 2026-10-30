@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1060" viewBox="0 0 720 1060" role="img" aria-labelledby="title desc">
+  <title id="title">La memoria de una petición termina, pero la referencia sobrevive</title>
+  <desc id="desc">Secuencia conceptual de CVE-2026-109619. Un mismo proceso worker atiende dos peticiones. La petición A deja una referencia global a su memoria temporal. Esa memoria se libera, pero la referencia no se reinicia. La petición B llega al mismo worker y una operación temprana consume el estado antiguo antes de la inicialización normal. No toda petición activa esta secuencia.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#4269ae"/></marker><marker id="bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#ad4a37"/></marker></defs>
+  <rect width="720" height="1060" rx="20" fill="#f5f7fb"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="40" y="57" fill="#4269ae" font-size="22" letter-spacing="2">03 · CVE-2026-109619</text>
+    <text x="40" y="109" fill="#101b2b" font-size="32" font-weight="650">El proceso sigue. Los datos ya no.</text>
+    <rect x="40" y="150" width="640" height="812" rx="22" fill="#fff" stroke="#4269ae" stroke-width="2"/>
+    <path d="M62 150H658Q680 150 680 172V219H40V172Q40 150 62 150" fill="#e6edfa"/>
+    <text x="72" y="195" fill="#2d508e" font-size="25" font-weight="600">UN MISMO WORKER ATIENDE A Y B</text>
+    <text x="76" y="265" fill="#4269ae" font-size="25" font-weight="600">1. Petición A</text>
+    <text x="76" y="305" fill="#101b2b" font-size="26">Guarda una referencia a sus datos.</text>
+    <rect x="76" y="337" width="241" height="76" rx="10" fill="#e6edfa"/>
+    <text x="196" y="383" text-anchor="middle" fill="#2d508e" font-size="25">Referencia global</text>
+    <path d="M330 374H382" stroke="#4269ae" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="404" y="337" width="240" height="76" rx="10" fill="#eaf5f1" stroke="#147d68" stroke-width="2"/>
+    <text x="524" y="383" text-anchor="middle" fill="#116753" font-size="25">Memoria de A</text>
+    <path d="M360 429V459" stroke="#4269ae" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="76" y="506" fill="#ad4a37" font-size="25" font-weight="600">2. Termina la petición A</text>
+    <text x="76" y="546" fill="#101b2b" font-size="26">Se libera la memoria, pero la referencia</text>
+    <text x="76" y="582" fill="#101b2b" font-size="26">puede quedar sin reiniciar.</text>
+    <rect x="76" y="612" width="241" height="76" rx="10" fill="#fff0dd" stroke="#a96820" stroke-width="2"/>
+    <text x="196" y="658" text-anchor="middle" fill="#805016" font-size="25">Referencia vieja</text>
+    <path d="M330 649H382" stroke="#ad4a37" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#bad)"/>
+    <rect x="404" y="612" width="240" height="76" rx="10" fill="#f1f2f5" stroke="#a3aab5" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="524" y="658" text-anchor="middle" fill="#52637b" font-size="25">Memoria liberada</text>
+    <path d="M360 704V733" stroke="#4269ae" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="76" y="780" fill="#ad4a37" font-size="25" font-weight="600">3. Petición B, en el mismo worker</text>
+    <text x="76" y="822" fill="#101b2b" font-size="26">Una operación temprana usa el estado</text>
+    <text x="76" y="858" fill="#101b2b" font-size="26">antiguo antes de que se reinicie.</text>
+    <rect x="76" y="885" width="568" height="47" rx="9" fill="#fae9e4"/>
+    <text x="360" y="916" text-anchor="middle" fill="#8d382b" font-size="24" font-weight="600">Uso de memoria ya liberada</text>
+    <text x="40" y="1008" fill="#52637b" font-size="23">Secuencia conceptual; no toda petición la activa.</text>
+    <text x="40" y="1040" fill="#52637b" font-size="23">Deben coincidir el productor, el consumidor y el worker.</text>
+  </g>
+</svg>

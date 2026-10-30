@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHP2Shell: cronología técnica de dos vulnerabilidades críticas en PHP</title>
+<meta name="description" content="De 2004 a octubre de 2026: la historia técnica de PHP2Shell, los abortos por OOM, los Buckets incompletos, el estado global obsoleto y los parches del motor Zend.">
+<meta property="article:published_time" content="2026-10-27T22:38:44-03:00">
+<meta property="article:modified_time" content="2026-10-27T23:16:23-03:00">
+<meta property="article:section" content="Ciberseguridad">
+<meta property="article:section" content="Web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP2Shell: cronología técnica de dos vulnerabilidades críticas en PHP">
+<meta property="og:description" content="Una reconstrucción cronológica del fallo: rutas de ejecución, invariantes de memoria, diferencias entre SAPIs y respuesta de seguridad.">
+<meta property="og:image" content="../media/php2shell/portada-memoria.jpg">
+<meta property="og:url" content="https://solidchain.ar/posts/php2shell-vulnerabilidades-criticas-php.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://solidchain.ar/posts/php2shell-vulnerabilidades-criticas-php.html">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/site.css?v=3">
+<link rel="stylesheet" href="../assets/theme.css?v=3">
+<link rel="stylesheet" href="../assets/php2shell.css?v=2">
+<link rel="stylesheet" href="../assets/php2shell-timeline.css?v=1">
+<link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí ↗</a></nav></div></header>
+<main id="contenido" class="article-shell php2shell-article technical-chronology">
+<nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+<article>
+<header class="article-header">
+<p class="eyebrow">CIBERSEGURIDAD / HISTORIA DEL MOTOR ZEND</p>
+<h1>PHP2Shell: cronología técnica de dos vulnerabilidades críticas en PHP</h1>
+<p class="deck">De las interrupciones por límite de memoria de 2004 a los parches de octubre de 2026. Qué estado quedaba inconsistente, quién lo consumía y por qué el modo de ejecución del servidor cambiaba el resultado.</p>
+<p class="article-date"><time datetime="2026-10-27T22:38:44-03:00">27 de octubre de 2026</time> · 45 min de lectura técnica</p>
+</header>
+<img class="article-cover" src="../media/php2shell/portada-memoria.jpg" alt="Una referencia luminosa conecta bloques de memoria con una zona que se fragmenta, representación de un puntero obsoleto." width="1672" height="941" decoding="async">
+<div class="article-content">
+<p class="lead">PHP2Shell es una historia de invariantes que dejan de cumplirse cuando una operación se interrumpe. Una estructura pasa a ser visible antes de estar lista; una variable global sobrevive a los datos que señala; una rutina de limpieza confía en un estado que el camino de error no consiguió restaurar.</p>
+<p>Los identificadores <code>CVE-2026-109618</code> y <code>CVE-2026-109619</code> agrupan dos familias relacionadas: corrupción durante la salida por agotamiento de memoria y uso de estado global obsoleto. La publicación conjunta del 21 de octubre de 2026 no significa que fueran un único bug, que todas las variantes existieran desde la misma versión ni que todo servidor PHP pudiera explotarse de la misma manera.</p>
+<p>La cronología recorre primero los antecedentes y después reconstruye las rutas descubiertas en 2026. Los nombres y el orden interno se contrastan con <strong>PHP 8.5.11, anterior al parche, y PHP 8.5.12, corregido</strong>; al estudiar otras ramas hay que revisar su implementación. Los bloques señalados como pseudocódigo condensan el comportamiento y omiten ramas. Las fechas históricas indican cuándo ocurrió o se comunicó un hecho; las explicaciones técnicas reconstruyen lo que sucedía dentro del motor.</p>
+<nav class="reading-map chrono-index" aria-label="Línea de tiempo del artículo">
+<h2>La línea de tiempo</h2>
+<ol>
+<li><a href="#h2004">2004 · La interrupción insegura</a></li>
+<li><a href="#h2012">2012 · Sesiones antes de RINIT</a></li>
+<li><a href="#h2019">2019–2020 · Un fallo del parser</a></li>
+<li><a href="#h2024">2024–2025 · Auditoría y bloqueo del arreglo</a></li>
+<li><a href="#hdescubrimiento">30 jul–1 ago · Presión de memoria y Buckets</a></li>
+<li><a href="#h11ago">11 ago · mod_php frente a FPM</a></li>
+<li><a href="#hwiz">19–24 ago · Los estados que cruzan peticiones</a></li>
+<li><a href="#hseptiembre">Septiembre · Generalización y validación</a></li>
+<li><a href="#h17oct">17 oct · Telemetría anterior al anuncio</a></li>
+<li><a href="#h20oct">20 oct · La divulgación se adelanta</a></li>
+<li><a href="#h21oct">21 oct · Cómo corrige el motor ambos fallos</a></li>
+<li><a href="#h22oct">22 oct · Regresiones y señales de ataque</a></li>
+<li><a href="#h23oct">23 oct · La variante del serializador</a></li>
+<li><a href="#h27oct">25–27 oct · Evidencia y remediación</a></li>
+</ol>
+</nav>
+
+<div class="chronicle">
+<section class="chrono-event" aria-labelledby="h2004">
+<p class="event-date"><time datetime="2004-07-14">14 de julio de 2004</time><span class="event-kind">Antecedente</span></p>
+<h2 id="h2004">El límite de memoria ya podía interrumpir una operación insegura</h2>
+<p>Stefan Esser publica un aviso sobre PHP 4.3.7 y anteriores y PHP 5 hasta 5.0.0RC3, identificado entonces como <code>CAN-2004-0594</code>. Describe ejecución remota mediante la terminación de una petición por <code>memory_limit</code> en puntos donde las estructuras todavía no estaban completamente inicializadas. Había desarrollado un exploit funcional y decidió no publicarlo. El aviso tiene fecha de publicación del 14 de julio, aunque el mensaje archivado registra un envío la noche anterior. <a class="source-link" href="https://marc.info/?l=bugtraq&amp;m=108981780109154&amp;w=2">Aviso original de Esser.</a></p>
+<p>El antecedente importa por su modelo de fallo. Para evaluar una operación que administra memoria hay que mirar al menos cuatro momentos: reserva, inicialización, publicación de referencias y destrucción. Si una referencia se publica antes de completar la inicialización, el código de salida debe reconocer ese estado intermedio. Si la salida evita la restauración y el destructor supone que todo está listo, el manejo del error se convierte en otro acceso inseguro.</p>
+<p>Esser observó esta clase de problema en la inicialización de tablas hash y explicó que el consumo interno podía amplificar mucho los bytes enviados. Ese análisis no describe los mismos CVE de 2026: las estructuras, las versiones y las rutas concretas cambiaron. Sí anticipa dos preguntas que reaparecerían: <strong>cómo alcanzar el límite en un punto elegido y qué limpieza se ejecuta después de alcanzarlo</strong>.</p>
+<h3>Qué significa un bailout en el motor</h3>
+<p>En el Zend Engine de las versiones modernas afectadas, <code>zend_try</code> instala un punto de recuperación con la familia de operaciones <code>setjmp</code>. Un <code>zend_bailout()</code> puede transferir el control a ese punto mediante un salto no local. Es infraestructura escrita en C: no es una excepción PHP que recorra automáticamente todas las operaciones de limpieza pendientes de las funciones intermedias. El código posterior a la llamada que provocó el salto puede quedar sin ejecutar. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/Zend/zend.h">Macros de bailout en PHP 8.5.11.</a></p>
+<pre class="technical-code"><code>/* Modelo del control de flujo, no implementación literal de Zend. */
+instalar_punto_de_recuperacion();
+    publicar_estado_temporal();
+    operacion_que_puede_agotar_memoria();
+    restaurar_estado_temporal();   // el salto puede omitir esta parte
+
+punto_de_recuperacion:
+    cerrar_peticion();            // encuentra el estado que haya quedado</code></pre>
+<p>El problema puede ocurrir dentro de un único hilo: no exige una carrera concurrente entre dos threads. Se trata de <strong>atomicidad frente a fallos</strong>: la operación se interrumpe entre la publicación y la restauración de un invariante. Añadir un bloqueo entre hilos no corrige por sí mismo una salida que abandona la región crítica sin restaurar su estado.</p>
+<p>También conviene separar el límite lógico de PHP de la memoria física. <code>memory_limit</code> es una política del runtime sobre la memoria que contabiliza; el RSS del proceso incluye otros componentes y no es una lectura equivalente. Puede alcanzarse ese límite con RAM disponible en la máquina. La posterior corrección tendrá que preservar el control de consumo y, a la vez, evitar una interrupción insegura. <a class="source-link" href="https://www.php.net/manual/en/ini.core.php#ini.memory-limit">Semántica de memory_limit.</a></p>
+<aside class="event-result"><strong>Qué deja este antecedente:</strong> un error de asignación solo es seguro si todos los consumidores posteriores distinguen un objeto completo de uno que quedó a medio construir.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h2012">
+<p class="event-date"><time datetime="2012-03-01">1 de marzo de 2012</time><span class="event-kind">Cambio de arquitectura</span></p>
+<h2 id="h2012">PHP 5.4 incorpora progreso de subidas y amplía el trabajo anterior al script</h2>
+<p>Con PHP 5.4 aparece el seguimiento de progreso de subidas asociado a las sesiones. Cuando está habilitado, el parser multipart puede actualizar una sesión mientras recibe un archivo. El manual advierte que esa información se escribe antes de ejecutar los scripts. La extensión de sesiones participa así en una fase que precede a la inicialización ordinaria de los módulos. <a class="source-link" href="https://www.php.net/manual/en/session.upload-progress.php">Manual de progreso de subidas.</a></p>
+<p>Para seguir el resto de la historia hay que distinguir tres vidas. El proceso —o el contexto de ejecución en una compilación con threads— puede atender muchas solicitudes. El heap administrado por Zend para una petición contiene datos que deben dejar de utilizarse al cerrarla. Algunos globals del motor y de las extensiones viven en el contexto persistente del worker, aunque temporalmente señalen ese heap.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Vidas del estado interno de PHP"><table><caption>Tres dominios de vida que no deben confundirse</caption><thead><tr><th scope="col">Dominio</th><th scope="col">Ejemplos</th><th scope="col">Contrato relevante</th></tr></thead><tbody>
+<tr><td>Petición</td><td><code>zval</code>, arrays y cadenas temporales.</td><td>Sus referencias deben retirarse antes de destruir su almacenamiento.</td></tr>
+<tr><td>Worker</td><td><code>PS(...)</code>, <code>BG(...)</code>, <code>EG(...)</code>.</td><td>Conservar el contenedor global no prolonga la vida de la memoria apuntada.</td></tr>
+<tr><td>Memoria compartida</td><td>Estructuras persistidas por OPcache.</td><td>Los metadatos compartidos y los mapas locales tienen que avanzar de forma consistente.</td></tr>
+</tbody></table></div>
+<p>Las macros no identifican tres heaps: <code>PS</code> accede a globals de sesiones, <code>BG</code> a los de funciones básicas y <code>EG</code> a los del ejecutor. En builds con ZTS el acceso está asociado al contexto del thread. Llamarlos «globales» no significa que todos los procesos del servidor compartan la misma dirección.</p>
+<h3>La posición de RINIT es parte de la superficie de ataque</h3>
+<p>En el ciclo habitual, <code>MINIT</code> inicializa un módulo al arrancar el runtime; <code>RINIT</code> prepara su estado por petición; <code>RSHUTDOWN</code> lo cierra. El progreso de subidas ofrece una entrada especial que puede utilizar sesiones antes del RINIT ordinario. En la rama 8.5.11, el orden relevante de <code>php_request_startup()</code> pasa por el parseo de variables antes de <code>zend_activate_modules()</code>. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/main/main.c">Ciclo de petición en main/main.c.</a></p>
+<figure class="native-diagram"><div class="engine-sequence">
+<div><span>01 · Preparación del motor</span><code>zend_activate()</code><small>Inicialización del ejecutor y del compilador.</small></div>
+<div class="phase-risk"><span>02 · Entrada HTTP</span><code>php_hash_environment()</code><small>Puede entrar al parser multipart y a callbacks de sesiones.</small></div>
+<div><span>03 · Activación de módulos</span><code>zend_activate_modules()</code><small>RINIT ordinario de las extensiones.</small></div>
+<div><span>04 · Marca de activación</span><code>PG(modules_activated) = 1</code><small>Importa para decidir si se ejecuta RSHUTDOWN.</small></div>
+<div><span>05 · Aplicación</span><code>php_execute_script()</code><small>El programa PHP ya puede realizar autenticación y su lógica.</small></div>
+<div><span>06 · Cierre</span><code>php_request_shutdown()</code><small>Destructores, módulos y liberación de memoria según la ruta.</small></div>
+</div><figcaption>Figura 1. Subconjunto del ciclo de PHP 8.5.11. Entre estas etapas hay más trabajo; «antes de RINIT» no significa «antes de cualquier inicialización del ejecutor».</figcaption></figure>
+<p>La variable <code>PG(modules_activated)</code> evita invocar cierres ordinarios de extensiones que todavía no completaron su arranque. Esa decisión es razonable bajo un contrato convencional. Se vuelve delicada cuando un callback temprano ya creó estado de una extensión y después una interrupción impide llegar al punto de activación.</p>
+<aside class="event-result"><strong>Qué cambia desde este hito:</strong> hay estado de sesiones accesible durante el parseo de la petición, antes de la aplicación y del RINIT normal. Su limpieza debe cubrir también ese recorrido especial.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h2019">
+<p class="event-date"><time datetime="2019-11-28">28 de noviembre de 2019</time><span class="event-kind">Reporte y corrección en 2020</span></p>
+<h2 id="h2019">El bug #78876 muestra que abortar el parser también puede romper la limpieza</h2>
+<p>El reporte #78876 se presenta contra PHP 7.2.25. Su título describe variables multipart largas que provocan OOM y archivos temporales que no se eliminan. El caso concreto involucra un contador <code>int</code> de longitud que se desborda; al convertirse para una operación de reasignación, el tamaño pasa a ser enorme y la asignación falla. Los temporales de archivos procesados anteriormente quedan pendientes. El caso se asocia a <code>CVE-2019-11048</code> y el registro se cierra en mayo de 2020. <a class="source-link" href="https://bugs.php.net/bug.php?id=78876">Reporte, discusión y commits históricos.</a></p>
+<p>La fecha importa porque varias reconstrucciones retrospectivas lo sitúan en 2020. Ese fue un año de seguimiento y corrección; la presentación original es de noviembre de 2019. Su diagnóstico tampoco debe ampliarse automáticamente a la ejecución remota de PHP2Shell: el reporte documenta su propio overflow y un efecto de disponibilidad y limpieza.</p>
+<h3>Qué revelaba técnicamente el síntoma</h3>
+<p>Procesar un multipart es una transacción parcial sobre varios recursos: buffers, arrays que describen campos, archivos temporales y callbacks. Recibir una parte puede crear recursos que todavía deben retirarse si falla una parte posterior. La operación no termina de forma segura solo porque el servidor devuelve un 500 o un 502: el cierre debe dejar coherentes tanto la memoria como los recursos externos.</p>
+<pre class="technical-code"><code>parte 1 → crear temporal T1 → registrar sus metadatos
+parte 2 → crear temporal T2 → registrar sus metadatos
+parte 3 → falla una asignación → se abandona el parseo
+
+contrato esperado:
+    retirar registros parciales y limpiar T1 y T2
+
+riesgo general de la clase:
+    saltar la ruta que conoce qué recursos ya se crearon</code></pre>
+<p>Los recursos externos y las referencias de memoria son problemas distintos, pero ambos obligan a preguntar dónde se registra la propiedad del recurso y quién conserva información suficiente para limpiarlo. Corregir el contador del parser elimina esa causa concreta de asignación errónea; no prueba que todos los demás puntos de interrupción del motor sean seguros.</p>
+<p>Por eso una revisión del manejo de OOM debe seguir el control después del error. El punto donde se detecta la falta de memoria puede estar lejos del consumidor que termina interpretando el estado inválido. Una caída dentro de un destructor, por ejemplo, puede ser la manifestación tardía de una publicación incompleta ocurrida al registrar un campo HTTP.</p>
+<aside class="event-result"><strong>Qué se sabía entonces:</strong> existía un caso reproducible en que un error del parser dejaba trabajo de limpieza incompleto. Ese antecedente no demostraba por sí mismo las primitivas de corrupción explotadas en 2026.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h2024">
+<p class="event-date"><span>2024 → <time datetime="2025-04-10">10 de abril de 2025</time></span><span class="event-kind">Auditoría</span></p>
+<h2 id="h2024">La auditoría encuentra indicios y el arreglo queda atrapado en sus costes</h2>
+<p>Quarkslab realiza una auditoría durante casi dos meses de 2024, coordinada mediante OSTIF y la Fundación PHP. OSTIF publica los resultados el 10 de abril de 2025: revisión manual, pruebas dinámicas, trabajo sobre herramientas y criptografía, con un alcance limitado por tiempo. El informe enumera 27 hallazgos, 17 con impacto de seguridad. <a class="source-link" href="https://ostif.org/php-audit-complete/">Resultados y alcance publicados por OSTIF.</a></p>
+<p>La Fundación PHP explica después que un desarrollador del core encontró las primeras señales del problema OOM al corregir uno de los hallazgos de Quarkslab. En 2024 se consideró la posibilidad de explotación, pero no se habían identificado vectores concretos. Las soluciones estudiadas implicaban compromisos de compatibilidad, denegación de servicio o cambios en extensiones de terceros. El equipo reconoce que la toma de decisiones y la falta de recursos hicieron que el trabajo se detuviera y retomara repetidamente. <a class="source-link" href="https://thephp.foundation/blog/2026/10/21/todays-php-security-release-and-how-were-strengthening-php-security/">Retrospectiva de la Fundación PHP.</a></p>
+<h3>Por qué cambiar la semántica de emalloc afecta a todo el runtime</h3>
+<p>Muchas funciones internas se escriben bajo un contrato práctico: una asignación devuelve memoria utilizable o abandona la ejecución mediante el mecanismo fatal. Convertir todas esas llamadas en operaciones que devuelven <code>NULL</code> exigiría comprobar y propagar el fallo en una cantidad muy grande de lugares. Un solo llamador que continúe suponiendo que obtuvo memoria introduciría otra clase de acceso inválido.</p>
+<p>Reordenar una asignación puede cerrar un caso, pero no necesariamente la familia. La operación interrumpida podría actualizar contadores, publicar un puntero, liberar una referencia anterior, ejecutar callbacks o modificar metadatos persistentes. Cada secuencia exige un contrato válido también en sus estados intermedios.</p>
+<p>Hay además una tensión entre integridad y disponibilidad. Terminar inmediatamente todo proceso que alcanza el límite evita algunos consumidores posteriores, pero convierte cada OOM alcanzable en una muerte del worker. Permitir que siga trabajando sin límite conserva la ejecución a costa de consumo no acotado. La solución necesita definir <em>dónde</em> se puede abandonar una operación y qué hacer si no se llega a ese punto con recursos suficientes.</p>
+<aside class="event-result"><strong>Qué faltaba:</strong> pasar de la sospecha arquitectónica a una ruta de entrada y un consumidor reproducibles, y elegir una estrategia general que no trasladara el problema a todas las extensiones.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="hdescubrimiento">
+<p class="event-date"><span><time datetime="2026-07-30">30 de julio</time> → <time datetime="2026-08-01">1 de agosto de 2026</time></span><span class="event-kind">Descubrimiento</span></p>
+<h2 id="hdescubrimiento">La presión de memoria se convierte en una interrupción controlable</h2>
+<p>Calif comienza su auditoría de PHP el 30 de julio dentro de Patch the Planet. Su relato fecha el primer hallazgo el 1 de agosto: una forma de provocar un fatal por OOM y un punto de interrupción con el que pudo construir una cadena contra WordPress. El uso de IA formó parte de la revisión y de la búsqueda de variantes; la evidencia relevante son las rutas y las demostraciones que los investigadores consiguieron reproducir. <a class="source-link" href="https://calif.io/php2shell/">Cronología e investigación de Calif.</a></p>
+<h3>Primer problema: el tamaño del cuerpo no equivale al coste de representarlo</h3>
+<p>El parser recibe bytes, pero crea estructuras nativas. Un campo anidado puede necesitar varias tablas hash, buckets y claves; una descripción de archivo puede distribuir sus atributos en diferentes subarrays. El coste depende de la forma de los datos, de sus metadatos y del trabajo que generan.</p>
+<pre class="technical-code"><code>memoria de procesamiento ≈
+    buffers del parser
+  + cadenas y claves
+  + tablas hash y sus Buckets
+  + zvals de los valores
+  + metadatos de archivos y de sesiones
+  + reservas y alineación del allocator
+
+bytes del cuerpo HTTP ≠ bytes del heap de la petición</code></pre>
+<p>En el parser vulnerable, <code>post_max_size</code> se contrasta al comienzo con la longitud declarada en <code>SG(request_info).content_length</code>. Ese chequeo no sustituye contabilizar todo el flujo decodificado ni el crecimiento de sus estructuras. El código también limita el número de partes, de modo que evaluar una ruta requiere revisar los límites que realmente quedan efectivos en esa rama. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/main/rfc1867.c">Parser RFC1867 de PHP 8.5.11.</a></p>
+<p>El formato HTTP puede permitir entregar un cuerpo sin una longitud declarada útil para ese chequeo: en HTTP/1.1, la codificación por chunks establece el fin mediante el propio framing. Además, si un filtro de entrada descomprime el contenido, el tamaño declarado puede representar bytes comprimidos y no el flujo que procesa PHP. La existencia de esas rutas depende de lo que acepte y entregue el frontend; no implica que cualquier proxy se comporte igual. <a class="source-link" href="https://www.rfc-editor.org/rfc/rfc9112.html#section-7.1">Framing chunked en RFC 9112</a> · <a class="source-link" href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">Rutas OOM documentadas por PHP.</a></p>
+<p>Otra ruta usa el trabajo de metadatos generado por controles de archivo vacíos y nombres anidados. Aunque un control vacío no cuente como archivo subido, procesarlo puede crear estructura. También importan las cabeceras por parte: limitar archivos, campos o partes no equivale a limitar todas las asignaciones que puede provocar una parte. Son formas de amplificación del trabajo, distintas de la transferencia de un archivo grande.</p>
+<h3>Segundo problema: hacer visible un Bucket antes de inicializarlo</h3>
+<p>En Zend, un array asociativo usa una <code>HashTable</code> y entradas <code>Bucket</code>. Cada bucket contiene un valor <code>zval</code>, información de hash y una clave cuando corresponde. El <code>zval</code> lleva información de tipo: esa marca determina si el cierre trata el contenido como cadena, array, objeto u otro valor. Interpretar bytes anteriores como si fueran un zval válido puede enviar la destrucción por una rama incorrecta. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/Zend/zend_types.h">Definiciones de HashTable, Bucket y zval.</a></p>
+<p>En <code>_zend_hash_str_add_or_update_i()</code> el alta incrementa <code>nNumUsed</code> y <code>nNumOfElements</code>, selecciona el bucket y luego construye su clave con <code>zend_string_init()</code>. La asignación de la clave puede provocar OOM antes de inicializar los miembros restantes. <code>nNumUsed</code> delimita la región ocupada del almacenamiento —que puede incluir huecos— y <code>nNumOfElements</code> cuenta entradas. Publicar el nuevo extremo de la región antes de completar el bucket afecta a quienes después recorren esa región. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/Zend/zend_hash.c">Orden de las operaciones en zend_hash.c.</a></p>
+<pre class="technical-code"><code>/* Pseudocódigo de la secuencia vulnerable; se omiten ramas. */
+i = tabla.nNumUsed
+tabla.nNumUsed = i + 1
+tabla.nNumOfElements = tabla.nNumOfElements + 1
+slot = tabla.arData[i]
+
+slot.key = crear_clave_con_asignacion()  // puede interrumpir aquí
+slot.hash = hash_calculado
+slot.valor = valor_entrante
+enlazar_slot_en_la_tabla()</code></pre>
+<figure class="native-diagram"><ol class="bucket-sequence">
+<li><span>Antes del alta</span><code>nNumUsed = N</code><small>La región visible termina antes del nuevo slot.</small></li>
+<li class="phase-risk"><span>Después del contador</span><code>nNumUsed = N + 1</code><small>El nuevo slot ya entra en el rango que se recorrerá.</small></li>
+<li class="phase-risk"><span>OOM en la clave</span><code>key / zval incompletos</code><small>La salida no local omite las asignaciones siguientes.</small></li>
+<li class="phase-risk"><span>Destrucción posterior</span><code>recorrer hasta N + 1</code><small>El consumidor alcanza una entrada sin el contrato esperado.</small></li>
+</ol><figcaption>Figura 2. La ventana de publicación incompleta. El dato peligroso no tiene que ser el buffer cuya asignación falló.</figcaption></figure>
+<p>Un invariante útil para razonar sobre el caso es que todo slot alcanzable durante la destrucción tenga una representación válida para su estado: una entrada inicializada o un hueco marcado de forma reconocible. Avanzar el contador sin asegurar eso crea una ventana. Al saltar por OOM, la rutina no completa el bucket ni retrocede necesariamente los contadores.</p>
+<p>La ruta se alcanza al registrar variables de una petición. Un parseo de POST puede llegar a <code>php_register_variable_ex()</code>, actualizar una tabla de símbolos y terminar en la inserción de la clave. Los datos de archivos multipart recorren su propia entrada y convergen en el registro de variables. El objetivo es un comportamiento del motor durante el procesamiento HTTP: no requiere que la aplicación llame directamente a una función de bajo nivel de tablas hash.</p>
+<p>De ahí no se deduce RCE para todo OOM. Hace falta que se alcance el slot inconsistente, que un consumidor interprete sus bytes de manera útil para el ataque y que las condiciones de memoria permitan continuar. Un zval que casualmente parece indefinido puede no producir el mismo efecto que otro cuya marca indica un objeto. Una dirección inválida puede terminar solamente en una caída.</p>
+<aside class="event-result"><strong>Qué se obtuvo:</strong> presión de memoria alcanzable desde HTTP y un punto de publicación incompleta. El siguiente paso decisivo era comprobar si el servidor ejecutaba el consumidor después del fallo.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h11ago">
+<p class="event-date"><time datetime="2026-08-11">11 de agosto de 2026</time><span class="event-kind">Reporte y alcance</span></p>
+<h2 id="h11ago">El cierre de mod_php convierte el estado incompleto en una ruta explotable</h2>
+<p>El 11 de agosto, Calif reporta a PHP ejecución remota con la misma causa de fondo del problema OOM investigado desde 2024. La Fundación sitúa desde ese reporte la corrección como prioridad principal de su trabajo de seguridad. <a class="source-link" href="https://thephp.foundation/blog/2026/10/21/todays-php-security-release-and-how-were-strengthening-php-security/">Fecha de comunicación reconocida por la Fundación.</a></p>
+<h3>La SAPI decide qué ocurre tras fallar el arranque</h3>
+<p>Una <strong>SAPI</strong> es la integración entre PHP y su entorno de ejecución. Compartir motor y versión no obliga a compartir la misma secuencia ante un fallo. Con Apache y <code>mod_php</code>, el cierre de petición llega a <code>php_request_shutdown()</code> incluso después de un arranque fallido. Esa limpieza puede destruir las superglobales que el parser dejó incompletas. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/sapi/apache2handler/sapi_apache2.c">Integración de Apache en PHP 8.5.11.</a></p>
+<p>En el bucle de solicitudes de PHP-FPM, si <code>php_request_startup()</code> devuelve <code>FAILURE</code>, el hijo finaliza el request FastCGI, cierra el módulo y termina con <code>FPM_EXIT_SOFTWARE</code>. No sigue el mismo recorrido de destrucción de la petición ni vuelve a aceptar otra dentro de ese hijo. Esto corta ese consumidor concreto del estado incompleto. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/sapi/fpm/fpm/fpm_main.c">Rama de error en el worker de FPM.</a></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Diferencias técnicas de SAPI"><table><caption>Un mismo fallo inicial, dos recorridos posteriores</caption><thead><tr><th scope="col">Momento</th><th scope="col">Apache con mod_php</th><th scope="col">PHP-FPM</th></tr></thead><tbody>
+<tr><td>OOM mientras arranca la petición</td><td>Puede dejar tablas o estado incompletos.</td><td>También puede fallar el startup.</td></tr>
+<tr><td>Después del fallo de startup</td><td>Ejecuta el cierre de petición que puede consumir el estado.</td><td>Termina el hijo, sin reutilizarlo para la siguiente petición.</td></tr>
+<tr><td>Resultado de esa secuencia</td><td>RCE confirmada antes del script.</td><td>La secuencia temprana se corta; hay que estudiar otras rutas.</td></tr>
+<tr><td>Fallo después de un startup exitoso</td><td>Necesita analizarse en su contexto.</td><td>Puede cerrar una petición y seguir con otra: cambia el análisis de persistencia.</td></tr>
+</tbody></table></div>
+<p>Una autenticación implementada en PHP todavía no se ejecutó en la ruta temprana de mod_php. En ese sentido el ataque demostrado es previo al código de la aplicación. El alcance de privilegios inicial corresponde a la cuenta del worker; la ejecución remota de código no implica automáticamente permisos de root.</p>
+<p>La documentación actual de <code>CVE-2026-109618</code> distingue demostración y susceptibilidad: confirma el exploit HTTP de mod_php con configuraciones ordinarias, considera FPM susceptible por análisis del código tras un startup normal y aclara que para ese CVE no se demostró un exploit FPM completo. El relato amplio de cadenas FPM de los investigadores debe leerse junto con esa distinción y con el segundo CVE. <a class="source-link" href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">Alcance documentado de CVE-2026-109618.</a></p>
+<p>Esto evita un diagnóstico basado solo en «usa Apache» o «usa Nginx». Apache puede trabajar con mod_php o delegar en FPM; Nginx suele delegar la ejecución. Para identificar exposición hacen falta la SAPI, la fase del fallo y el consumidor posterior. Cambiar de frontend no constituye por sí mismo una corrección del motor.</p>
+<aside class="event-result"><strong>Qué se confirmó:</strong> la limpieza no era un epílogo inocuo. En una SAPI concreta formaba parte de la cadena que convertía una interrupción del parser en corrupción utilizable.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="hwiz">
+<p class="event-date"><span><time datetime="2026-08-19">19</time> → <time datetime="2026-08-24">24 de agosto de 2026</time></span><span class="event-kind">Hallazgo independiente y variantes</span></p>
+<h2 id="hwiz">La investigación sigue el estado que cruza la frontera entre peticiones</h2>
+<p>Wiz fecha su descubrimiento independiente el 19 de agosto, confirma RCE en despliegues de Drupal el 20 y WordPress el 21, y reporta los problemas a PHP el 24. Su investigación abarca fuga de memoria, bookkeeping del deserializador, backtraces fatales y OPcache. Son demostraciones en condiciones concretas y variantes del motor; no una afirmación de que todos esos productos tengan la misma configuración de explotación. <a class="source-link" href="https://www.wiz.io/blog/php2shell-php-rce">Investigación y cronología de Wiz.</a></p>
+<h3>Sesiones tempranas: quién produce la referencia obsoleta</h3>
+<p>En PHP 8.5.11, <code>php_session_rfc1867_callback()</code> puede inicializar estado de sesiones en un evento de inicio de archivo. Allí aparece <code>PS(id)</code>, que referencia un <code>zend_string</code>, y la actualización de la sesión puede establecer <code>PS(http_session_vars)</code>. Todo esto puede ocurrir antes de completar la activación ordinaria de los módulos.</p>
+<p>En el recorrido normal, el final del multipart y las rutinas correspondientes retiran ese estado. Si el parseo se interrumpe, el callback final puede no ejecutarse. Además, con <code>PG(modules_activated)</code> todavía en cero, el cierre no ejecuta el RSHUTDOWN ordinario de las extensiones. El heap de la petición puede liberarse de todos modos. El contenedor global persiste y sus referencias apuntan a almacenamiento cuya vida ya terminó. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/ext/session/session.c">Callbacks y estado de sesiones en session.c.</a></p>
+<pre class="technical-code"><code>/* Esquema de propiedad, no payload de una petición. */
+worker.PS(id) ────────────────► zend_string de la petición A
+worker.PS(http_session_vars) ► zval / array de la petición A
+
+interrupción antes del cierre esperado
+    ↓
+se destruye el heap de A
+    ↓
+el worker sigue vivo, pero esas referencias ya no son válidas</code></pre>
+<p>Un estado inválido todavía necesita un consumidor alcanzable para transformarse en una vulnerabilidad observable. Si la próxima petición reinicia todos esos campos antes de usarlos, corta esa cadena. Si el hijo muere antes de aceptar otra petición, también la corta. La condición interesante es una operación que llega antes del reinicio y confía en el estado anterior.</p>
+<figure class="diagram"><picture><source media="(max-width:650px)" srcset="../media/php2shell/memoria-entre-peticiones-movil.svg" width="400" height="1260"><img src="../media/php2shell/memoria-entre-peticiones.svg" alt="Un estado del worker sigue señalando el heap liberado de A y una operación temprana de B lo consume antes de reiniciarlo." width="720" height="1060" loading="lazy" decoding="async"></picture><figcaption>Figura 3. El caso entre peticiones exige que sobreviva el contexto relevante. Dos solicitudes al mismo dominio no garantizan que las atienda el mismo worker.</figcaption></figure>
+<h3>El consumidor temprano y la fuga mediante Set-Cookie</h3>
+<p>Las rutas de progreso de subidas pueden volver a entrar al manejo de sesiones durante el parseo de una petición posterior. Esa entrada puede ocurrir antes del reinicio ordinario que la aplicación nunca ve. Si se interpreta un identificador viejo como un <code>zend_string</code> válido, se confía tanto en la dirección como en los metadatos de esa cadena.</p>
+<p>Wiz demostró que esa confianza podía acabar codificando bytes del heap reutilizado dentro de una cookie de respuesta <code>PHPSESSID</code>. La fuga es del proceso que atiende la solicitud: su contenido depende de qué almacenamiento pudo alcanzarse y de cómo se reutilizó. No equivale a leer indiscriminadamente la RAM de toda la máquina. Tampoco requiere que el programa de la aplicación llame a <code>session_start()</code> en la ruta demostrada. <a class="source-link" href="https://www.wiz.io/blog/php2shell-php-rce">Demostración de divulgación de memoria.</a></p>
+<p>El canal de salida es relevante para la observabilidad: el cuerpo de la respuesta podría no contener nada llamativo mientras una cabecera transporta información anómala. Un sistema que solo registra URL, estado HTTP y tamaño del cuerpo puede perder contexto. Registrar cookies completas en producción también puede divulgar secretos legítimos; la captura de evidencias tiene que limitarse y protegerse según el incidente.</p>
+<h3>El deserializador mantiene bookkeeping que también necesita un final</h3>
+<p>La decodificación de sesiones puede utilizar las rutinas de deserialización de PHP. En <code>php_var_unserialize_init()</code>, el estado de trabajo incluye listas de valores y referencias. Cuando no hay un contexto activo se crea uno; en llamadas anidadas puede reutilizarse. Los campos concretos de la rama examinada son <code>BG(unserialize).data</code> y <code>BG(unserialize).level</code>. La destrucción normal reduce el nivel y retira la referencia cuando corresponde. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/ext/standard/var_unserializer.re">Inicialización y destrucción del deserializador.</a></p>
+<p>Un nivel distinto de cero puede hacer que una operación posterior siga un puntero de contexto existente. Si una interrupción impidió el cierre y ese contexto pertenecía al heap anterior, el valor del nivel ya no garantiza que exista un contexto válido. Aquí el estado peligroso es una pareja: un indicador de actividad y la referencia que supuestamente respalda.</p>
+<p>Esto es distinto de una inyección de objetos PHP basada solo en que una aplicación llama a <code>unserialize()</code> sobre una entrada del usuario. El problema investigado está en la vida del bookkeeping del motor y en sus consumidores tempranos. Las garantías de una capa de aplicación no reparan automáticamente el estado nativo que sobrevivió a una petición.</p>
+<h3>Los backtraces fatales abren otra pareja de productor y consumidor</h3>
+<p>En PHP 8.5, <code>fatal_error_backtraces</code> puede hacer que se conserve un backtrace en <code>EG(last_fatal_error_backtrace)</code>. El fallo de ciclo de vida permite que el valor siga refiriéndose a memoria de una petición terminada. Un diagnóstico temprano en otra solicitud puede entrar al manejo de errores y tocarlo antes de que el ejecutor lo reinicialice.</p>
+<p>El consumidor no necesita mostrar ni registrar el warning: acceder al estado precede a la decisión de presentación. Por eso ocultar errores con <code>display_errors=0</code> o cambiar <code>error_reporting</code> no elimina ese acceso. Para analizar la ruta importan las opciones INI aplicadas por petición y su posición respecto del inicio del ejecutor. <a class="source-link" href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">Productores y consumidores confirmados del segundo CVE.</a></p>
+<p>La implementación de manejo de errores de la rama examinada destruye y redefine el último backtrace al procesar nuevos errores. Un valor que parece un zval válido, pero refiere al heap anterior, puede convertir esa operación de mantenimiento en el consumidor del use after free. Esta ruta muestra que el estado persistente peligroso no se limita a las sesiones. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/Zend/zend.c">Manejo de errores en Zend.</a></p>
+<h3>OPcache agrega una frontera entre estado local y compartido</h3>
+<p>Wiz también describió confusión de tipos durante la persistencia de scripts en OPcache. El código compilado persistido puede usar índices para resolver punteros específicos de cada worker. En <code>zend_accel_script_persist()</code>, el avance y la publicación de los límites de esos mapas deben mantenerse coherentes. Una asignación que interrumpe una actualización parcial puede dejar metadatos que otro contexto interprete con un significado diferente. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.11/ext/opcache/zend_persist.c">Persistencia de scripts y map_ptr en OPcache.</a></p>
+<p>Una entrada de mapa que se reutiliza para un objeto de otro tipo puede hacer que metadatos anteriores resuelvan un puntero incompatible. Esa es la diferencia entre confundir el tipo de una estructura y simplemente conservar un puntero viejo. La investigación incluyó una cadena WordPress con este comportamiento. Es un caso adicional de publicación parcial: no debe reducirse a la secuencia de dos peticiones atendidas por un mismo worker que explica el caso de sesiones.</p>
+<h3>Qué aportan las primitivas y qué falta hasta RCE</h3>
+<p>Una fuga puede reducir incertidumbre sobre direcciones que introduce ASLR. Reutilizar un bloque liberado puede permitir que un consumidor lea campos controlados. Una operación de destrucción sobre un tipo equivocado puede alterar memoria o el flujo de control. Son capacidades diferentes: fuga, uso de memoria liberada y confusión de tipos no son sinónimos de una shell ya obtenida.</p>
+<p>Convertirlas en ejecución remota requiere una cadena que siga funcionando con el allocator, la ABI, las extensiones, las protecciones y el tráfico de ese despliegue. NX reduce la utilidad de ejecutar bytes arbitrarios del heap; ASLR introduce incertidumbre de direcciones; ambas pueden complicar una cadena sin reparar la corrupción que la originó. Esa es la razón técnica para separar el impacto demostrado de la portabilidad de cada exploit.</p>
+<aside class="event-result"><strong>Qué amplía este hallazgo:</strong> el análisis pasa de un slot incompleto a estados temporales publicados en distintos subsistemas, con consumidores que pueden aparecer en otra petición o en otro dominio de persistencia.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="hseptiembre">
+<p class="event-date"><span>Agosto → septiembre de 2026</span><span class="event-kind">Generalización del fallo</span></p>
+<h2 id="hseptiembre">La corrección tiene que cubrir invariantes y no una sola demostración</h2>
+<p>La coordinación reúne los reportes de Calif, OpenAI y Wiz. La Fundación fecha nuevos vectores de OpenAI el 18 de septiembre. El conjunto obliga a revisar el patrón común: publicar estado de vida corta, hacer trabajo que puede fallar y confiar después en que la restauración ocurrió. <a class="source-link" href="https://thephp.foundation/blog/2026/10/21/todays-php-security-release-and-how-were-strengthening-php-security/">Coordinación y reportes adicionales.</a></p>
+<p>La cuestión del estado obsoleto se puede expresar como una relación entre productor, límite de vida y consumidor. Un productor coloca una referencia de petición en un contenedor que vive más tiempo. Un error evita retirarla, o una operación tardía la vuelve a establecer después del reinicio. El almacenamiento se libera. Un consumidor posterior usa la referencia antes del siguiente reinicio válido.</p>
+<pre class="technical-code"><code>P: publicar referencia a datos de A
+I: interrupción o publicación tardía durante el cierre
+F: terminar la vida del almacenamiento de A
+C: consumir ese estado antes de reinicializarlo
+
+condición peligrosa: P → I → F → C
+
+romper un enlace puede cortar una ruta;
+corregir la familia exige revisar los demás productores y consumidores.</code></pre>
+<p>Los errores fatales no se limitan a OOM: pueden provenir de compilación, excepciones no capturadas, fallos de <code>require</code> o tiempos de ejecución agotados. Una extensión también puede emitir un diagnóstico durante una fase tardía del cierre y repoblar información de error que ya se había limpiado. El parche necesita ocuparse de ese estado más amplio. <a class="source-link" href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">Modelo oficial de productores y consumidores.</a></p>
+<h3>Qué debería demostrar la validación de un arreglo de esta clase</h3>
+<p>Reproducir una caída comprueba una ruta, pero no alcanza para verificar la vida de todos los globals. Una estrategia de revisión útil combina inyección de fallos de asignación, sanitizers, cierre y apertura de peticiones dentro del mismo proceso, y comparación de SAPIs. Hacer que cada asignación falle por turno puede encontrar ventanas que una prueba basada solo en grandes cuerpos HTTP no recorre.</p>
+<p>Los resultados tienen que responder preguntas concretas: ¿el conteo de una tabla sigue describiendo contenido destruible?, ¿un contexto de deserialización activo tiene almacenamiento válido?, ¿pueden aparecer diagnósticos después del reinicio?, ¿se reutiliza el worker tras el error?, ¿se publicaron metadatos compartidos de una operación incompleta? Son criterios de verificación del invariante, no una receta para asumir que un test sin caída equivale a ausencia de vulnerabilidad.</p>
+<aside class="event-result"><strong>Qué cambia en la estrategia:</strong> el objetivo pasa a ser una política segura de interrupción y de reinicio del estado, conservando compatibilidad y límites de recursos.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h17oct">
+<p class="event-date"><time datetime="2026-10-17">17 de octubre de 2026</time><span class="event-kind">Actividad observada retrospectivamente</span></p>
+<h2 id="h17oct">MadPot registra un intento antes de que se publique el parche</h2>
+<p>AWS informa después que su telemetría MadPot identificó un intento de explotación de PHP2Shell fechado el 17 de octubre, cuatro días antes de la divulgación pública. El tráfico procedía de una infraestructura de anonimización comercial. AWS no establece cómo obtuvo el actor la información y advierte que no sabía si las cargas observadas habrían tenido éxito en sistemas reales. <a class="source-link" href="https://aws.amazon.com/blogs/security/amazon-threat-intelligence-identifies-php2shell-exploitation-prior-to-public-disclosure-in-madpot/">Análisis original de Amazon Threat Intelligence.</a></p>
+<h3>Por qué un paquete sospechoso no demuestra el final de una cadena</h3>
+<p>En una vulnerabilidad de memoria hay varios hitos observables: recepción de un patrón, agotamiento de memoria, caída del proceso, divulgación de bytes, alteración de control y ejecución de una instrucción del atacante. Ver uno no prueba automáticamente los siguientes. Un sensor que emula un servicio puede observar el intento sin reproducir la ABI ni el allocator de un runtime vulnerable real.</p>
+<p>Para atribuir ejecución hace falta correlacionar evidencias adicionales: actividad de procesos, escrituras o conexiones posteriores, instrumentación del worker u otras observaciones del sistema. Para atribuir el acceso inicial a un CVE concreto, además hay que enlazar esa actividad con su mecanismo. Encontrar malware en una máquina que también tiene PHP vulnerable no reconstruye esa relación por sí solo.</p>
+<p>La consecuencia operativa de la fecha temprana es que revisar solo el tráfico posterior al anuncio puede dejar fuera actividad relevante. La fecha de aplicación del parche delimita cuándo se corrige una instancia; no marca necesariamente el comienzo de su posible exposición.</p>
+<aside class="event-result"><strong>Qué aporta la observación:</strong> evidencia de un intento anterior a la divulgación, con un alcance más limitado que una confirmación de compromiso exitoso de servidores reales.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h20oct">
+<p class="event-date"><time datetime="2026-10-20">20 de octubre de 2026</time><span class="event-kind">Divulgación alterada</span></p>
+<h2 id="h20oct">Los identificadores circulan y la ventana coordinada se reduce un día</h2>
+<p>La Fundación PHP sitúa la circulación de los dos CVE alrededor de las 15:00 UTC, inicialmente sin detalles técnicos. El preanuncio se publica a las 19:30 UTC y la entrega se adelanta del 22 al 21 de octubre a las 14:00 UTC. También documenta un video de Calif publicado por error, posible circulación de mitigaciones y, ya el día 21, imágenes de Chainguard con el arreglo antes del levantamiento del embargo. <a class="source-link" href="https://thephp.foundation/blog/2026/10/21/todays-php-security-release-and-how-were-strengthening-php-security/">Cronología de divulgación de la Fundación.</a></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Horas de la divulgación"><table><caption>Horarios expresados en UTC</caption><thead><tr><th scope="col">Fecha y hora</th><th scope="col">Hecho descrito por la Fundación PHP</th></tr></thead><tbody>
+<tr><td>20 oct · ~15:00</td><td>Empiezan a circular los identificadores, junto a datos incorrectos de severidad y horario.</td></tr>
+<tr><td>20 oct · 19:30</td><td>Se publica el aviso anticipado.</td></tr>
+<tr><td>20 oct · ~20:00</td><td>Se publica por error un video de demostración.</td></tr>
+<tr><td>21 oct · 07:41</td><td>Chainguard publica imágenes que contienen la corrección.</td></tr>
+<tr><td>21 oct · 14:00</td><td>Nuevo horario de divulgación y lanzamiento coordinados.</td></tr>
+</tbody></table></div>
+<h3>Qué información revela un arreglo antes que un exploit</h3>
+<p>Una diferencia entre binarios o versiones de código puede mostrar qué contadores se inicializan antes, qué globals se reinician o qué mecanismo de error se reemplazó. Esa información puede reducir el espacio de búsqueda de variantes aunque todavía no exista una cadena portable. Publicar un contenedor corregido también distribuye un artefacto del que es posible extraer diferencias.</p>
+<p>La coordinación con distribuidores intenta que, cuando los detalles sean públicos, haya paquetes utilizables por los administradores. Publicar inmediatamente todo al circular los CVE no garantiza que cada distribución ya tenga un paquete listo. Esperar conserva tiempo de empaquetado, pero también prolonga la exposición de quien no puede instalar todavía el arreglo. El adelanto de un día fue una decisión sobre esa ventana operacional.</p>
+<aside class="event-result"><strong>Qué se acelera:</strong> la disponibilidad de pistas técnicas se aproxima a la de los paquetes corregidos, mientras los operadores aún preparan su despliegue.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h21oct">
+<p class="event-date"><time datetime="2026-10-21">21 de octubre de 2026</time><span class="event-kind">Publicación de correcciones</span></p>
+<h2 id="h21oct">El motor cambia la salida por OOM y refuerza el reinicio entre peticiones</h2>
+<p>PHP publica 8.2.35, 8.3.36, 8.4.27 y 8.5.12. Los dos avisos tienen severidad crítica, 9,2 en CVSS 4.0. Las entradas corresponden a dos familias; la antigüedad y la configuración de cada variante deben evaluarse por separado. Las demostraciones que se remontan a PHP 5.4 no permiten atribuir todos los mecanismos modernos, como el backtrace fatal de 8.5, a esa versión histórica. <a class="source-link" href="https://www.php.net/archive/2026.php#2026-10-21-5">Anuncio y versiones corregidas.</a></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Los dos CVE publicados"><table><caption>Qué corrige cada familia</caption><thead><tr><th scope="col">Aviso</th><th scope="col">Invariante comprometido</th><th scope="col">Corrección principal</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">CVE-2026-109618</a></td><td>El cierre encuentra estado que una salida por OOM dejó incompleto.</td><td>Evitar la salida OOM en puntos arbitrarios de una mutación.</td></tr>
+<tr><td><a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">CVE-2026-109619</a></td><td>Un estado de petición sigue siendo utilizable fuera de la vida de su almacenamiento.</td><td>Completar el reinicio del estado que puede alcanzar una operación posterior.</td></tr>
+</tbody></table></div>
+<h3>Soft OOM: registrar el error y diferir su tratamiento</h3>
+<p>La corrección de OOM no consiste simplemente en poner <code>PS(id)</code> a <code>NULL</code>. Cambia el contrato del error de límite de memoria: en lugar de saltar inmediatamente desde una asignación en mitad de una mutación, registra un error pendiente para tratarlo en un punto seguro de la máquina virtual. Esa máquina virtual es el ejecutor de instrucciones de PHP, no una VM de alojamiento.</p>
+<p>En <code>zend_alloc.c</code> de 8.5.12, el registro diferido usa <code>EG(delayed_oom)</code> y activa <code>EG(vm_interrupt)</code>. La comprobación distingue el límite suave de un límite duro mayor. Mientras existe margen, la operación nativa puede completar el tramo necesario antes del tratamiento seguro. El consumo no pasa a ser ilimitado: superar el umbral duro termina inmediatamente el proceso. <a class="source-link" href="https://github.com/php/php-src/blob/php-8.5.12/Zend/zend_alloc.c">Error diferido y comprobación de límites en el allocator corregido.</a></p>
+<pre class="technical-code"><code>/* Modelo de la política nueva; no es un diff aplicable. */
+si la próxima asignación supera el límite suave:
+    intentar recuperar memoria cuando corresponda
+    si también supera el límite duro:
+        terminar_el_proceso_sin_limpieza_ordinaria()
+    si el error todavía no estaba pendiente:
+        registrar_OOM_pendiente()
+        solicitar_atención_del_ejecutor()
+
+en un punto seguro:
+    atender el OOM con invariantes consistentes</code></pre>
+<figure class="native-diagram"><div class="oom-policy">
+<div><span>Política anterior afectada</span><strong>Asignación → bailout inmediato</strong><p>El salto puede abandonar una operación cuyo estado ya está publicado.</p></div>
+<div class="policy-safe"><span>Margen entre límites</span><strong>Soft OOM → punto seguro</strong><p>Se registra la condición y se evita interrumpir la mutación arbitrariamente.</p></div>
+<div><span>Sin margen suficiente</span><strong>Hard OOM → salida del proceso</strong><p>La ruta usa <code>_exit(137)</code> y evita el cierre ordinario sobre estado parcial.</p></div>
+</div><figcaption>Figura 4. El límite duro acota el margen de ejecución diferida. La salida con código 137 en esta ruta no demuestra por sí sola que el kernel enviara SIGKILL.</figcaption></figure>
+<p>La función de bailout sigue existiendo para otros recorridos del motor. El cambio documentado elimina su uso inseguro para este manejo de OOM; no convierte toda salida fatal de PHP en una excepción de aplicación. Confundir esas dos afirmaciones llevaría a dar por solucionado cualquier estado temporal que un error no relacionado con memoria pudiera abandonar.</p>
+<h3>Reinicio de estado: cubrir lo que se publica y lo que se repuebla</h3>
+<p>El segundo arreglo aborda los estados internos que no deben sobrevivir a la liberación del heap. El objetivo incluye los casos donde faltó un reset y aquellos donde una operación tardía volvió a poblar el estado después del reset normal. La prueba relevante es que una entrada temprana de la próxima petición no encuentre referencias utilizables de la anterior.</p>
+<p>En FPM, el productor puede ocurrir durante la ejecución de la aplicación después de un startup exitoso; tras un fatal, el hijo puede pasar por el cierre y seguir atendiendo solicitudes. Para el caso de estado obsoleto se validó una ruta que usa después el progreso de subidas como consumidor temprano. Esta es una razón para no extrapolar la terminación de FPM durante startup a todos los errores de la ejecución.</p>
+<p>Los diagnósticos de configuración son otro consumidor posible. En mod_php, ciertas opciones aplicadas por directorio se procesan antes del startup; en FPM pueden importar los parámetros <code>PHP_VALUE</code> o <code>PHP_ADMIN_VALUE</code> suministrados por el frontend. El pool de FPM se configura al arrancar el worker y <code>.user.ini</code> se aplica después de la inicialización normal: no son el mismo consumidor temprano. <a class="source-link" href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">Condiciones actuales de los consumidores por SAPI.</a></p>
+<div class="explorer" id="memory-explorer">
+<h3>Comparar las secuencias del motor</h3>
+<p class="explorer-intro">Recorridos conceptuales: Bucket incompleto, sesión obsoleta y las dos salidas del allocator corregido. Cada caso tiene condiciones propias.</p>
+<div data-controls hidden><fieldset class="mode-picker"><legend>Ruta que querés inspeccionar</legend>
+<label><input type="radio" name="memory-mode" value="bucket" checked> Bucket / mod_php</label>
+<label><input type="radio" name="memory-mode" value="session"> Sesión / mod_php</label>
+<label><input type="radio" name="memory-mode" value="soft"> Soft OOM / parche</label>
+<label><input type="radio" name="memory-mode" value="hard"> Hard OOM / parche</label>
+</fieldset></div>
+<div class="memory-board"><p class="worker-label">TRAZA EXPLICATIVA DEL ESTADO</p><p class="trace-phase"><small>Etapa</small><code data-stage>Inserción en HashTable</code></p><div class="memory-cells">
+<div class="memory-cell" data-reference-cell><small>Estado publicado</small><strong data-reference>El contador delimita los slots previos.</strong></div><span class="memory-arrow" aria-hidden="true">→</span><div class="memory-cell"><small>Memoria o flujo</small><strong data-memory>El nuevo Bucket aún no es visible.</strong></div></div></div>
+<div aria-live="polite" aria-atomic="true"><p class="step-status" data-step-title>La ventana se abre al publicar el contador</p><p class="step-explanation" data-step-explanation>Si la asignación de la clave interrumpe la inicialización, el cierre puede recorrer un slot que todavía no representa un valor válido. Las rutas corregidas evitan esa salida arbitraria por OOM o terminan el proceso sin el cierre ordinario.</p></div>
+<div class="step-controls" data-controls hidden><button type="button" data-previous disabled>← Anterior</button><button type="button" class="next-step" data-next>Siguiente paso →</button><span class="step-count" data-step-count>Paso 1 de 6</span></div>
+<noscript><p>Las figuras 2, 3 y 4 describen las rutas sin interacción. El selector y el avance por pasos requieren JavaScript.</p></noscript>
+</div>
+<h3>Reglas WAF y disponibilidad de paquetes</h3>
+<p>Cloudflare informa protección por defecto para sus WAF gratuitos y pagos desde el 21 de octubre a las 03:02 UTC. Un WAF puede reconocer y bloquear formas conocidas de entrada antes de PHP; necesita inspeccionar el tráfico pertinente y evitar que el origen quede accesible por otra ruta. Es una barrera de exposición, mientras el arreglo modifica el comportamiento del runtime. <a class="source-link" href="https://blog.cloudflare.com/php-vulnerabilities-waf-protection/">Despliegue de protecciones de Cloudflare.</a></p>
+<p>En Linux, una revisión de paquete con backport puede incluir el arreglo sin adoptar exactamente el número del tarball upstream. Para ramas fuera de soporte, PHP ofreció backports mínimos de fuente de 7.4, 8.0 y 8.1, lo que no restablece su mantenimiento regular. Actualizar una imagen o instalar archivos nuevos tampoco reemplaza automáticamente todos los procesos que conservan el runtime anterior.</p>
+<aside class="event-result"><strong>Qué cambia con la publicación:</strong> existen correcciones distribuibles para las dos familias originales. La verificación pasa del archivo instalado al código que realmente ejecutan los workers.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h22oct">
+<p class="event-date"><time datetime="2026-10-22">22 de octubre de 2026</time><span class="event-kind">Validación posterior y rectificaciones</span></p>
+<h2 id="h22oct">Una caída del heap necesita diagnóstico, incluso después de actualizar</h2>
+<p>El issue #24488, abierto el 21 y corregido en el código el 22 de octubre, documenta una regresión de SimpleXML observada en 8.4.27 y 8.5.12. El caso materializa la tabla de propiedades de un <code>SimpleXMLElement</code> y lo incorpora a un ciclo que recolecta el GC. El resultado es una doble liberación de esa tabla y un mensaje de corrupción del heap. El issue atribuye el origen al cambio GH-24050; no establece que lo hayan causado los arreglos de PHP2Shell. <a class="source-link" href="https://github.com/php/php-src/issues/24488">Reporte y diagnóstico de SimpleXML.</a></p>
+<p>La distinción importa para operación y para análisis forense. <code>zend_mm_heap corrupted</code> describe un fallo detectado por el administrador de memoria, no identifica por sí mismo su causa. Una regresión funcional y un intento de explotación pueden producir síntomas de la misma familia. Hay que conservar versión, extensiones, stack trace cuando exista y ruta de aplicación que disparó el fallo.</p>
+<p>«Corregido en el repositorio» tampoco es equivalente a «presente en el paquete que ejecuta el servidor». Entre ambos hay una compilación, un empaquetado y un despliegue. Revertir a una versión anterior sin los parches de seguridad para eliminar una caída podría volver a abrir la exposición original: la decisión requiere identificar y corregir la regresión específica.</p>
+<h3>La telemetría pública también se corrige</h3>
+<p>El 22 de octubre a las 21:21 UTC, Sophos rectifica su interpretación de una actividad que había presentado como explotación exitosa. Su actualización describe escaneo e intentos fallidos y aclara que la carga Potassium/Mirai mencionada no llegó a entregarse. El artículo conserva entradas anteriores, por lo que hay que leer su actualización y no solo un párrafo histórico o el extracto de un buscador. <a class="source-link" href="https://www.sophos.com/en-us/blog/proof-of-concept-exploit-released-for-php-vulnerabilities-109618-109619">Rectificación de Sophos.</a></p>
+<aside class="event-result"><strong>Qué exige este momento:</strong> separar el estado del parche, la causa de una caída y el nivel de evidencia sobre explotación. Un indicador técnico aislado no resuelve las tres preguntas.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h23oct">
+<p class="event-date"><time datetime="2026-10-23">23 de octubre de 2026</time><span class="event-kind">Aviso adicional de sesiones</span></p>
+<h2 id="h23oct">El cambio del serializador durante la ejecución deja otra ruta por revisar</h2>
+<p>PHP publica un aviso sobre <code>CVE-2026-115560</code>. Requiere una combinación poco habitual: configurar <code>session.serialize_handler</code> como <code>php_binary</code> o <code>php_serialize</code>, cambiarlo a <code>php</code> con <code>ini_set()</code> antes de llamar a <code>session_start()</code> y mantener habilitado el progreso de subidas. El proyecto recomienda desactivar temporalmente esa función hasta una próxima corrección regular; aplicaciones que nunca cambian el handler en ejecución pueden mantenerla habilitada según el aviso. <a class="source-link" href="https://www.php.net/archive/2026.php#2026-10-23-1">Aviso oficial del 23 de octubre.</a></p>
+<p>La particularidad vuelve a estar en el orden temporal. El manejo temprano de subidas ve la configuración disponible durante el parseo; más tarde el programa puede cambiar el formato con el que espera manejar sesiones. Para auditar esa combinación hay que seguir la configuración a través de las fases, en lugar de leer un único valor final en un diagnóstico de la aplicación.</p>
+<p>Este aviso no invalida que 8.2.35, 8.3.36, 8.4.27 y 8.5.12 corrijan los dos CVE originales. Sí impide tratar esos números como una respuesta exhaustiva a cualquier variante relacionada con sesiones. Su recomendación adicional tiene un alcance concreto y se conserva cuando la instalación utiliza la combinación señalada.</p>
+<h3>Qué bloquea cada medida temporal</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Alcance técnico de mitigaciones"><table><caption>Relacionar el control con el enlace de la cadena que modifica</caption><thead><tr><th scope="col">Control</th><th scope="col">Ruta que reduce</th><th scope="col">Límite de la medida</th></tr></thead><tbody>
+<tr><td><code>session.upload_progress.enabled=0</code></td><td>Entradas tempranas de progreso de subidas.</td><td>No reinicia todo estado del ejecutor ni corrige otros productores o consumidores.</td></tr>
+<tr><td><code>fatal_error_backtraces=0</code> en PHP 8.5</td><td>Productor de backtraces fatales del caso confirmado.</td><td>No elimina errores fatales ni las otras estructuras de vida temporal.</td></tr>
+<tr><td>Retirar INI inválidas aplicadas por petición</td><td>Diagnósticos previos al reinicio ordinario del ejecutor.</td><td>No modifica el consumidor independiente de sesiones.</td></tr>
+<tr><td><code>pm.max_requests=1</code></td><td>Reutilización del mismo hijo FPM para otra petición.</td><td>Coste de crear procesos; no es un arreglo general de corrupción ni de estado compartido.</td></tr>
+<tr><td>Límites del cuerpo decodificado y del trabajo del parser</td><td>Presión de memoria y algunos gatillos alcanzables.</td><td>Un límite de transporte no demuestra seguridad de las operaciones nativas.</td></tr>
+</tbody></table></div>
+<p>Las opciones deben entrar en vigor antes de la ruta que intentan bloquear y quedar administrativamente efectivas. Un ejemplo parcial para un pool FPM es:</p>
+<pre class="technical-code"><code>; Fragmento de pool FPM: reduce rutas concretas, no sustituye actualizar.
+[www]
+php_admin_flag[session.upload_progress.enabled] = off
+
+; Solo en PHP 8.5:
+php_admin_flag[fatal_error_backtraces] = off</code></pre>
+<p>Después hay que renovar todos los workers pertinentes. Cambiar estas opciones desde el script llega tarde para proteger operaciones que ocurren antes del script. En FPM tampoco hay que atribuir a <code>.user.ini</code> la misma posición temporal que a las opciones que el frontend aplica antes del startup. <a class="source-link" href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">Alcance y posición de las mitigaciones de estado obsoleto.</a></p>
+<h3>Por qué memory_limit=-1 no es una solución total</h3>
+<p>En una instalación que aún no puede actualizar, quitar el límite interno predecible reduce el gatillo OOM controlable de una ruta. Eso no impide que falle una asignación subyacente y permite consumos de recursos mayores. Los límites externos de contenedores o cgroups proporcionan una frontera de disponibilidad, pero tampoco garantizan que nunca falle una asignación.</p>
+<p>Si master y workers comparten un grupo, su política de OOM puede afectar a varios procesos. No hay que interpretar un simple <code>MemoryMax</code> de servicio como una garantía de que solo termina el hijo atacante. Los límites <code>RLIMIT_AS</code> y <code>RLIMIT_DATA</code> pueden provocar precisamente un fallo de asignación que alcance la ruta vulnerable, por lo que el aviso de PHP desaconseja usarlos como sustituto. <a class="source-link" href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">Condiciones y límites de las medidas OOM.</a></p>
+<aside class="event-result"><strong>Qué enseña el aviso posterior:</strong> la configuración tiene una cronología propia dentro de cada petición. La efectividad de un control depende tanto de su valor como del momento en que PHP lo aplica.</aside>
+</section>
+
+<section class="chrono-event" aria-labelledby="h27oct">
+<p class="event-date"><span><time datetime="2026-10-25">25</time> → <time datetime="2026-10-27">27 de octubre de 2026</time></span><span class="event-kind">Estado de la evidencia y operación</span></p>
+<h2 id="h27oct">La respuesta pasa a verificar versiones efectivas y a reconstruir la exposición</h2>
+<p>El 25 de octubre, Unit 42 retira la atribución a PHP2Shell del acceso inicial de un incidente contra una agencia europea porque no pudo confirmarla. El 26, CISA incorpora los dos CVE originales a KEV, su catálogo de vulnerabilidades explotadas conocidas, con fecha de remediación del 29 de octubre en el marco federal aplicable. Son evidencias con alcances distintos: una rectificación sobre un incidente particular y una clasificación oficial de explotación conocida. <a class="source-link" href="https://unit42.paloaltonetworks.com/cve-2026-109618-cve-2026-109619/">Actualización de Unit 42</a> · <a class="source-link" href="https://raw.githubusercontent.com/cisagov/kev-data/main/known_exploited_vulnerabilities.json">Datos oficiales de KEV.</a></p>
+<p>En su revisión del 27, Wiz describe intentos limitados sin éxitos identificados en su propia telemetría y no identifica un PoC público de explotación completa y general contra objetivos arbitrarios; también menciona exploits privados compartidos por colaboradores. La ausencia de éxito en ese conjunto no contradice automáticamente una explotación observada fuera de él ni permite afirmar que todo Internet esté libre de incidentes. <a class="source-link" href="https://www.wiz.io/blog/php2shell-exploitation-so-far">Seguimiento fechado de Wiz.</a></p>
+<h3>La matriz de versiones sirve para inventariar, no para adivinar el paquete</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Versiones originales corregidas"><table><caption>Primeras versiones upstream que corrigen ambos CVE originales</caption><thead><tr><th scope="col">Rama</th><th scope="col">Versión corregida</th><th scope="col">Qué comprobar en el despliegue</th></tr></thead><tbody>
+<tr><td>8.2</td><td>8.2.35</td><td rowspan="4">Binario o revisión del paquete, SAPI, configuración efectiva, extensiones y renovación de los procesos activos.</td></tr>
+<tr><td>8.3</td><td>8.3.36</td></tr><tr><td>8.4</td><td>8.4.27</td></tr><tr><td>8.5</td><td>8.5.12</td></tr>
+</tbody></table></div>
+<p>Una distribución puede portar las correcciones manteniendo parte de la numeración anterior; el boletín y la revisión del paquete son necesarios para evaluarlo. Una extensión también puede influir en las rutas de error y la organización de memoria, por lo que la lista de módulos efectivos del servicio forma parte del inventario.</p>
+<p>En Windows hay además una actualización de paquetes del 26 de octubre: las compilaciones con sufijo <code>-1</code> incorporan una corrección de Brotli, <code>CVE-2026-111497</code>. El proyecto aclara que el número de versión del runtime PHP permanece igual. Es un problema separado que ejemplifica por qué el nombre del paquete y sus dependencias aportan información que <code>PHP_VERSION</code> por sí solo no muestra. <a class="source-link" href="https://www.php.net/archive/2026.php#2026-10-26-1">Aviso de las compilaciones Windows.</a></p>
+<h3>Verificar el servicio que recibe las peticiones</h3>
+<p><code>php -v</code> identifica el ejecutable invocado desde la terminal. <code>php --ini</code> describe la configuración de ese contexto CLI. Ninguno demuestra por sí solo qué módulo cargó Apache o qué binario ejecuta un pool FPM. La comprobación del servicio debe identificar la instancia que atiende el dominio y contrastarla con su paquete, imagen y configuración.</p>
+<p>En contenedores, reconstruir una imagen sin reemplazar los contenedores activos deja ejecutando el código anterior. En servicios persistentes, instalar archivos nuevos puede dejar procesos con mappings del binario o de módulos previos. El cierre operacional incluye renovar esos procesos y comprobar las instancias resultantes, no solamente el éxito del gestor de paquetes.</p>
+<figure class="diagram"><picture><source media="(max-width:650px)" srcset="../media/php2shell/defensas-movil.svg" width="400" height="1080"><img src="../media/php2shell/defensas.svg" alt="Actualizar y renovar procesos es la corrección principal; configuración y WAF reducen exposición; la verificación del servicio cierra el despliegue." width="720" height="900" loading="lazy" decoding="async"></picture><figcaption>Figura 5. Los controles se relacionan con partes distintas del problema. El inventario debe terminar en procesos efectivos, no en una versión declarada.</figcaption></figure>
+<h3>Qué puede aportar cada señal durante una investigación</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Interpretación de señales"><table><caption>Señales útiles y límites de su interpretación</caption><thead><tr><th scope="col">Señal</th><th scope="col">Qué sugiere investigar</th><th scope="col">Qué no establece por sí sola</th></tr></thead><tbody>
+<tr><td>OOM repetidos ligados a multipart</td><td>Consumo generado por el parser y rutas de salida.</td><td>Que se haya consumido un objeto inválido o ejecutado código.</td></tr>
+<tr><td>SIGSEGV, SIGABRT o corrupción del heap</td><td>Stack, versión, extensiones y petición anterior del worker.</td><td>La identidad de un CVE o la intención del origen.</td></tr>
+<tr><td>Cookies de sesión anormalmente grandes o malformadas</td><td>Cabeceras de respuesta y posible divulgación de memoria.</td><td>Que toda cookie inusual tenga ese origen.</td></tr>
+<tr><td>Código de salida 137</td><td>Origen de la terminación, señal real y logs del runtime o contenedor.</td><td>Un SIGKILL del kernel: el hard OOM de PHP también usa ese código.</td></tr>
+<tr><td>Actividad de procesos o escrituras posteriores</td><td>Correlación con el worker y el acceso inicial.</td><td>Que PHP2Shell fuera necesariamente el vector.</td></tr>
+</tbody></table></div>
+<p>Para los casos que dependen del mismo worker, la identidad del proceso y el orden de peticiones pueden ser tan relevantes como la IP. Una respuesta 500 de A y una respuesta anómala de B cobran otro significado si se demuestra que el mismo contexto conservó el estado entre ambas. Sin esa relación, la correlación temporal sigue siendo una hipótesis.</p>
+<p>Una respuesta a incidentes también debe contemplar exposición de memoria sin ejecución de comandos. Si se confirma que se divulgaron secretos, hay que identificar su alcance y revocarlos según corresponda. El parche evita nuevas rutas conocidas del motor, pero no retira credenciales que ya salieron ni elimina persistencia que un atacante hubiera instalado.</p>
+<h3>El invariante que une la cronología</h3>
+<p>Desde el aviso de 2004 hasta los CVE de octubre, el hilo común es el estado que queda disponible después de una interrupción. El parser, las tablas hash, las sesiones, los backtraces y OPcache administran objetos distintos; todos necesitan que publicar, completar y retirar una referencia respeten su contrato de vida.</p>
+<p>El avance de 2026 fue demostrar consumidores alcanzables, separar los recorridos por SAPI y modificar tanto la política de OOM como el reinicio del estado. La frontera de una petición no puede depender de que todos sus caminos anteriores hayan terminado normalmente.</p>
+<aside class="event-result"><strong>Estado al 27 de octubre de 2026:</strong> los dos CVE originales tienen versiones corregidas, hay una recomendación adicional sobre sesiones y la verificación exige conocer qué código ejecuta cada instancia y qué ocurrió antes de corregirla.</aside>
+</section>
+</div>
+
+<section aria-labelledby="fuentes">
+<h2 id="fuentes">Fuentes primarias y mapa del código</h2>
+<p>Los avisos delimitan el alcance y las mitigaciones; las etiquetas de código fijan la versión usada para examinar el orden de operaciones. Una interpretación histórica de los investigadores puede ser más amplia que el alcance demostrado para un CVE y una SAPI concretos.</p>
+<ol class="sources-list">
+<li><a href="https://marc.info/?l=bugtraq&amp;m=108981780109154&amp;w=2">Stefan Esser, aviso 11/2004</a>: interrupciones por memory_limit, versiones históricas y publicación.</li>
+<li><a href="https://www.php.net/manual/en/session.upload-progress.php">Manual de progreso de subidas</a> y <a href="https://www.php.net/manual/en/ini.core.php#ini.memory-limit">directivas del núcleo</a>: comportamiento y configuración.</li>
+<li><a href="https://bugs.php.net/bug.php?id=78876">PHP bug #78876</a>: presentación de 2019, seguimiento y corrección de 2020.</li>
+<li><a href="https://ostif.org/php-audit-complete/">OSTIF, resultados de la auditoría de Quarkslab</a>, publicados el 10 de abril de 2025.</li>
+<li><a href="https://calif.io/php2shell/">Calif Research, investigación técnica de PHP2Shell</a>: descubrimiento, inserciones y secuencias de sesiones.</li>
+<li><a href="https://www.wiz.io/blog/php2shell-php-rce">Wiz Research, investigación del 21 de octubre</a> y <a href="https://www.wiz.io/blog/php2shell-exploitation-so-far">seguimiento del 27</a>: variantes, demostraciones y telemetría.</li>
+<li><a href="https://thephp.foundation/blog/2026/10/21/todays-php-security-release-and-how-were-strengthening-php-security/">Fundación PHP, retrospectiva del 21 de octubre</a>: auditoría, coordinación y ruptura del embargo.</li>
+<li><a href="https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w">GHSA-w8hw-w9fx-j79w</a> y <a href="https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp">GHSA-6wmf-4rv5-p3rp</a>: alcance actual de las dos familias.</li>
+<li><a href="https://www.php.net/archive/2026.php#2026-10-21-5">Aviso crítico de PHP</a>, <a href="https://www.php.net/archive/2026.php#2026-10-23-1">aviso adicional de sesiones</a> y <a href="https://www.php.net/archive/2026.php#2026-10-26-1">recompilación Windows</a>.</li>
+<li><a href="https://aws.amazon.com/blogs/security/amazon-threat-intelligence-identifies-php2shell-exploitation-prior-to-public-disclosure-in-madpot/">AWS, intento observado en MadPot</a>; <a href="https://blog.cloudflare.com/php-vulnerabilities-waf-protection/">Cloudflare, reglas WAF</a>.</li>
+<li><a href="https://github.com/php/php-src/issues/24488">Issue #24488 de SimpleXML</a>; <a href="https://www.sophos.com/en-us/blog/proof-of-concept-exploit-released-for-php-vulnerabilities-109618-109619">rectificación de Sophos</a>; <a href="https://unit42.paloaltonetworks.com/cve-2026-109618-cve-2026-109619/">actualización de Unit 42</a>.</li>
+<li><a href="https://raw.githubusercontent.com/cisagov/kev-data/main/known_exploited_vulnerabilities.json">Catálogo KEV oficial</a>: fechas de incorporación y remediación de los dos CVE.</li>
+</ol>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Archivos de referencia"><table><caption>Lectura del código fuente por responsabilidad</caption><thead><tr><th scope="col">Etiqueta</th><th scope="col">Archivo</th><th scope="col">Qué observar</th></tr></thead><tbody>
+<tr><td>8.5.11</td><td><a href="https://github.com/php/php-src/blob/php-8.5.11/Zend/zend.h">Zend/zend.h</a></td><td>Macros zend_try y punto de bailout.</td></tr>
+<tr><td>8.5.11</td><td><a href="https://github.com/php/php-src/blob/php-8.5.11/Zend/zend_hash.c">Zend/zend_hash.c</a>, <a href="https://github.com/php/php-src/blob/php-8.5.11/Zend/zend_types.h">zend_types.h</a></td><td>Orden de publicación del Bucket y representación de valores.</td></tr>
+<tr><td>8.5.11</td><td><a href="https://github.com/php/php-src/blob/php-8.5.11/main/main.c">main/main.c</a>, <a href="https://github.com/php/php-src/blob/php-8.5.11/main/rfc1867.c">rfc1867.c</a></td><td>Startup, flags, parser y cierre de petición.</td></tr>
+<tr><td>8.5.11</td><td><a href="https://github.com/php/php-src/blob/php-8.5.11/ext/session/session.c">ext/session/session.c</a></td><td>Entrada temprana y globals de sesiones.</td></tr>
+<tr><td>8.5.11</td><td><a href="https://github.com/php/php-src/blob/php-8.5.11/ext/standard/var_unserializer.re">ext/standard/var_unserializer.re</a></td><td>Pareja data/level del bookkeeping.</td></tr>
+<tr><td>8.5.11</td><td><a href="https://github.com/php/php-src/blob/php-8.5.11/ext/opcache/zend_persist.c">ext/opcache/zend_persist.c</a></td><td>Persistencia y publicación del límite de map_ptr.</td></tr>
+<tr><td>8.5.11</td><td><a href="https://github.com/php/php-src/blob/php-8.5.11/sapi/apache2handler/sapi_apache2.c">sapi_apache2.c</a>, <a href="https://github.com/php/php-src/blob/php-8.5.11/sapi/fpm/fpm/fpm_main.c">fpm_main.c</a></td><td>Consumir el cierre o terminar el hijo tras fallar startup.</td></tr>
+<tr><td>8.5.12</td><td><a href="https://github.com/php/php-src/blob/php-8.5.12/Zend/zend_alloc.c">Zend/zend_alloc.c</a></td><td>OOM pendiente, límites suave/duro y salida inmediata.</td></tr>
+</tbody></table></div>
+<p class="article-endnote">Revisión técnica al 27 de octubre de 2026. Las secuencias y los fragmentos de pseudocódigo representan contratos de estado; no son parches aplicables ni una prueba de explotación. La implementación exacta y el alcance demostrado dependen de la rama, la SAPI y las condiciones indicadas en los avisos.</p>
+</section>
+</div>
+</article>
+<div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+<script src="../assets/php2shell-technical.js?v=1" defer></script>
+</body>
+</html>

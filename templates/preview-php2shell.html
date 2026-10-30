@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Vista previa de PHP2Shell</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#dfe5ed;font:14px/1.5 system-ui,sans-serif;color:#172332}header{padding:14px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#fff;border-bottom:1px solid #bac5d3}header strong{margin-right:auto}header a{color:#315db3}button{font:inherit;padding:7px 12px;border-radius:5px;border:1px solid #bac5d3;background:#fff;color:#172332;cursor:pointer}button[aria-pressed=true]{background:#172332;color:#fff}main{padding:20px;display:flex;justify-content:center}iframe{display:block;width:100%;height:calc(100vh - 110px);min-height:500px;border:0;background:#fff;box-shadow:0 6px 35px #17233220}iframe.mobile{max-width:390px}iframe.compact{max-width:320px}a:focus-visible,button:focus-visible{outline:3px solid #315db3;outline-offset:3px}@media(max-width:650px){header{padding:12px}main{padding:10px}}
+</style>
+</head>
+<body>
+<header><strong>PHP2Shell · Vista previa</strong><button type="button" data-size="desktop" aria-pressed="true">Escritorio</button><button type="button" data-size="mobile" aria-pressed="false">Móvil 390 px</button><button type="button" data-size="compact" aria-pressed="false">Móvil 320 px</button><a href="../posts/php2shell-vulnerabilidades-criticas-php.html">Abrir artículo ↗</a></header>
+<main><iframe id="draft" src="../posts/php2shell-vulnerabilidades-criticas-php.html" title="Artículo PHP2Shell"></iframe></main>
+<script>
+document.querySelectorAll('button[data-size]').forEach(button=>button.addEventListener('click',()=>{document.getElementById('draft').className=button.dataset.size==='desktop'?'':button.dataset.size;document.querySelectorAll('button[data-size]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));}));
+</script>
+</body>
+</html>

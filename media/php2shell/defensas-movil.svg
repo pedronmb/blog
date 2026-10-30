@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="1080" viewBox="0 0 400 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Actualizar PHP, complementar la defensa y verificar</title>
+  <desc id="desc">La corrección principal consiste en actualizar PHP y reiniciar los workers. La configuración temporal reduce solo rutas concretas. Los límites externos y el WAF complementan la defensa. Finalmente se comprueba que la web usa PHP corregido.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#4269ae"/></marker></defs>
+  <rect width="400" height="1080" rx="16" fill="#f5f7fb"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="20" y="42" fill="#4269ae" font-size="20">04 · LA RESPUESTA</text>
+    <g fill="#101b2b" font-size="26" font-weight="650"><text x="20" y="85">Corregir, complementar</text><text x="20" y="119">y comprobar</text></g>
+    <rect x="20" y="151" width="360" height="203" rx="14" fill="#eaf5f1" stroke="#147d68" stroke-width="2"/>
+    <text x="40" y="189" fill="#116753" font-size="20" font-weight="650">CORRECCIÓN PRINCIPAL</text>
+    <g fill="#101b2b" font-size="24" font-weight="600"><text x="40" y="230">Actualizar PHP</text><text x="40" y="262">y reiniciar workers</text></g>
+    <g fill="#365f55" font-size="22"><text x="40" y="302">El parche debe llegar</text><text x="40" y="332">a los procesos activos.</text></g>
+    <path d="M200 367V391" stroke="#4269ae" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="20" y="412" width="360" height="183" rx="14" fill="#fff3e6" stroke="#b58040" stroke-width="2"/>
+    <text x="40" y="450" fill="#805016" font-size="20" font-weight="650">REDUCCIÓN TEMPORAL</text>
+    <text x="40" y="491" fill="#101b2b" font-size="24" font-weight="600">Ajustar la configuración</text>
+    <g fill="#704b22" font-size="22"><text x="40" y="531">Reduce rutas concretas;</text><text x="40" y="561">no reemplaza el parche.</text></g>
+    <path d="M200 608V632" stroke="#4269ae" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="20" y="653" width="360" height="183" rx="14" fill="#fff" stroke="#ccd6e6" stroke-width="2"/>
+    <text x="40" y="691" fill="#4269ae" font-size="20" font-weight="650">PROTECCIONES ADICIONALES</text>
+    <text x="40" y="732" fill="#101b2b" font-size="24" font-weight="600">Límites externos y WAF</text>
+    <g fill="#52637b" font-size="22"><text x="40" y="772">Contienen recursos y filtran</text><text x="40" y="802">patrones conocidos.</text></g>
+    <path d="M200 849V873" stroke="#4269ae" stroke-width="3" marker-end="url(#a)"/>
+    <rect x="20" y="894" width="360" height="160" rx="14" fill="#e6edfa" stroke="#4269ae" stroke-width="2"/>
+    <text x="40" y="932" fill="#2d508e" font-size="20" font-weight="650">VERIFICACIÓN FINAL</text>
+    <text x="40" y="973" fill="#101b2b" font-size="24" font-weight="600">Comprobar el PHP de la web</text>
+    <g fill="#3f5f94" font-size="22"><text x="40" y="1013">Revisar versión, paquete,</text><text x="40" y="1043">servicio y registros.</text></g>
+  </g>
+</svg>

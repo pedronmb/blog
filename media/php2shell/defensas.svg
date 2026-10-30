@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="900" viewBox="0 0 720 900" role="img" aria-labelledby="title desc">
+  <title id="title">La defensa empieza por actualizar y termina por verificar</title>
+  <desc id="desc">Cuatro partes de una respuesta defensiva: instalar PHP corregido y reiniciar los procesos worker es la corrección principal. La configuración temporal solo reduce rutas concretas. Los límites externos y el WAF complementan la respuesta. Finalmente hay que verificar que los procesos activos utilizan la versión corregida.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#4269ae"/></marker></defs>
+  <rect width="720" height="900" rx="20" fill="#f5f7fb"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="40" y="60" fill="#4269ae" font-size="22" letter-spacing="2">04 · CÓMO SE CIERRA EL PROBLEMA</text>
+    <text x="40" y="111" fill="#101b2b" font-size="33" font-weight="650">Corregir, complementar y comprobar</text>
+    <rect x="40" y="155" width="640" height="159" rx="16" fill="#eaf5f1" stroke="#147d68" stroke-width="2"/>
+    <circle cx="91" cy="206" r="24" fill="#147d68"/><path d="M79 206L88 215L104 197" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="134" y="204" fill="#116753" font-size="22" font-weight="650" letter-spacing="1">CORRECCIÓN PRINCIPAL</text>
+    <text x="76" y="252" fill="#101b2b" font-size="29" font-weight="600">Actualizar PHP y reiniciar workers</text>
+    <text x="76" y="289" fill="#365f55" font-size="24">El parche debe llegar a los procesos activos.</text>
+    <path d="M360 326V350" stroke="#4269ae" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="40" y="369" width="640" height="127" rx="16" fill="#fff3e6" stroke="#b58040" stroke-width="2"/>
+    <text x="76" y="412" fill="#805016" font-size="22" font-weight="650" letter-spacing="1">REDUCCIÓN TEMPORAL DEL RIESGO</text>
+    <text x="76" y="452" fill="#101b2b" font-size="28" font-weight="600">Ajustar la configuración</text>
+    <text x="76" y="482" fill="#704b22" font-size="23">Reduce rutas concretas; no reemplaza el parche.</text>
+    <path d="M360 508V532" stroke="#4269ae" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="40" y="551" width="640" height="127" rx="16" fill="#fff" stroke="#ccd6e6" stroke-width="2"/>
+    <text x="76" y="594" fill="#4269ae" font-size="22" font-weight="650" letter-spacing="1">PROTECCIONES COMPLEMENTARIAS</text>
+    <text x="76" y="634" fill="#101b2b" font-size="28" font-weight="600">Límites externos y WAF</text>
+    <text x="76" y="664" fill="#52637b" font-size="23">Contienen recursos y filtran patrones conocidos.</text>
+    <path d="M360 690V714" stroke="#4269ae" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="40" y="733" width="640" height="127" rx="16" fill="#e6edfa" stroke="#4269ae" stroke-width="2"/>
+    <text x="76" y="776" fill="#2d508e" font-size="22" font-weight="650" letter-spacing="1">VERIFICACIÓN FINAL</text>
+    <text x="76" y="816" fill="#101b2b" font-size="28" font-weight="600">Comprobar qué PHP atiende la web</text>
+    <text x="76" y="846" fill="#3f5f94" font-size="23">Revisar versión, paquete, servicio y registros.</text>
+  </g>
+</svg>

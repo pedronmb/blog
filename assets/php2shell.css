@@ -1,0 +1,65 @@
+.php2shell-article{max-width:940px}
+.php2shell-article .article-header{max-width:850px}
+.php2shell-article .article-header h1{font-size:clamp(34px,4.7vw,56px);line-height:1.12}
+.php2shell-article .deck{font-size:clamp(18px,2.1vw,23px);line-height:1.55;color:var(--muted);max-width:780px;margin:0 0 22px}
+.php2shell-article .article-content{max-width:820px;margin-inline:auto}
+.php2shell-article .article-cover{max-height:none;aspect-ratio:16/9}
+.draft-label{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:5px;padding:4px 9px;font-size:11px;font-weight:650;letter-spacing:.08em;color:var(--muted);margin-right:12px}
+.php2shell-article .lead{font-size:20px;line-height:1.75}
+.reading-map,.key-note,.explorer{border:1px solid var(--line);border-radius:12px;background:var(--white);padding:26px;margin:30px 0}
+.reading-map h2,.key-note h2,.explorer h3{margin-top:0!important}
+.reading-map ol{columns:2;column-gap:35px;margin-bottom:0!important;font-size:14px}
+.reading-map li{break-inside:avoid;padding-bottom:5px}
+.key-note{border-left:4px solid var(--blue);background:var(--blue-soft)}
+.key-note p:last-child{margin-bottom:0}
+.key-note .note-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.source-link{font-size:.8em;white-space:normal}
+.diagram img{width:100%;max-width:720px;height:auto;border:1px solid var(--line);border-radius:10px!important;background:#f5f7fb}
+.diagram picture{display:block}
+.diagram figcaption{text-align:left!important;font-size:13px!important}
+.table-scroll{overflow:auto;max-width:100%;margin:26px 0;border:1px solid var(--line);border-radius:8px}
+.table-scroll table{margin:0!important;min-width:540px}
+.table-scroll th,.table-scroll td{border-width:0 0 1px!important}
+.table-scroll tr:last-child td{border-bottom:0!important}
+.table-scroll caption{text-align:left;padding:14px 15px;font-size:14px;font-weight:650;background:var(--white);color:var(--ink)}
+.table-hint{font-size:12px;color:var(--muted);margin-top:-14px!important}
+.timeline{list-style:none;padding-left:0!important;border-left:2px solid var(--line);margin-left:10px!important}
+.timeline li{position:relative;margin:0 0 23px 0!important;padding-left:28px!important}
+.timeline li::before{content:"";position:absolute;width:10px;height:10px;background:var(--blue);border-radius:50%;left:-6px;top:10px}
+.timeline time,.timeline .period{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--blue);display:block}
+.timeline p{font-size:15px;line-height:1.8;margin:4px 0 0!important}
+.explorer .explorer-intro{font-size:15px}
+.explorer [hidden]{display:none!important}
+.mode-picker{border:0;padding:0;margin:0 0 22px;display:flex;flex-wrap:wrap;gap:10px}
+.mode-picker legend{font-size:13px;font-weight:650;margin-bottom:10px}
+.mode-picker label{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 12px;border:1px solid var(--line);border-radius:6px;cursor:pointer}
+.mode-picker label:has(input:checked){border-color:var(--blue);background:var(--blue-soft)}
+.mode-picker input{accent-color:var(--blue)}
+.memory-board{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:20px}
+.worker-label{font-size:11px;letter-spacing:.1em;font-weight:700;color:var(--muted);margin:0 0 15px!important}
+.memory-cells{display:grid;grid-template-columns:1fr 42px 1fr;align-items:center;gap:10px}
+.memory-cell{min-height:112px;padding:15px;background:var(--white);border:1px solid var(--line);border-radius:7px;display:flex;flex-direction:column;justify-content:center}
+.memory-cell small{font-size:11px;color:var(--muted);display:block;margin-bottom:6px}
+.memory-cell strong{font-size:15px;line-height:1.5}
+.memory-arrow{text-align:center;font-size:26px;color:var(--blue)}
+.memory-cell[data-state="stale"]{border-color:#b16a25;background:#fff2e4;color:#783b13}
+.memory-cell[data-state="safe"]{border-color:#207762;background:#e7f6ef;color:#145b49}
+[data-theme="dark"] .memory-cell[data-state="stale"]{background:#39291c;color:#ffd0a0;border-color:#b98a51}
+[data-theme="dark"] .memory-cell[data-state="safe"]{background:#173b34;color:#aff0d9;border-color:#528e7c}
+.step-status{font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--blue);margin:22px 0 8px!important}
+.step-explanation{font-size:16px;min-height:5.4em;line-height:1.8;margin-bottom:18px!important}
+.step-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.step-controls button{font:inherit;font-size:13px;font-weight:650;color:var(--ink);border:1px solid var(--line);background:var(--white);padding:10px 16px;border-radius:6px;cursor:pointer}
+.step-controls .next-step{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.step-controls button:disabled{opacity:.4;cursor:default}
+.step-controls .step-count{font-size:12px;color:var(--muted);margin-left:auto}
+.php2shell-article :focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+.php2shell-article details{border:1px solid var(--line);border-radius:8px;padding:17px 20px;margin:25px 0}
+.php2shell-article summary{font-weight:650;cursor:pointer;font-size:15px}
+.php2shell-article details[open] summary{margin-bottom:18px}
+.php2shell-article details p,.php2shell-article details li{font-size:15px}
+.sources-list{font-size:14px;line-height:1.8}
+.sources-list li{margin-bottom:12px!important}
+.article-endnote{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:22px;margin-top:35px}
+@media(max-width:650px){.reading-map,.key-note,.explorer{padding:20px}.reading-map ol{columns:1}.php2shell-article .lead{font-size:18px}.memory-cells{grid-template-columns:1fr}.memory-arrow{transform:rotate(90deg);line-height:1}.memory-cell{min-height:80px}.memory-board{padding:15px}.step-explanation{min-height:0}.timeline p{font-size:14px}.table-scroll{margin-inline:0}.php2shell-article .article-header h1{font-size:35px}.step-controls button{padding:11px 13px}.php2shell-article .diagram{margin-inline:-10px}.php2shell-article .diagram figcaption{padding-inline:10px}}
+@media print{.reading-map,.step-controls,.mode-picker,.draft-label{display:none}.explorer,.key-note,.memory-board{background:transparent;border-color:#777}.php2shell-article .article-content{max-width:none}.table-scroll{overflow:visible}.table-scroll table{min-width:0}.step-explanation{min-height:0}.timeline li{break-inside:avoid}.diagram img{border:0}}

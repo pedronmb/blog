@@ -1,0 +1,43 @@
+.technical-chronology .article-header h1{font-size:clamp(35px,4.6vw,54px)}
+.technical-chronology .article-content{font-size:16.5px;line-height:1.9}
+.technical-chronology .lead{font-size:21px}
+.chrono-index{margin-bottom:46px}
+.chrono-index li{padding-bottom:9px}
+.chronicle{margin-left:7px}
+.chrono-event{position:relative;padding:0 0 52px 35px;border-left:2px solid var(--line)}
+.chrono-event:last-child{padding-bottom:28px}
+.chrono-event::before{content:"";position:absolute;left:-7px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 5px var(--paper)}
+.technical-chronology .event-date{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:650;color:var(--blue);line-height:1.6;margin:0 0 16px}
+.event-kind{font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);padding:3px 7px;border-radius:4px;text-transform:uppercase}
+.technical-chronology .chrono-event>h2{margin:0 0 24px;font-size:29px;line-height:1.35;letter-spacing:-.6px;scroll-margin-top:90px}
+.technical-chronology h3{font-size:21px;line-height:1.45}
+.event-result{padding:18px 20px;border-radius:7px;background:var(--blue-soft);font-size:14px;line-height:1.8;margin:28px 0 4px;color:var(--ink)}
+.native-diagram{padding:22px;border:1px solid var(--line);border-radius:10px;background:var(--white)}
+.native-diagram figcaption{text-align:left!important;font-size:12px!important}
+.engine-sequence{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.engine-sequence>div,.bucket-sequence>li{padding:17px;border:1px solid var(--line);border-radius:7px;background:var(--paper)}
+.engine-sequence span,.bucket-sequence span,.oom-policy span{display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.engine-sequence code,.bucket-sequence code{display:block;font-size:12px;line-height:1.7;background:transparent!important;color:var(--ink)!important;padding:0}
+.engine-sequence small,.bucket-sequence small{display:block;font-size:12px;color:var(--muted);line-height:1.7;margin-top:9px}
+.technical-chronology .bucket-sequence{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:0;counter-reset:bucket}
+.technical-chronology .bucket-sequence>li{margin:0;padding:17px}
+.phase-risk{border-color:#c58f59!important;background:#fff4e7!important}
+.phase-risk span,.phase-risk small{color:#79532c!important}
+.phase-risk code{color:#543715!important}
+[data-theme="dark"] .phase-risk{background:#30261e!important;border-color:#8d6846!important}
+[data-theme="dark"] .phase-risk span,[data-theme="dark"] .phase-risk small{color:#e2bd95!important}
+[data-theme="dark"] .phase-risk code{color:#ffe1b9!important}
+.oom-policy{display:grid;gap:12px}
+.oom-policy>div{padding:18px;border:1px solid var(--line);border-radius:7px;background:var(--paper)}
+.oom-policy strong{font-size:15px;display:block}
+.oom-policy p{font-size:13px!important;line-height:1.7;margin:7px 0 0!important}
+.oom-policy .policy-safe{border-left:4px solid #278069}
+.trace-phase{margin:0 0 18px!important;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.trace-phase small{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
+.trace-phase code{background:transparent!important;color:var(--ink)!important;padding:0!important;font-size:13px!important}
+.technical-chronology .explorer .step-explanation{min-height:7em;font-size:15px}
+.technical-chronology .memory-cell strong{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;overflow-wrap:anywhere}
+.technical-chronology .mode-picker label{font-size:12px}
+.technical-chronology .sources-list{font-size:13px}
+@media(max-width:650px){.technical-chronology .article-header h1{font-size:34px}.technical-chronology .article-content{font-size:16px}.technical-chronology .lead{font-size:18px}.chronicle{margin-left:3px}.chrono-event{padding:0 0 40px 18px}.technical-chronology .event-date{font-size:12px;gap:7px;margin-bottom:14px}.technical-chronology .chrono-event>h2{font-size:25px;line-height:1.35;letter-spacing:-.5px}.event-kind{font-size:9px}.native-diagram{padding:14px}.engine-sequence,.technical-chronology .bucket-sequence{grid-template-columns:1fr}.engine-sequence code,.bucket-sequence code{font-size:13px}.event-result{padding:16px;font-size:13px}.technical-chronology .chrono-event .explorer{padding:16px;margin-left:-10px}.technical-chronology .explorer .step-explanation{min-height:0}.technical-chronology .memory-cell strong{font-size:12px}.technical-chronology .chrono-event .table-scroll{margin-left:-10px}.technical-chronology .chrono-event pre{margin-left:-10px;padding:17px;font-size:11px}.technical-chronology .chrono-event .diagram{margin-left:-10px;margin-right:-6px}.native-diagram figcaption{font-size:12px!important}}
+@media print{.chrono-event{border-left-color:#bbb;padding-left:20px}.chrono-event::before{box-shadow:none}.event-date{break-after:avoid}.event-result{break-inside:avoid}.native-diagram{break-inside:avoid;background:transparent}.engine-sequence>div,.bucket-sequence>li,.oom-policy>div{background:transparent}.technical-chronology .article-content{font-size:10.5pt}.technical-chronology .chrono-event>h2{font-size:18pt}}
