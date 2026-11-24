@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Idempotencia en APIs REST: Diseñando endpoints resilientes a redes inestables y reintentos</title>
+    <meta name="description" content="Cómo usar Idempotency-Key, PostgreSQL y Redis para recuperar respuestas perdidas sin duplicar pedidos ni cobros.">
+    <meta property="article:published_time" content="2026-11-23T12:08:22-03:00">
+    <meta property="article:section" content="Arquitectura">
+    <meta property="article:section" content="Web">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Idempotencia en APIs REST: Diseñando endpoints resilientes a redes inestables y reintentos">
+    <meta property="og:description" content="Cómo usar Idempotency-Key, PostgreSQL y Redis para recuperar respuestas perdidas sin duplicar pedidos ni cobros.">
+    <meta property="og:url" content="https://solidchain.ar/posts/idempotencia-en-apis-rest.html">
+    <meta property="og:image" content="../media/idempotencia-en-apis-rest/portada.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://solidchain.ar/posts/idempotencia-en-apis-rest.html">
+    <script src="../assets/theme.js"></script>
+    <link rel="stylesheet" href="../assets/site.css?v=3">
+    <link rel="stylesheet" href="../assets/theme.css?v=3">
+    <link rel="icon" href="../assets/favicon.svg?v=3" type="image/svg+xml">
+    <link rel="alternate" type="application/rss+xml" title="Solidchain" href="../feed.xml">
+    <style>
+        @media (max-width: 650px) {
+            .article-content .idempotency-contract { min-width: 0; }
+        }
+    </style>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Ir al contenido</a>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="../"><img class="brand-mark" src="../assets/favicon.svg?v=3" alt="" width="35" height="35" aria-hidden="true"> Solidchain</a><nav class="main-nav" aria-label="Navegación principal"><a href="../">Artículos</a><a href="../sobre-mi.html">Sobre mí <span aria-hidden="true">↗</span></a></nav></div></header>
+<main id="contenido" class="article-shell">
+    <nav class="breadcrumb" aria-label="Ubicación"><a href="../">← Todos los artículos</a></nav>
+    <header class="article-header">
+        <p class="eyebrow">Arquitectura · Web</p>
+        <h1>Idempotencia en APIs REST: Diseñando endpoints resilientes a redes inestables y reintentos</h1>
+        <p class="article-date"><time datetime="2026-11-23T12:08:22-03:00">23 nov 2026</time></p>
+    </header>
+    <img class="article-cover" src="../media/idempotencia-en-apis-rest/portada.webp" width="1440" height="810" alt="" decoding="async">
+    <article class="article-content">
+        <p>El usuario toca «Pagar». La API procesa el cobro, pero la conexión se corta antes de que el teléfono reciba la respuesta. La app muestra un error y vuelve a enviar <code>POST /pagos</code>. Si el servidor interpreta ese segundo mensaje como una operación nueva, el usuario puede terminar pagando dos veces.</p>
+        <p>Un <em>timeout</em> solo indica que el cliente dejó de esperar. Para recuperar el resultado sin repetir el efecto, el cliente identifica la operación con una clave estable y el servidor guarda esa clave junto con el resultado. Cuando el efecto ocurre en una pasarela externa, también hay que coordinar los reintentos con ella.</p>
+
+        <h2>Qué se puede repetir en HTTP</h2>
+        <p>Un método es idempotente si varias solicitudes idénticas tienen el mismo efecto pretendido que una sola. <code>GET</code>, <code>PUT</code> y <code>DELETE</code> tienen esa semántica. Por ejemplo, dos <code>DELETE /pedidos/ped_731</code> pueden responder primero <code>204</code> y después <code>404</code>. En ambos casos, el pedido queda ausente. Un <code>POST</code> necesita un contrato explícito para ofrecer esa garantía. <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2">RFC 9110, § 9.2.2</a>.</p>
+
+        <h2>El contrato de <code>Idempotency-Key</code></h2>
+        <p>Generá un UUID aleatorio antes del primer envío y guardalo con la operación pendiente si la app puede reiniciarse. Reutilizá esa clave con los mismos datos en cada reintento. Generá otra únicamente cuando el usuario inicie una operación distinta.</p>
+        <pre tabindex="0" aria-label="Solicitud HTTP de ejemplo"><code>POST /pagos HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Content-Length: 64
+Idempotency-Key: "df9a1b86-7a15-4ae0-9f68-3e6416aa22ad"
+
+{"pedido_id":"ped_731","importe_centavos":129900,"moneda":"ARS"}</code></pre>
+        <p>El ejemplo usa comillas porque el borrador de la IETF define el valor como una cadena de campos estructurados. Al llamar a una API existente, seguí el formato que documenta ese proveedor. <a href="https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/">Borrador de la IETF</a>.</p>
+        <p>Del lado del servidor, autenticá y autorizá cada solicitud, también al recuperar una respuesta. Buscá la clave dentro del ámbito del solicitante autenticado y de la operación de API. Guardá además una huella SHA-256 de los parámetros validados que determinan el efecto, incluidos los parámetros de ruta o consulta relevantes. Usá una representación determinista para que el orden de los campos de un objeto JSON no cambie la huella.</p>
+        <table class="idempotency-contract" aria-label="Respuestas al repetir una solicitud">
+            <thead><tr><th scope="col">Qué encuentra el servidor</th><th scope="col">Cómo responde</th></tr></thead>
+            <tbody>
+                <tr><td>Falta la clave obligatoria.</td><td><code>400 Bad Request</code>.</td></tr>
+                <tr><td>La clave es nueva.</td><td>Reserva la clave e inicia la operación.</td></tr>
+                <tr><td>La clave existe con una huella diferente.</td><td><code>422 Unprocessable Content</code>. Conserva la operación original.</td></tr>
+                <tr><td>La clave y la huella coinciden, con resultado definitivo.</td><td>Repite el código, el cuerpo y los encabezados guardados para esa respuesta, como <code>Location</code>.</td></tr>
+                <tr><td>La operación sigue pendiente.</td><td>En este diseño, el flujo asíncrono devuelve <code>202 Accepted</code> con un enlace de consulta. El borrador propone <code>409 Conflict</code> para solicitudes simultáneas que la API rechaza mientras procesa la primera.</td></tr>
+            </tbody>
+        </table>
+        <p>Documentá cuánto tiempo se puede recuperar un resultado y qué pasa cuando vence la clave. Una política posible es retener respuestas definitivas durante 48 horas desde que la operación termina. Después de purgar la fila, una solicitud con esa clave puede iniciar una operación nueva. Si el cliente supera la ventana, puede consultar el resultado por su identificador o por una referencia de negocio antes de volver a enviar el <code>POST</code>.</p>
+
+        <h2>PostgreSQL evita pedidos duplicados</h2>
+        <p>Cuando todo el efecto vive en la misma base, como en <code>POST /pedidos</code>, guardá la reserva de la clave, el pedido y la respuesta en una sola transacción. La restricción única decide cuál solicitud adquiere la reserva, incluso cuando los reintentos llegan a instancias distintas.</p>
+        <pre tabindex="0" aria-label="Esquema SQL del registro de idempotencia"><code>CREATE TABLE solicitudes_idempotentes (
+    solicitante_id   bigint NOT NULL,
+    operacion        text NOT NULL,
+    clave            text NOT NULL,
+    huella           bytea NOT NULL,
+    estado           text NOT NULL CHECK (estado IN (
+        'en_proceso', 'confirmado', 'rechazado', 'incierto'
+    )),
+    codigo_http      smallint,
+    encabezados      jsonb,
+    cuerpo           bytea,
+    expira_en        timestamptz,
+    PRIMARY KEY (solicitante_id, operacion, clave)
+);</code></pre>
+        <p>La primera sentencia de la transacción intenta reservar la clave. Los parámetros <code>$1</code> a <code>$4</code> son el solicitante, la operación, la clave y la huella.</p>
+        <pre tabindex="0" aria-label="Reserva atómica de la clave en PostgreSQL"><code>INSERT INTO solicitudes_idempotentes
+    (solicitante_id, operacion, clave, huella, estado)
+VALUES ($1, $2, $3, $4, 'en_proceso')
+ON CONFLICT (solicitante_id, operacion, clave) DO NOTHING
+RETURNING clave;</code></pre>
+        <ol>
+            <li>Si <code>RETURNING</code> devuelve una fila, esta transacción tiene la reserva. Creá el pedido y actualizá la fila a <code>confirmado</code> con el <code>201 Created</code>, el cuerpo que contiene su ID, los encabezados que correspondan y el vencimiento. Enviá la respuesta después del <code>COMMIT</code>.</li>
+            <li>Si <code>RETURNING</code> queda vacío, leé la fila con un <code>SELECT</code> separado en <code>READ COMMITTED</code>. El <code>INSERT</code> puede esperar a que termine la transacción rival y el <code>SELECT</code> toma una nueva instantánea. Compará la huella y devolvé el resultado guardado o el <code>422</code>. <a href="https://www.postgresql.org/docs/current/transaction-iso.html#XACT-READ-COMMITTED">Aislamiento de transacciones en PostgreSQL</a>.</li>
+        </ol>
+        <p>Si el proceso cae antes del <code>COMMIT</code>, se revierten la reserva y el pedido. Si cae después, la siguiente solicitud con la misma clave puede recuperar el <code>201</code> y el mismo ID. En este flujo, el estado <code>en_proceso</code> queda dentro de la transacción. Para acotar la espera bajo concurrencia, poné un límite al bloqueo y devolvé un error transitorio si se agota.</p>
+
+        <h2>Redis acelera los reintentos</h2>
+        <p>Si muchos reintentos consultan la misma clave, usá Redis como caché distribuida de resultados definitivos ya guardados en la base. La entrada incluye el ámbito del solicitante, la operación y la clave en su identificador, y guarda la huella junto con la respuesta. Aplicá la misma autorización antes de responder desde la caché.</p>
+        <ol>
+            <li>Consultá Redis con <code>GET</code>. Si hay una entrada vigente, compará la huella y devolvé la respuesta guardada o el <code>422</code> correspondiente.</li>
+            <li>Ante un fallo de Redis o una entrada ausente o vencida, ejecutá el flujo de PostgreSQL. Así, todas las instancias siguen sujetas a la misma reserva.</li>
+            <li>Después del <code>COMMIT</code>, poblá la caché con <code>SET clave valor EX segundos</code>. Limitá ese TTL al tiempo restante de la fila en la base. Ante un desalojo por presión de memoria, la siguiente lectura puede reconstruir la entrada. <a href="https://redis.io/docs/latest/commands/set/">Comando SET</a> · <a href="https://redis.io/docs/latest/develop/reference/eviction/">Desalojo de claves en Redis</a>.</li>
+        </ol>
+        <p>Un <code>SET ... NX EX</code> puede coordinar trabajo durante un plazo. Si ese plazo vence mientras la primera instancia todavía opera, una segunda puede adquirir la clave. La restricción y la transacción de PostgreSQL sostienen la garantía del pedido aunque Redis pierda esa reserva temporal. <a href="https://redis.io/docs/latest/develop/clients/patterns/distributed-locks/">Bloqueos distribuidos en Redis</a>.</p>
+
+        <h2>Los cobros requieren un estado recuperable</h2>
+        <p>La pasarela puede cobrar y perder su respuesta antes de que tu API guarde el resultado. Un <code>ROLLBACK</code> en tu base deja intacto ese cobro. Si tras el <em>timeout</em> otro proceso inicia un cobro con una clave nueva, podría duplicarlo.</p>
+        <ol>
+            <li><strong>Registrá la intención antes de llamar a la pasarela.</strong> En una transacción local, reservá la clave, creá el pago <code>en_proceso</code> con un ID propio y persistí la clave estable que enviarás a la pasarela para esa operación. Si un trabajador ejecuta el cobro, guardá también su tarea en una <em>outbox</em> en esa transacción. La API puede responder <code>202</code> con <code>Location: /pagos/{id}</code>. <a href="patron-outbox-evitando-la-inconsistencia-de-datos-en-sistemas-distribuidos-y-microservicios.html">Patrón Outbox</a>.</li>
+            <li><strong>Persistí el desenlace que comunica la pasarela.</strong> Si confirma el cobro, registrá <code>confirmado</code> y la referencia externa. Si confirma un rechazo definitivo, registrá <code>rechazado</code>. En ambos casos actualizá el pago y guardá la respuesta definitiva en una sola transacción. Si hay un <em>timeout</em> o una caída después de enviar la solicitud, tratá el resultado como <code>incierto</code>, incluso si la fila sigue mostrando <code>en_proceso</code> porque el trabajador cayó antes de actualizarla.</li>
+            <li><strong>Conciliá las operaciones pendientes.</strong> Consultá el objeto de la pasarela por su ID o por una referencia de comercio si el proveedor lo permite. También podés aplicar sus <em>webhooks</em> verificados, deduplicando los eventos y evitando que uno tardío revierta un estado terminal. Reintentá la llamada externa con la misma clave y los mismos parámetros solo dentro de la garantía documentada por la pasarela. Si vence esa ventana y el desenlace sigue incierto, mantené el caso pendiente de conciliación. <a href="https://docs.stripe.com/api/idempotent_requests">Claves y retención en Stripe</a> · <a href="https://docs.stripe.com/error-low-level#server-errors">Resultados inciertos en Stripe</a>.</li>
+        </ol>
+        <p>Conservá <code>expira_en</code> en <code>NULL</code> mientras el pago esté pendiente. Asigná el vencimiento del registro de idempotencia cuando haya un desenlace definitivo. Así, la limpieza de claves preserva la reserva mientras un cobro sigue incierto.</p>
+        <p>Un pago puede recibir claves distintas si el usuario paga desde dos pestañas. Si tu negocio admite un único pago por pedido, representalo con una restricción como <code>UNIQUE (cuenta_id, pedido_id)</code> en la tabla de pagos y hacé que ambas solicitudes reutilicen ese registro. La clave de idempotencia vincula los intentos de una solicitud. La restricción de negocio vincula todas las solicitudes que apuntan al mismo pago.</p>
+
+        <h2>Qué reintentar y cómo probarlo</h2>
+        <p>Ante cortes de red o errores transitorios documentados, reintentá con la misma clave y un límite de intentos. Usá espera exponencial con variación aleatoria (<em>jitter</em>) y respetá <code>Retry-After</code> si la API lo devuelve. Ante un <code>202</code>, consultá el recurso indicado. Ante un <code>422</code> por una huella distinta, corregí el uso de la clave en el cliente.</p>
+        <ul>
+            <li><strong>Cortá la conexión después del <code>COMMIT</code>.</strong> El reintento debe devolver el ID original y la base debe contener un solo pedido.</li>
+            <li><strong>Enviá dos solicitudes en paralelo con la misma clave.</strong> Debe haber una sola creación. Cambiá un parámetro en el siguiente envío y comprobá que responde <code>422</code>.</li>
+            <li><strong>Vaciá Redis o simulá que está caído.</strong> PostgreSQL debe resolver el reintento con el mismo resultado.</li>
+            <li><strong>Simulá un cobro confirmado seguido de un <em>timeout</em>.</strong> El pago debe quedar disponible para conciliación y terminar confirmado una sola vez, incluso si se repite la tarea o el <em>webhook</em>.</li>
+        </ul>
+    </article>
+    <div class="article-return"><a href="../">← Seguir explorando los artículos</a></div>
+</main>
+<footer class="site-footer"><div class="container footer-inner"><a class="footer-brand" href="../">Solidchain<span>.</span></a><p>Ideas, código y lo que hay entre ambos.</p><a href="../feed.xml">RSS ↗</a></div></footer>
+</body>
+</html>
